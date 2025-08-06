@@ -16,6 +16,7 @@ import {
   SiDiscord,
   SiX
 } from "@icons-pack/react-simple-icons";
+import Banner from '../components/Banner';
 
 const navbarLinks: LinkItemType[] = [
   {
@@ -317,6 +318,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     }
     ]}
   >
+    <Banner />
     {children}
     <Footer />
   </HomeLayout>;
