@@ -1,0 +1,145 @@
+---
+title: "Swap"
+description: "Swap contract facilitates the exchange of assets between two parties"
+icon: ArrowsRightLeftIcon
+---
+import Link from "fumadocs-core/link";
+
+Swap contract facilitates the exchange of assets between two parties. This contract is designed to be used in a peer-to-peer exchange scenario where two parties agree to exchange assets. The contract ensures that the assets are locked up until it is accepted by the other party. At any point before it is accepted, one can cancel the swap to retrieve the assets.
+
+There are 2 actions (or endpoints) available to interact with this smart contract:
+
+- initiate swap
+- accept asset
+- cancel swap
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the contract [!toc]
+
+To initialize the payment splitter, we need to initialize a <Link href="https://meshjs.dev/providers">provider</Link>, `MeshTxBuilder` and `MeshSwapContract`.
+
+```tsx
+import { MeshSwapContract } from "@meshsdk/contract";
+import { MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshSwapContract({
+  mesh: meshTxBuilder,
+  fetcher: provider,
+  wallet: wallet,
+  networkId: 0,
+});
+```
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/swap">Mesh Github Repository</Link>.
+
+
+## Initiate Swap
+
+User A can initiate a swap by providing assets to the swap contract.
+
+`initiateSwap()` initiate a swap. The function accepts the following parameters:
+
+- toProvide (Asset[]) - a list of assets user A is trading
+- toReceive (Asset[]) - a list of assets user A is expecting to receive from another user
+
+Note that the parameters are arrays, so you can provide multiple assets to the swap, and these assets can be tokens and lovelace.
+
+<Card>
+### Initiate Swap [!toc]
+
+Initiate a swap by defining the assets for the swap contract
+
+**Amount lovelace to give**
+`10000000`
+
+**Asset to receive**
+`d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+```tsx
+const assetToProvide: Asset = {
+  unit: "lovelace",
+  quantity: '10000000',
+};
+
+const assetToReceive: Asset = {
+  unit: 'd9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e',
+  quantity: "1",
+};
+
+const tx = await contract.initiateSwap([assetToProvide], [assetToReceive]);
+const signedTx = await wallet.signTx(tx);
+const txHash = await wallet.submitTx(signedTx);
+```
+</Card>
+
+
+## Accept Swap
+
+User B can accept a swap by providing the swap transaction hash to the contract.
+
+`acceptSwap()` accept a swap. The function accepts the following parameters:
+
+- swapUtxo (UTxO) - the utxo of the transaction in the script for the swap
+
+The function accepts a swap transaction hash and returns a transaction hash if the swap is successfully accepted.
+
+A <Link href="https://preprod.cardanoscan.io/transaction/e266fc6b0b2481988f9742a28b914dabf7da5403a3893d5ba4b05530d2519f3a">successful transaction</Link> will send the assets to the wallet that signed the transaction to accept the swap.
+
+<Card>
+  ### Accept Swap [!toc]
+
+  Accept a swap by providing the assets to the swap contract
+
+  **Tx hash**
+  `Tx hash`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.acceptSwap(utxo);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Cancel Swap
+
+Any any time before swap is accepted, user A can cancel the swap.
+
+`cancelSwap()` cancel a swap. The function accepts the following parameters:
+
+- swapUtxo (UTxO) - the utxo of the transaction in the script for the swap
+
+The function accepts a swap transaction hash and returns a transaction hash if the swap is successfully canceled.
+
+<Card>
+  ### Cancel Swap [!toc]
+
+  Cancel a swap to get your funds back
+
+  **Tx hash**
+  `Tx hash`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.cancelSwap(utxo);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

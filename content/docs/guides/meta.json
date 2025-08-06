@@ -1,0 +1,4 @@
+{
+  "title": "Guides",
+  "pages": ["nextjs", "minting-on-nodejs", "multisig-minting", "prove-wallet-ownership", "custom-provider", "smart-contract-transactions", "aiken", "standalone", "vesting", "node-specific-imports", "nft-collection"]
+}

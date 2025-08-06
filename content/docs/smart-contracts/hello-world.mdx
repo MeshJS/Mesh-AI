@@ -1,0 +1,147 @@
+---
+title: "Hello World"
+description: "Simple lock and unlock assets contract"
+icon: PlayIcon
+---
+import Link from "fumadocs-core/link";
+
+The Hello World smart contract is a simple lock-and-unlock assets contract, providing a hands-on introduction to end-to-end smart contract validation and transaction building.
+
+There are 2 conditions to unlock the assets:
+
+- Signer must be the same as the one who locked the assets
+- Signer must provide the message `Hello, World!`
+
+There are 2 actions (or endpoints) available to interact with this smart contract:
+
+- Lock assets
+- Redeem assets
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the contract [!toc]
+
+To initialize the contract, we need to initialize a provider, `MeshTxBuilder` and `MeshGiftCardContract`.
+
+```tsx
+import { MeshHelloWorldContract } from "@meshsdk/contract";
+import { MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshHelloWorldContract({
+  mesh: meshTxBuilder,
+  fetcher: provider,
+  wallet: wallet,
+  networkId: 0,
+});
+```
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/hello-world">Mesh Github Repository</Link>.
+
+
+## Lock Assets
+
+This transaction locks funds into the contract.
+
+The datum must match the representation expected by the validator (and as specified in the blueprint), so this is a constructor with a single field that is a byte array.
+
+```tsx
+pub type Datum {
+  owner: VerificationKeyHash,
+}
+```
+
+Thus, we provide a hash digest of our public key, which will be needed to unlock the funds.
+
+```tsx
+await txBuilder
+  .txOut(scriptAddress, assets)
+  .txOutDatumHashValue(mConStr0([signerHash]))
+  .changeAddress(walletAddress)
+  .selectUtxosFrom(utxos)
+  .complete();
+```
+
+<Card>
+  ### Lock Asset [!toc]
+
+  Lock asset in the contract
+
+  **Lovelace amount**
+  `5000000`
+
+  ```tsx
+  const assets: Asset[] = [
+    {
+      unit: "lovelace",
+      quantity: '5000000',
+    },
+  ];
+
+  const tx = await contract.lockAsset(assets);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Unlock Assets
+
+There are 2 conditions to unlock the assets:
+
+- Signer must be the same as the one who locked the assets
+- Signer must provide the message `Hello, World!`
+
+The validator script for the contract checks that the redeemer is the same as the owner of the datum and that the message is `Hello, World!`:
+
+```tsx
+validator hello_world {
+  spend(
+    datum_opt: Option<Datum>,
+    redeemer: Redeemer,
+    _input: OutputReference,
+    tx: Transaction,
+  ) {
+    expect Some(datum) = datum_opt
+    let must_say_hello = redeemer.msg == "Hello, World!"
+    let must_be_signed = list.has(tx.extra_signatories, datum.owner)
+    must_say_hello && must_be_signed
+  }
+
+  else(_) {
+    fail
+  }
+}
+```
+
+<Card>
+  ### Redeem Giftcard [!toc]
+
+  Redeem a gift card given the gift card UTxO
+
+  **Tx hash**
+  `Tx hash`
+
+  **Message**
+  `Hello, World!`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.unlockAsset(utxo, 'Hello, World!');
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

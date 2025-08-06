@@ -1,0 +1,173 @@
+---
+title: "Marketplace"
+description: "Build a NFT marketplace to buy and sell NFTs"
+icon: ShoppingCartIcon
+---
+import Link from "fumadocs-core/link";
+
+The marketplace smart contract allows users to buy and sell NFTs. A seller list an NFT for sales by specifying a certain price, and anyone can buy it by paying the demanded price.
+
+There are 4 actions (or endpoints) available to interact with this smart contract:
+
+- list asset
+- buy asset
+- updating listing
+- cancel listing
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the Marketplace [!toc]
+
+Utilizing the Marketplace contract requires a blockchain provider and a connected browser wallet. Here is an example how we can initialize the Marketplace.
+
+```tsx
+import { MeshMarketplaceContract } from "@meshsdk/contract";
+import { MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshMarketplaceContract(
+  {
+    mesh: meshTxBuilder,
+    fetcher: provider,
+    wallet: wallet,
+    networkId: 0,
+  },
+  'addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr',
+  200, // 2% fee
+);
+```
+
+To initialize the Marketplace, we import the `MeshMarketplaceContract`. The first JSON object is the `inputs` for the `MeshTxInitiatorInput`, this requires a `MeshTxBuilder`, a `Provider`, a `Wallet`, and define the network ID.
+
+Second and third parameters are the `ownerAddress` and `feePercentageBasisPoint`. The `ownerAddress` is the address of the marketplace owner which will receive the marketplace fee. The `feePercentageBasisPoint` is the percentage of the sale price that the marketplace `owner` will take. The fee numerator is in the order of hundreds, for example `200` implies a fee of `2%`.
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/marketplace">Mesh Github Repository</Link>.
+
+
+## List Asset
+
+List an asset on the marketplace. This will allow other users to buy the asset. The seller will receive the listing price in ADA. The seller can cancel the listing at any time. The seller can also update the listing price at any time.
+
+`listAsset()` list an asset for sale. The function accepts the following parameters:
+
+- asset (string) - the asset's unit to be listed
+- price (number) - the listing price in Lovelace
+
+<Card>
+  ### List Asset [!toc]
+
+  List an asset for sale
+
+  **Listing price in Lovelace** `10000000`
+
+  **Asset unit**
+  `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+  ```tsx
+  const tx = await contract.listAsset('d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e', 10000000);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Buy Asset
+
+Purchase a listed asset from the marketplace. The seller will receive the listed price in ADA and the buyer will receive the asset. The marketplace owner will receive a fee if it is specified.
+
+`purchaseAsset()` purchase a listed asset. The function accepts the following parameters:
+
+- utxo (UTxO) - unspent transaction output in the script
+
+We have provided a very handle function, `getUtxoByTxHash`, which will return the UTxO object for a given transaction hash.
+
+A <Link href="https://preprod.cardanoscan.io/transaction/f9f7ddbbbe1c34717134c89c343aaa27d4c5f62e6e8a127757400ac8d45e64e8">successful purchase</Link> will send the asset to the wallet that signed the transaction to purchase the asset.
+
+<Card>
+  ### Buy Asset [!toc]
+
+  Purchase a listed asset from the marketplace
+
+  **Tx hash**
+  `Tx hash`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.purchaseAsset(utxo);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Update Listing
+
+Update a listing on the marketplace. For the contract, the seller can update the listing price.
+
+`relistAsset()` update a listing on the marketplace. The function accepts the following parameters:
+
+- utxo (UTxO) - unspent transaction output in the script
+- newListPrice (number) - the new listing price in Lovelace
+
+We have provided a very handle function, `getUtxoByTxHash`, which will return the UTxO object for a given transaction hash.
+
+<Card>
+  ### Update Listing [!toc]
+
+  Update the listing price of an asset on the marketplace
+
+  **Tx hash**
+  `Tx hash`
+
+  **New listing price in Lovelace**
+  `20000000`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.relistAsset(utxo, 20000000);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Cancel Listing
+
+Cancel a listing on the marketplace. The seller can cancel the listing at any time. The seller will receive the listed asset back.
+
+`delistAsset()` cancel a listing on the marketplace. The function accepts the following parameters:
+
+- utxo (UTxO) - unspent transaction output in the script
+
+We have provided a very handle function, `getUtxoByTxHash`, which will return the UTxO object for a given transaction hash.
+
+<Card>
+  ### Cancel Listing [!toc]
+
+  Cancel a listing on the marketplace
+
+  **Tx hash**
+  `Tx hash`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.delistAsset(utxo);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

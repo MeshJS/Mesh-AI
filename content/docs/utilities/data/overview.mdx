@@ -1,0 +1,39 @@
+---
+title: "Data Overview"
+description: "Learn about the basics, and how Mesh handles Cardano data"
+icon: CircleStackIcon
+---
+import Link from "fumadocs-core/link";
+
+Parsing and converting data in Plutus is a common task when working with transactions. This page will show you how to do that.
+
+## Use of Data in Cardano
+
+Cardano data and information is usually communicated in `CBOR` encoding format, which can be decoded into `JSON` representation.
+
+On top of the 2, Mesh also provides the `Data` type which get rids of unnecessary wrappers.
+
+Mesh supports building data for your app in all 3 different formats.
+
+- `Mesh` - the `Data` type
+- `JSON`
+- `CBOR`
+
+
+## Mesh Data Type
+
+Mesh `Data` type is best used when you want to quickly and easily compose your data types.
+
+<Link href="/apis/data/mesh">Learn more</Link>
+
+
+## JSON Data Type
+
+All Cardano data has the JSON representation, which is suitable for building Web3 app which needs frequent back and forth conversion between on-chain and off-chain code. Mesh also supports building data in JSON format with strong input validation support.
+
+<Link href="/apis/data/json">Learn more</Link>
+
+
+## CBOR
+
+CBOR is the lowest level representation of data in Cardano. Mesh provides endpoints to allow users to provide CBOR in providing data, which is the case for developers utilizing other serialization package other than mesh in part the application.

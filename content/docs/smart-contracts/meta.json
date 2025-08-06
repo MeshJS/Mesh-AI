@@ -1,0 +1,4 @@
+{
+  "title": "Smart Contracts",
+  "pages": ["content-ownership", "escrow", "giftcard", "hello-world", "marketplace", "plutus-nft", "payment-splitter", "swap", "vesting"]
+}

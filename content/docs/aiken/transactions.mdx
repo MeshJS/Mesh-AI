@@ -1,0 +1,166 @@
+---
+title: "Build Transactions"
+description: "Build transactions to interact with smart contracts"
+---
+import Link from "fumadocs-core/link";
+
+## Create transaction to lock tokens
+
+In this section, we will create a simple UI that allows users to lock assets on the Cardano blockchain.
+
+First, we get initialze the `PlutusScript` and resolve the script address:
+
+```tsx
+function getScript() {
+  const scriptCbor = applyParamsToScript(compiledCode, []);
+
+  const script: PlutusScript = {
+    code: scriptCbor,
+    version: "V2",
+  };
+  const scriptAddress = resolvePlutusScriptAddress(script, 0);
+  return { script, scriptAddress };
+}
+```
+
+```tsx
+const { scriptAddress } = await getScript();
+```
+
+We are using the `resolvePlutusScriptAddress` function to resolve the script address.
+
+You notice here we use the `applyParamsToScript`, which apply parameters to a script allows you to create a custom <Link href="https://cips.cardano.org/cip/cip-57">CIP-57 compliant script</Link> based on some inputs. For this script, we don't have any parameters to apply, but simply applied with double CBOR encoding to `scriptCbor`.
+
+Next, we get the wallet address hash:
+
+```tsx
+async function getWalletAddress(wallet: BrowserWallet) {
+  const addresses = await wallet.getUsedAddresses();
+  const address = addresses[0];
+
+  if (!address) {
+    throw new Error("No address found");
+  }
+
+  const hash = resolvePaymentKeyHash(address);
+  return { address, hash };
+}
+```
+
+```tsx
+const { hash } = await getWalletAddress(wallet);
+```
+
+Here, we use the `resolvePaymentKeyHash` function to resolve the payment key hash of the wallet.
+
+Then, we create the `Data` (datum) object containing the address hash:
+
+```tsx
+const datum: Data = {
+  alternative: 0,
+  fields: [hash],
+};
+```
+
+Finally, we prepare the transaction to lock the assets on the Cardano blockchain.
+
+```tsx
+const tx = new Transaction({ initiator: wallet });
+tx.sendLovelace(
+  {
+    address: scriptAddress,
+    datum: { value: datum },
+  },
+  "5000000",
+);
+
+const unsignedTx = await tx.build();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+
+## Create transaction to redeem tokens
+
+In this section, we will walk you through the process of creating a transaction to redeem tokens.
+
+First, we need to get the script and script address. We can do this by calling the function we created in the previous section.
+
+```tsx
+const { script, scriptAddress } = await getScript();
+```
+
+Next, we need to get the wallet address and its hash. We can do this by calling the function we created in the previous section.
+
+```tsx
+const { address, hash } = await getWalletAddress(wallet);
+```
+
+As the contracts requires the owner's address in the datum field, we are creating a new datum with the owner's address. We create the `Data` (datum) object containing the address hash:
+
+```tsx
+const datum: Data = {
+  alternative: 0,
+  fields: [hash],
+};
+```
+
+After that, we get the UTXO in the script based on the datum:
+
+```tsx
+async function getAssetUtxo({
+  scriptAddress,
+  asset,
+  datum,
+}: {
+  scriptAddress: string;
+  asset: string;
+  datum: any;
+}) {
+  const provider = getProvider();
+  const utxos = await provider.fetchAddressUTxOs(
+    scriptAddress,
+    asset,
+  );
+
+  const dataHash = resolveDataHash(datum);
+
+  let utxo = utxos.find((utxo: any) => {
+    return utxo.output.dataHash == dataHash;
+  });
+
+  return utxo;
+}
+```
+
+```tsx
+const assetUtxo = await getAssetUtxo({
+  scriptAddress: scriptAddress,
+  asset: "lovelace",
+  datum: datum,
+});
+```
+
+Finally, we prepare the transaction to redeem the tokens:
+
+```tsx
+const redeemer = { data: { alternative: 0, fields: ["Hello, World!"] } };
+
+const tx = new Transaction({ initiator: wallet })
+  .redeemValue({
+    value: assetUtxo,
+    script: script,
+    datum: datum,
+    redeemer: redeemer,
+  })
+  .sendValue(address, assetUtxo)
+  .setRequiredSigners([address]);
+
+const unsignedTx = await tx.build();
+const signedTx = await wallet.signTx(unsignedTx, true);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+Here you notice that in the `redeemer`. As the validator requires, here we specify `Hello, World!`, which is the message we need to provide to unlock the tokens.
+
+For the transaction, we use the `redeemValue` function to redeem the locked assets, the `sendValue` function to send the assets to the owner's address, and the `setRequiredSigners` function to set the required signers.

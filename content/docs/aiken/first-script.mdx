@@ -1,0 +1,69 @@
+---
+title: "Write a Smart Contract"
+description: "Learn how to write your first Aiken script, with a simple redeemer"
+---
+import Link from "fumadocs-core/link";
+
+## Write your first smart contract in Aiken
+
+In this section, we will walk you through the process of writing a simple smart contract in Aiken.
+
+We will use the Visual Studio Code editor for this tutorial. You can use any other editor of your choice, but we recommend using Visual Studio Code for its rich feature set and support for Aiken.
+
+First, we create a new Aiken project within this project folder:
+
+```bash
+$ aiken new meshjs/hello_world
+$ cd hello_world
+$ aiken check
+```
+
+Remember to check your Aiken project by running `aiken check` after creating a new project and as you develop the contract.
+
+### Write the smart contract [!toc]
+
+Let's create file for our validator, `validators/hello_world.ak`:
+
+```tsx
+use aiken/hash.{Blake2b_224, Hash}
+use aiken/list
+use aiken/transaction.{ScriptContext}
+use aiken/transaction/credential.{VerificationKey}
+
+type Datum {
+  owner: Hash<Blake2b_224, VerificationKey>,
+}
+
+type Redeemer {
+  msg: ByteArray,
+}
+
+validator {
+  fn hello_world(datum: Datum, redeemer: Redeemer, context: ScriptContext) -> Bool {
+    let must_say_hello =
+      redeemer.msg == "Hello, World!"
+
+    let must_be_signed =
+      list.has(context.transaction.extra_signatories, datum.owner)
+
+    must_say_hello && must_be_signed
+  }
+}
+```
+
+The validator checks for two conditions:
+
+- The redeemer message is `Hello, World!`
+- The transaction is signed by the owner
+
+If both conditions are met, the validator returns `true`. Otherwise, it returns `false`.
+
+## Compile and build
+
+Let's compile the smart contract with the Aiken CLI:
+
+```tsx
+$ aiken build
+```
+
+This command will compile the smart contract and generate the `plutus.json` file in the root folder. This file is a <Link href="https://cips.cardano.org/cip/CIP-0057">CIP-0057 Plutus blueprint</Link>, blueprint describes your on-chain contract and its binary interface.

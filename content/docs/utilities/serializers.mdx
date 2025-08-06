@@ -1,0 +1,128 @@
+---
+title: "Serializers"
+description: "Encode objects into CBOR or bech32 format."
+icon: ArrowTurnRightDownIcon
+---
+import Link from "fumadocs-core/link";
+
+In smart contract manipulations, serialization is a crucial process that encode data structures or objects into a format that can be easily stored or transmitted and later reconstructed. Below are utilities to help serialize various Cardano smart contracts components.
+
+## Serialize Native Script
+
+The function `serializeNativeScript` allows you to provide the `nativeScript` with an option of `networkId` and `stakeCredentialHash`, returns:
+- Bech32 address
+- Script Cbor
+
+This example demonstrates how to derive the native script from the `pubKeyHash` with the `deserializeAddress` then serialize the native script to a bech32 address and script Cbor. To read more on <Link href="/apis/utilities/deserializers">deserializeAddress</Link>.
+
+<Card>
+  ### Serialize Native Script [!toc]
+
+  Serialize Native script into bech32 address
+
+  ```tsx
+  import {
+    serializeNativeScript,
+    NativeScript,
+    deserializeAddress
+  } from "@meshsdk/core";
+
+  const { pubKeyHash: keyHash } = deserializeAddress(
+    'addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9',
+  );
+
+  const nativeScript: NativeScript = {
+    type: "all",
+    scripts: [
+      {
+        type: "before",
+        slot: "99999999",
+      },
+      {
+        type: "sig",
+        keyHash: keyHash,
+      },
+    ],
+  };
+
+  serializeNativeScript(nativeScript);
+  ```
+</Card>
+
+
+## Serialize Plutus Script
+
+The function `serializePlutusScript` allows you to provide the `plutusScript` with an option of `networkId` and `stakeCredentialHash`, returns:
+- Bech32 address
+
+This example demonstrates how to derive and serialize a plutus script into a bech32 address.
+
+<Card>
+  ### Serialize Plutus Script [!toc]
+
+  Serialize Plutus script into bech32 address
+
+  ```tsx
+  import { PlutusScript, serializePlutusScript } from "@meshsdk/core";
+
+  const plutusScript: PlutusScript = {
+    code: demoPlutusAlwaysSucceedScript,
+    version: "V2",
+  };
+
+  serializePlutusScript(plutusScript);
+  ```
+</Card>
+
+
+## Serialize Address Object
+
+Serialize address in Cardano data JSON format into bech32 address with `serializeAddressObj()`.
+
+First you need to create an address object with `pubKeyAddress()` or `scriptAddress()`.
+
+`pubKeyAddress()` accepts the following parameters:
+
+```tsx
+pubKeyAddress(
+  bytes: string,
+  stakeCredential?: string,
+  isStakeScriptCredential?: boolean
+): PubKeyAddress
+```
+
+`scriptAddress()` accepts the following parameters:
+
+```tsx
+scriptAddress(
+  bytes: string,
+  stakeCredential?: string,
+  isStakeScriptCredential?: boolean
+): ScriptAddress
+```
+
+`serializeAddressObj()` accepts the following parameters:
+
+```tsx
+serializeAddressObj(
+  address: PubKeyAddress | ScriptAddress,
+  networkId?: number
+): string
+```
+
+<Card>
+  ### Serialize Address Object [!toc]
+
+  Serialize address in Cardano data JSON format into bech32 address
+
+  ```tsx
+  import { pubKeyAddress, serializeAddressObj } from "@meshsdk/core";
+
+  const address = pubKeyAddress(
+    'aa048e4cc8a1e67e1d97ffbd4be614388014cbc2b2451527202943b6',
+    '9d4dcd7e454d2434164f4efb8edeb358d86a1dad9ec6224cfcbce3e6'
+  );
+
+  serializeAddressObj(address, 1);
+  ```
+</Card>

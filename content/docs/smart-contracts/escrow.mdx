@@ -1,0 +1,187 @@
+---
+title: "Escrow"
+description: "Secure exchange of assets between two parties"
+icon: ArrowsRightLeftIcon
+---
+import Link from "fumadocs-core/link";
+
+The escrow smart contract allows two parties to exchange assets securely. The contract holds the assets until both parties agree and sign off on the transaction.
+
+There are 4 actions available to interact with this smart contract:
+
+- initiate escrow and deposit assets
+- deposit assets
+- complete escrow
+- cancel escrow
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the contract [!toc]
+
+To initialize the escrow, we need to initialize a provider, `MeshTxBuilder` and `MeshEscrowContract`.
+
+```tsx
+import { MeshEscrowContract } from "@meshsdk/contract";
+import { MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshEscrowContract({
+  mesh: meshTxBuilder,
+  fetcher: provider,
+  wallet: wallet,
+  networkId: 0,
+});
+```
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/escrow">Mesh Github Repository</Link>.
+
+
+## Initiate Escrow
+
+An escrow is initiated by one of the party, user A, by locking assets to the escrow contract.
+
+`initiateEscrow()` initiate an escrow. The function accepts the following parameters:
+
+- escrowAmount (Asset[]) - a list of assets user A is trading
+
+The function returns a transaction hex if the escrow is successfully initiated.
+
+<Card>
+### Initiate Escrow [!toc]
+
+Initiate an escrow, in this demo, person A is initiating the escrow and deposit ADA.
+
+**Listing price in Lovelace** `10000000`
+
+```tsx
+const escrowAmount: Asset[] = [
+  {
+    unit: "lovelace",
+    quantity: '10000000',
+  },
+];
+
+const tx = await contract.initiateEscrow(escrowAmount);
+const signedTx = await wallet.signTx(tx);
+const txHash = await wallet.submitTx(signedTx);
+```
+</Card>
+
+
+## Recipient Deposit
+
+User B can deposit assets into the escrow after initiation step (`initiateEscrow()`).
+
+`recipientDeposit()` deposit assets into the escrow. The function accepts the following parameters:
+
+- escrowUtxo (UTxO) - the utxo of the transaction on the contract
+- depositAmount (Asset[]) - a list of assets user B is trading
+
+We have provided a very handle function, `getUtxoByTxHash`, which will return the UTxO object for a given transaction hash.
+
+<Card>
+### Recipient Deposit [!toc]
+
+Deposit funds into the escrow for trade. In this demo, person B is depositing an asset into the escrow.
+
+**Tx hash:** `Tx hash`
+
+**Asset unit**
+`d9312da562da182b02322fd8acb536f37eb9d29fba7...68546f6b656e`
+
+```tsx
+const utxo = await contract.getUtxoByTxHash('');const escrowAmount: Asset[] = [
+  {
+    unit: 'd9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e',
+    quantity: '1',
+  },
+];
+
+const tx = await contract.initiateEscrow(escrowAmount);
+const signedTx = await wallet.signTx(tx);
+const txHash = await wallet.submitTx(signedTx);
+```
+</Card>
+
+
+## Complete Escrow
+
+A user can complete an escrow if the terms of the agreement are met. The completion can be initiated by any recipient of the escrow.
+
+`completeEscrow()` complete an escrow. The function accepts the following parameters:
+
+- escrowUtxo (UTxO) - the utxo of the transaction in the script to be completed
+
+**Important**: This is a multi-signature transaction. Both users must sign the transaction to complete the escrow.
+
+A <Link href="https://preprod.cardanoscan.io/transaction/019b6ba41ee0a9de90068fe5c1eb1fd81489be5d2402bd560b548e1cd7f22056">successful completion of the escrow</Link> will result in the assets being swapped between the two parties.
+
+<Card>
+### Person A signs the transaction [!toc]
+
+User A completes the escrow by calling the `completeEscrow()` function and partial sign the transaction.
+
+**Tx hash:** `Tx hash`
+
+```tsx
+const utxo = await contract.getUtxoByTxHash('');
+const tx = await contract.completeEscrow(utxo);
+const signedTxUserA = await wallet.signTx(tx, true);
+```
+</Card>
+
+<br />
+
+<Card>
+### Person B signs and submits the transaction [!toc]
+
+The signed transaction will be handled to User B to sign the transaction and submits it to the blockchain to complete the escrow.
+
+**Tx hash:** `Tx hash`
+
+**Transaction CBOR** `Transaction CBOR`
+
+```tsx
+const signedTxUserB = await wallet.signTx(signedTxUserA, true);
+const txHash = await wallet.submitTx(signedTxUserB);
+```
+</Card>
+
+
+## Cancel Escrow
+
+A user can cancel an escrow if the other party fails to fulfill the terms of the agreement. Cancel can be initiated by any users who have partcipated in the escrow and can be done at any time before complete. Canceling the escrow will return the assets to the respective users.
+
+`cancelEscrow()` cancel an escrow. The function accepts the following parameters:
+
+- escrowUtxo (UTxO) - the utxo of the transaction to be canceled
+
+We have provided a very handle function, `getUtxoByTxHash`, which will return the UTxO object for a given transaction hash.
+
+<Card>
+### Cancel Escrow [!toc]
+
+Any users who have partcipated in the escrow and can cancel the trade at any time before complete.
+
+**Tx hash:** `Tx hash`
+
+```tsx
+const utxo = await contract.getUtxoByTxHash('');
+
+const tx = await contract.cancelEscrow(utxo);
+const signedTx = await wallet.signTx(tx);
+const txHash = await wallet.submitTx(signedTx);
+```
+</Card>

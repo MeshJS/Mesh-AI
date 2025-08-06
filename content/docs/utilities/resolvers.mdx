@@ -1,0 +1,327 @@
+---
+title: "Resolvers"
+description: "Converts between different formats."
+icon: ArrowRightIcon
+---
+import Link from "fumadocs-core/link";
+
+## Resolve Private Key
+
+Provide the mnemonic phrases and `resolvePrivateKey` will return a private key.
+
+<Card>
+  ### Resolve Private Key [!toc]
+
+  Convert mnemonic to private key
+
+  **Mnemonic**
+  ```
+  [
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution",
+    "solution"
+  ]
+  ```
+
+  ```tsx
+  resolvePrivateKey(["solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution","solution"]);
+  ```
+</Card>
+
+
+## Resolve Transaction Hash
+
+Provide a `cborTx`, `resolveTxHash` will return the transaction hash. This hash is useful for creating chain transactions.
+
+<Card>
+  ### Resolve Transaction Hash [!toc]
+
+  Convert transaction cborTx to transaction hash
+
+  ```tsx
+  const tx = new Transaction({ initiator: wallet });
+  tx.sendLovelace('addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr', '1500000');
+
+  const unsignedTx = await tx.build();
+  const hash1 = resolveTxHash(unsignedTx);
+
+  const signedTx = await wallet.signTx(unsignedTx, false);
+  const hash2 = resolveTxHash(signedTx);
+
+  const txHash = await wallet.submitTx(signedTx);
+
+  // txHash == hash1 == hash2
+  ```
+</Card>
+
+
+## Resolve Data Hash
+
+Converts datum into hash. Getting the hash is useful when you need to query for the UTXO that contain the assets you need for your transaction's input.
+
+Explore <Link href="/apis/transaction">Transaction</Link> to learn more about designing Datum, and learn how to query for UTXOs containing the datum hash.
+
+<Card>
+  ### Resolve Data Hash [!toc]
+
+  Convert datum into hash
+
+  **Datum:** `supersecretdatum`
+
+  ```tsx
+  resolveDataHash('supersecretdatum');
+  ```
+</Card>
+
+
+## Resolve Native Script Hash
+
+Converts NativeScript into hash.
+
+<Card>
+  ### Resolve Native Script Hash [!toc]
+
+  Convert NativeScript to hash
+
+  **Address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  ```tsx
+  const keyHash = resolvePaymentKeyHash('addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr');
+
+  const nativeScript: NativeScript = {
+    type: "all",
+    scripts: [
+      {
+        type: "sig",
+        keyHash: keyHash,
+      },
+    ],
+  };
+
+  resolveNativeScriptHash(nativeScript);
+  ```
+</Card>
+
+
+## Resolve Script Hash
+
+`resolveScriptHash` will return a script hash. For example, this is useful when you want to convert a script to a policy ID.
+
+<Card>
+  ### Resolve Script Hash [!toc]
+
+  Convert script to hash (like policy ID)
+
+  **script address**
+  `8200581c5867c3b8e27840f556ac268b781578b14c5661fc63ee720dbeab663f`
+
+  ```tsx
+  resolveScriptHash('8200581c5867c3b8e27840f556ac268b781578b14c5661fc63ee720dbeab663f')
+  ```
+</Card>
+
+
+## Resolve Stake Address
+
+Provide a wallet address, and `resolveRewardAddress` will return a staking address in bech32 format.
+
+<Card>
+  ### Resolve Stake Address [!toc]
+
+  Convert wallet address to staking address
+
+  **Address**
+  `addr_test1qpvx0sacuf...swx9`
+
+  ```tsx
+  resolveRewardAddress('addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9');
+  ```
+</Card>
+
+
+## Resolve Fingerprint
+
+Takes policy ID and asset name, and return asset fingerprint based on <Link href="https://cips.cardano.org/cip/cip-14">CIP-14</Link>.
+
+<Card>
+  ## Resolve Asset Fingerprint [!toc]
+
+  Convert asset policy ID and asset name to asset fingerprint.
+
+  **Policy ID**
+  `426117329844ccb3b0ba877220ff06a5bdf21eab3fb33e2f3a3f8e69`
+
+  **Asset Name**
+  `4d657368546f6b656e`
+
+  ```tsx
+  resolveFingerprint(
+    '426117329844ccb3b0ba877220ff06a5bdf21eab3fb33e2f3a3f8e69',
+    '4d657368546f6b656e'
+  )
+  ```
+</Card>
+
+
+## Resolve Stake Key Hash
+
+Provide a stake address, and `resolveStakeKeyHash` will return the pub key hash of the stake address. This key hash is useful for building the NativeScript.
+
+<Card>
+  ## Resolve Stake Key Hash [!toc]
+
+  Convert stake address to pub key hash
+
+  **Address**
+  `stake_test1uzw5mnt7g4xjgdqkfa80hrk7kdvds6sa4k0vvgjvlj7w8eskffj2n`
+
+  ```tsx
+  resolveStakeKeyHash('stake_test1uzw5mnt7g4xjgdqkfa80hrk7kdvds6sa4k0vvgjvlj7w8eskffj2n');
+  ```
+</Card>
+
+
+## Resolve Rep Id
+
+Resolve Rep Id from scrip hash.
+
+<Card>
+  ### Resolve Rep Id [!toc]
+
+  Resolve rep id from scrip hash
+
+  ```tsx
+  let script: NativeScript = {
+      type: "all",
+      scripts: [
+        {
+          type: "sig",
+          keyHash: 'aa048e4cc8a1e67e1d97ffbd4be614388014cbc2b2451527202943b6'
+        },
+      ],
+    };
+
+  resolveScriptHashDRepId(resolveNativeScriptHash(script));
+  ```
+</Card>
+
+
+## Resolve Epoch Number
+
+With `resolveEpochNo`, you can get the current epoch with:
+
+```tsx
+import { resolveEpochNo } from '@meshsdk/core';
+const epoch = resolveEpochNo('preprod');
+```
+
+You can also provide date in `milliseconds` to get epoch in the past or the future. For example, get the epoch 1 year from now:
+
+```tsx
+import { resolveEpochNo } from '@meshsdk/core';
+let oneYearFromNow = new Date();
+oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+const epoch = resolveEpochNo('preprod', oneYearFromNow.getTime());
+```
+
+<Card>
+  ### Resolve Epoch number [!toc]
+
+  Get the epoch number for the network
+
+  **Select network**
+  `preprod`
+
+  ```tsx
+  resolveEpochNo('preprod');
+  ```
+</Card>
+
+<br />
+
+<Card>
+  ### Resolve Epoch number 1 year from now [!toc]
+
+  Get the epoch number for the network 1 year from now
+
+  **Select network**
+  `preprod`
+
+  ```tsx
+  let oneYearFromNow = new Date()
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  resolveEpochNo(userInput, oneYearFromNow.getTime());
+  ```
+</Card>
+
+
+## Resolve Slot Number
+
+With `resolveSlotNo`, you can get the current slot number with:
+
+```tsx
+import { resolveSlotNo } from '@meshsdk/core';
+const slot = resolveSlotNo('preprod');
+```
+
+You can also provide date in `milliseconds` to get slots in the past or the future. For example, get the slot number 1 year from now:
+
+```tsx
+import { resolveSlotNo } from '@meshsdk/core';
+let oneYearFromNow = new Date();
+oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+const slot = resolveSlotNo('preprod', oneYearFromNow.getTime());
+```
+
+<Card>
+  ### Resolve Slot number [!toc]
+
+  Get the Slot number for the network
+
+  **Select network**
+  `preprod`
+
+  ```tsx
+  resolveSlotNo('preprod');
+  ```
+</Card>
+
+<br />
+
+<Card>
+  ### Resolve Slot number 1 year from now [!toc]
+
+  Get the Slot number for the network 1 year from now
+
+  **Select network**
+  `preprod`
+
+  ```tsx
+  let oneYearFromNow = new Date()
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  resolveSlotNo(userInput, oneYearFromNow.getTime());
+  ```
+</Card>
+

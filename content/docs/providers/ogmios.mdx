@@ -1,0 +1,60 @@
+---
+title: "Ogmios Provider"
+description: "Lightweight bridge interface for cardano-node that offers WebSockets API that enables local clients to speak Ouroboros' mini-protocols"
+---
+import Link from "fumadocs-core/link";
+
+<Link href="https://ogmios.dev/">Ogmios</Link> is a lightweight bridge interface for cardano-node. It offers a WebSockets API that enables local clients to speak Ouroboros' mini-protocols via JSON/RPC. Ogmios is a fast and lightweight solution that can be deployed alongside relays to create entry points on the Cardano network for various types of applications.
+
+Get started:
+
+```tsx
+import { OgmiosProvider } from "@meshsdk/core";
+
+const provider = new OgmiosProvider('<URL>');
+```
+
+## Evaluate Transaction
+
+`evaluateTx()` accepts an unsigned transaction (`unsignedTx`) and it evaluates the resources required to execute the transaction. Note that, this is only valid for transaction interacting with redeemer (smart contract). By knowing the budget required, you can use this to adjust the redeemer's budget so you don't spend more than you need to execute transactions for this smart contract.
+
+```tsx
+const unsignedTx = await tx.build();
+const evaluateTx = await provider.evaluateTx(unsignedTx);
+```
+
+Example responses from unlocking assets from the always succeed smart contract.
+
+```tsx
+[
+  {
+    "index": 0,
+    "tag": "SPEND",
+    "budget": {
+      "mem": 1700,
+      "steps": 368100
+    }
+  }
+]
+```
+
+With the `mem` and `steps`, you can refine the budget for the redeemer. For example:
+
+```tsx
+const redeemer = {
+  data: { alternative: 0, fields: [...] },
+  budget: {
+    mem: 1700,
+    steps: 368100,
+  },
+};
+```
+
+
+## Submit Transaction
+
+Submit a serialized transaction to the network.
+
+```tsx
+await provider.submitTx(signedTx);
+```

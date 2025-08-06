@@ -1,0 +1,99 @@
+---
+title: "Payment Splitter"
+description: "Split payouts equally among a list of specified payees"
+icon: ArrowsPointingOutIcon
+---
+import Link from "fumadocs-core/link";
+
+A payment splitter can be used for example to create a shared project donation address, ensuring that all payees receive the same amount
+
+Sending lovelace to the contract works similarly to sending lovelace to any other address. The payout transaction can only be submitted by one of the payees, and the output addresses are restricted to the payees. The output sum must be equally divided to ensure the transaction is successful.
+
+There are 2 actions (or endpoints) available to interact with this smart contract:
+
+- Send Lovelace to Payment Splitter
+- Trigger Payout
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the contract [!toc]
+
+To initialize the payment splitter, we need to initialize a <Link href="https://meshjs.dev/providers">provider</Link>, a `MeshTxBuilder`, and a `MeshPaymentSplitterContract`. Additionally, a list of payees is required to define the allowed payout addresses for the contract.
+
+```tsx
+import { MeshPaymentSplitterContract } from "@meshsdk/contract";
+import { MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshPaymentSplitterContract(
+  {
+    mesh: meshTxBuilder,
+    fetcher: provider,
+    wallet: wallet,
+    networkId: 0,
+  },
+  [
+    'addr_test1vpg334d6skwu6xxq0r4lqrnsjd5293n8s3d80em60kf6guc7afx8k',
+    'addr_test1vp4l2kk0encl7t7972ngepgm0044fu8695prkgh5vjj5l6sxu0l3p',
+    'addr_test1vqqnfs2vt42nq4htq460wd6gjxaj05jg9vzg76ur6ws4sngs55pwr',
+    'addr_test1vqv2qhqddxmf87pzky2nkd9wm4y5599mhp62mu4atuss5dgdja5pw',
+  ]
+);
+```
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/payment-splitter">Mesh Github Repository</Link>.
+
+
+## Send Lovelace to Payment Splitter
+
+`sendLovelaceToSplitter()` will lock Lovelace in the contract. The function accepts the following parameters:
+
+- lovelaceAmount (number) - the amount of Lovelace you want to send to the contract
+
+The function returns a transaction hash.
+
+<Card>
+  ### Send Lovelace to Payment Splitter [!toc]
+
+  Send Lovelace to the Payment Splitter contract to be distributed to the beneficiaries.
+
+  **Listing price in Lovelace**
+  `15000000`
+
+  ```tsx
+  const tx = await contract.sendLovelaceToSplitter(15000000);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Trigger Payout
+
+`triggerPayout()` will split the locked amount equally among the list of payees. The function doesn't need any parameters.
+
+The function returns a transaction hash if the payout has been done successfully.
+
+<Card>
+  ### Trigger Payout [!toc]
+
+  After the amount has been locked in the contract, you can trigger the payout to the payees.
+
+  ```tsx
+  const tx = await contract.triggerPayout();
+  const signedTx = await wallet.signTx(tx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

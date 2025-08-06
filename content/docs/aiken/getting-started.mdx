@@ -1,0 +1,65 @@
+---
+title: "Getting Started"
+description: "Setting up your system to compile Aiken smart contracts"
+---
+import Link from "fumadocs-core/link";
+
+## Installation Instructions
+
+This section will guide you through the process of setting up your system compile Aiken smart contracts. You can skip this section if you have already set up your system or do not wish to compile the contract.
+
+### Using aikup (on Linux & MacOS only) [!toc]
+
+If you are using Linux or MacOS, you can use the utility tool to download and manage Aiken's pre-compiled executables.
+
+You can install the Aiken CLI by running the following command in your terminal:
+
+```bash
+$ curl -sSfL https://install.aiken-lang.org | bash
+```
+
+After installing the Aiken CLI, you can use the following command to installs the latest version available. `aikup` is a cross-platform utility tool to download and manage Aiken's across multiple versions and for seamless upgrades.
+
+```tsx
+$ aikup
+```
+
+### From sources (all platforms) [!toc]
+
+You will know you have successfully installed Rust and Cargo when you can run the following commands in your terminal:
+
+```tsx
+$ rustc --version
+$ cargo --version
+```
+
+Next, you will need to install the Aiken CLI. You can install the Aiken CLI by running the following command in your terminal:
+
+```tsx
+$ cargo install aiken
+```
+
+### Check your installation [!toc]
+
+You will know you have successfully installed the Aiken CLI when you can run the following command in your terminal:
+
+```tsx
+$ aiken -V
+```
+
+If you face any issues, please check the installation instructions on the <Link href="https://aiken-lang.org/installation-instructions">Aiken website</Link> for more information.
+
+
+## Editor integrations
+
+Aiken language support for Visual Studio Code is provided by the Aiken extension. This extension provides syntax highlighting, code snippets, and error checking for Aiken smart contracts. Download the extension from the <Link href="https://marketplace.visualstudio.com/items?itemName=TxPipe.aiken">Visual Studio Code Marketplace</Link> or search `aiken` in the extensions tab of Visual Studio Code.
+
+
+## Useful commands
+
+Here are some useful commands you can use to compile and test your scripts.
+
+- `aiken build` - compiles the Aiken smart contract and generates a `plutus.json` file which contains type information, params, redeemer, datum, and the compiled code for each validator of your project and their corresponding hash digests to be used in addresses
+- `aiken check` - type-check a project and run tests
+- `aiken docs` - if you're writing a library, this generate documentation from you project
+- `aiken blueprint` - provides utility functions to generate addresses, apply parameters and convert the build output to various formats

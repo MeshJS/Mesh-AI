@@ -1,0 +1,77 @@
+---
+title: "Mesh Data"
+description: "Parse and manipulate data with Mesh Data type"
+icon: Bars2Icon
+---
+
+Mesh provides a full set of utility functions to help constructing the Mesh `Data` type you need for your Web3 app.
+
+**Types Support**
+
+All utility functions start with the prefix of m and all types All the utility functions start with the prefix of m, and are designed to return a type with the same naming as the utilities function, with capitalizing first letter, you can build your data with type supports in complex types, some examples:
+
+- `mConstr` returns `MConstr` type
+- `mBool` returns `MBool` type
+
+
+## Utilities in Building Constructor Mesh Data
+
+`mConStr` build the constructor object in Mesh `Data` type, with parameters:
+
+- alternative (number) - the constructor index
+- fields (any[]) - the constructor fields in array
+
+There are also some quick utilities only taking in **fields** as parameters for 0 - 2 indices:
+
+- `mConStr0` - building index 0 constructor
+- `mConStr1` - building index 1 constructor
+- `mConStr2` - building index 2 constructor
+
+<Card>
+  ### Constructor [!toc]
+
+  Building Mesh constructor object
+
+  ```tsx
+  import { mConStr } from "@meshsdk/core";
+  mConStr(0, []);
+  ```
+</Card>
+
+
+## Utilities in Building Primitives Mesh Data
+
+`mBool` build the boolean object in , with parameters:
+
+- b (boolean | boolean) - the boolean to be built
+
+For the rest of data primitives, they are represented by JS primitives:
+
+- Integer - `number` and `bigint`
+- Byte string - `string`
+- List - JS `Array`
+- Map - JS `Map`
+
+<Card>
+  ### Constructor [!toc]
+
+  Building Mesh bool object
+
+  ```tsx
+  import { mBool } from "@meshsdk/core";
+  mBool(true);
+  ```
+</Card>
+
+
+## Other Utilities
+
+The code example showing above does not cover all utilities, please checkout the hosted documentation for more details. The not covered utilities are as below:
+
+- `mAssetClass`
+- `mOutputReference`
+- `mTxOutRef`
+- `mTuple`
+- `mMaybeStakingHash`
+- `mPubKeyAddress`
+- `mScriptAddress`

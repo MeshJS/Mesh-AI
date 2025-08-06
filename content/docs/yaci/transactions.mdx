@@ -1,0 +1,98 @@
+---
+title: "Build Transactions"
+description: "Building and submitting transactions on Yaci"
+---
+
+## Import Yaci Provider
+
+First, We import `YaciProvider`
+
+```tsx
+import { YaciProvider } from "@meshsdk/core";
+
+const provider = new YaciProvider('<YACI_URL>', '<OPTIONAL_ADMIN_URL>');
+```
+
+By default, the `YaciProvider` will use the default URL, `https://yaci-node.meshjs.dev/api/v1/`. If you want to use a custom URL, you can pass it as a parameter.
+
+In this example, we initialize the `YaciProvider` and fetch the UTxOs of an address.
+
+You can topup ADA in your wallet by running the following command from devne in order to fetch the UTxOs of an address.
+
+```bash
+devnet:default>topup addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9 1000
+```
+
+<Card>
+  ### Get UTxOs [!toc]
+
+  Fetch UTxOs of an address. Note: your Yaci devnet must be running.
+
+  **Address**
+  `addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337...pmtv7cc3yel9uu0nq93swx9`
+
+  **Yaci URL**
+  `https://yaci-node.meshjs.dev/api/v1/`
+
+  ```tsx
+  import { YaciProvider } from "@meshsdk/core";
+
+  const provider = new YaciProvider('https://yaci-node.meshjs.dev/api/v1/');
+  const utxos = await provider.fetchAddressUTxOs('addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9');
+  ```
+</Card>
+
+
+## Basic Transaction
+
+We import a wallet, for example `MeshWallet` with `YaciProvider` as the `fetcher` and `submitter`:
+
+```tsx
+const provider = new YaciProvider();
+
+const wallet = new MeshWallet({
+  networkId: 0,
+  fetcher: provider,
+  submitter: provider,
+  key: {
+    type: "mnemonic",
+    words: demoMnemonic,
+  },
+});
+```
+
+Next, we create a transaction and send 1 ADA to the recipient address.
+
+```tsx
+const tx = new Transaction({ initiator: wallet });
+tx.sendLovelace('<recipient address>', "1000000");
+
+const unsignedTx = await tx.build();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+Note: for this transaction to work, you must have a Yaci devnet running and the wallet is funded. You can topup ADA in your wallet by running the following command from devnet:
+
+```bash
+devnet:default>topup addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lagzcp29tcana68ca5aqa6swlq6llfamln09tal7n5kvt4275ckwedpt4v7q48uhex 1000
+```
+
+<Card>
+  ### Get UTxOs [!toc]
+
+  Fetch UTxOs of an address. Note: your Yaci devnet must be running.
+
+  **Recipient Address**
+  `addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lag...tal7n5kvt4275ckwedpt4v7q48uhex`
+
+  **Yaci URL**
+  `https://yaci-node.meshjs.dev/api/v1/`
+
+  ```tsx
+  import { YaciProvider } from "@meshsdk/core";
+
+  const provider = new YaciProvider('https://yaci-node.meshjs.dev/api/v1/');
+  const utxos = await provider.fetchAddressUTxOs('addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lagzcp29tcana68ca5aqa6swlq6llfamln09tal7n5kvt4275ckwedpt4v7q48uhex');
+  ```
+</Card>
