@@ -185,7 +185,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/">
+          <NavbarMenuLink href="https://docs.meshjs.dev/">
             <DocumentTextIcon className="mr-3 h-5 w-5 text-blue-500" />
             <div className="flex flex-col">
               <span className="font-medium">Documentation</span>
