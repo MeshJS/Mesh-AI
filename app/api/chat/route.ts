@@ -7,7 +7,7 @@ import { convertToModelMessages, streamText } from 'ai';
 const mesh_api = createOpenAICompatible({
   name: 'MeshAI',
   apiKey: "",
-  baseURL: 'http://localhost:8000/api/v1/ask-mesh-ai',
+  baseURL: 'https://meshjs-rag.onrender.com/api/v1/ask-mesh-ai',
 });
 
 export async function POST(req: Request) {
