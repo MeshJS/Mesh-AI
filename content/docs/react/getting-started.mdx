@@ -79,7 +79,7 @@ For a custom label, add the label prop.
 <CardanoWallet label={"Connect Wallet"} />
 ```
 
-The customization is limited. For more customization, you can easily build your own wallet connection component. If you are using React, the <Link href="/apis/react/wallet-hooks">React hooks</Link> will be useful. You may also take reference from <Link href="https://github.com/MeshJS/mesh/blob/main/packages/mesh-react/src/cardano-wallet/index.tsx">this component</Link>.
+The customization is limited. For more customization, you can easily build your own wallet connection component. If you are using React, the <Link href="/react/wallet-hooks">React hooks</Link> will be useful. You may also take reference from <Link href="https://github.com/MeshJS/mesh/blob/main/packages/mesh-react/src/cardano-wallet/index.tsx">this component</Link>.
 
 ### Persist user session [!toc]
 If you would like to save the user last connected wallet and automatically connect to it on the next visit, you can use the persist prop.
@@ -115,7 +115,7 @@ The above code will log "Hello, World!" to the console when the wallet is connec
 
 <Link href="https://web3.meshjs.dev/">Mesh Web3 Services</Link> streamline user onboarding and on-chain feature integration, accelerating your app's time to market.
 
-To integrate Mesh Web3 Services, use the `web3Services` prop. The `networkId` is the network ID of the wallet you are connecting to. You may use any <Link href="/apis/providers/">providers</Link> for `fetcher` and `submitter`.
+To integrate Mesh Web3 Services, use the `web3Services` prop. The `networkId` is the network ID of the wallet you are connecting to. You may use any <Link href="/providers/">providers</Link> for `fetcher` and `submitter`.
 
 ```tsx
 const provider = new BlockfrostProvider('<BLOCKFROST_API_KEY>');

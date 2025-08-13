@@ -6,7 +6,7 @@ import Link from "fumadocs-core/link";
 
 In this guide, we will set up a Next.js application and connect it to the Cardano blockchain using Mesh. We will create a simple application that allows users to connect their wallets and view the assets in their wallets.
 
-Though this guide is focused on Next.js which uses <Link href="/apis/react">Mesh React</Link> you can also use Mesh with other frameworks like Remix, React, and Vue. Mesh SDK has <Link href="/apis/svelte">Svelte UI components</Link> too.
+Though this guide is focused on Next.js which uses <Link href="/react">Mesh React</Link> you can also use Mesh with other frameworks like Remix, React, and Vue. Mesh SDK has <Link href="/svelte">Svelte UI components</Link> too.
 
 You may follow this guide to setup your project or use the <Link href="/">Mesh CLI</Link> to scaffold a new project.
 
@@ -72,7 +72,7 @@ Your Next.js application is ready to connect wallet, browse assets and make some
 
 React context is an essential tool for building web applications. It allow you to easily share state in your applications, so you can use the data in any component within the app. This means that when the user has connected their wallet, visiting different pages on the app ensure their wallet is still connected.
 
-Open **pages/_app.tsx**, import and include <Link href="/apis/react/getting-started#meshProvider">MeshProvider</Link>. Your **_app.tsx** should look similar to this:
+Open **pages/_app.tsx**, import and include <Link href="/react/getting-started#meshProvider">MeshProvider</Link>. Your **_app.tsx** should look similar to this:
 
 ```tsx
 import "../styles/globals.css";
@@ -93,7 +93,7 @@ export default MyApp;
 
 ### 2. Add connect wallet component and check wallet's assets [!toc]
 
-Lets add the <Link href="/apis/react/ui-components#connectWallet">connect wallet component</Link> to allow users to connect wallets they have installed on their device. Connecting to wallets will ask the user for permission if not granted, and proceed to connect the selected wallet.
+Lets add the <Link href="/react/ui-components#connectWallet">connect wallet component</Link> to allow users to connect wallets they have installed on their device. Connecting to wallets will ask the user for permission if not granted, and proceed to connect the selected wallet.
 
 Lastly, we link those components together, allowing users to choose a wallet to connect, and query for assets in the wallet with **wallet.getAssets()**.
 

@@ -16,7 +16,12 @@ import {
   SiDiscord,
   SiX
 } from "@icons-pack/react-simple-icons";
-import Banner from '../components/Banner';
+import Banner from '@/components/ui/Banner';
+import { LargeSearchToggle } from 'fumadocs-ui/components/layout/search-toggle';
+import { Sparkles } from 'lucide-react';
+import { AISearchTrigger } from '@/components/ai';
+import { cn } from '@/lib/cn';
+import { buttonVariants } from '@/components/ui/button';
 
 const navbarLinks: LinkItemType[] = [
   {
@@ -53,7 +58,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/providers">
+          <NavbarMenuLink href="/providers">
             <CloudIcon className="mr-3 h-5 w-5 text-green-500" />
             <div className="flex flex-col">
               <span className="font-medium">Providers</span>
@@ -71,7 +76,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/react">
+          <NavbarMenuLink href="/react">
             <ComputerDesktopIcon className="mr-3 h-5 w-5 text-yellow-500" />
             <div className="flex flex-col">
               <span className="font-medium">React Components</span>
@@ -80,7 +85,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/svelte">
+          <NavbarMenuLink href="/svelte">
             <ComputerDesktopIcon className="mr-3 h-5 w-5 text-teal-500" />
             <div className="flex flex-col">
               <span className="font-medium">Svelte Components</span>
@@ -89,7 +94,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/smart-contracts">
+          <NavbarMenuLink href="/smart-contracts">
             <DocumentCheckIcon className="mr-3 h-5 w-5 text-amber-500" />
             <div className="flex flex-col">
               <span className="font-medium">Smart Contract Library</span>
@@ -98,7 +103,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/aiken">
+          <NavbarMenuLink href="/aiken">
             <div className="mr-3 h-5 w-5">
               {iconResolver("icons/aiken.png")}
             </div>
@@ -109,7 +114,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/hydra">
+          <NavbarMenuLink href="/hydra">
             <div className="mr-3 h-5 w-5">
               {iconResolver("icons/hydra.svg")}
             </div>
@@ -120,7 +125,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/yaci">
+          <NavbarMenuLink href="/yaci">
             <div className="mr-3 h-5 w-5">
               {iconResolver("icons/yaci.png")}
             </div>
@@ -176,7 +181,7 @@ const navbarLinks: LinkItemType[] = [
       <NavbarMenu>
         <NavbarMenuTrigger>Resources</NavbarMenuTrigger>
         <NavbarMenuContent>
-          <NavbarMenuLink href="/apis/guides">
+          <NavbarMenuLink href="/guides">
             <BookOpenIcon className="mr-3 h-5 w-5 text-purple-500" />
             <div className="flex flex-col">
               <span className="font-medium">Guides</span>
@@ -233,7 +238,7 @@ const navbarLinks: LinkItemType[] = [
               </span>
             </div>
           </NavbarMenuLink>
-          <NavbarMenuLink href="/apis/smart-contracts">
+          <NavbarMenuLink href="/smart-contracts">
             <DocumentCheckIcon className="mr-3 h-5 w-5 text-emerald-500" />
             <div className="flex flex-col">
               <span className="font-medium">Smart Contracts Library</span>
@@ -272,7 +277,7 @@ const navbarLinks: LinkItemType[] = [
       <NavbarMenu>
         <NavbarMenuTrigger>About</NavbarMenuTrigger>
         <NavbarMenuContent>
-          <NavbarMenuLink href="https://meshjs.dev/about">
+          <NavbarMenuLink href="/about">
             <HeartIcon className="mr-3 h-5 w-5 text-red-500" />
             <span className="font-medium">About Us</span>
           </NavbarMenuLink>
@@ -284,7 +289,7 @@ const navbarLinks: LinkItemType[] = [
             <LightBulbIcon className="mr-3 h-5 w-5 text-emerald-500" />
             <span className="font-medium">Project Catalyst</span>
           </NavbarMenuLink>
-          <NavbarMenuLink href="https://meshjs.dev/aboout/support-us">
+          <NavbarMenuLink href="https://meshjs.dev/about/support-us">
             <HeartIcon className="mr-3 h-5 w-5 text-pink-500" />
             <span className="font-medium">Support Us</span>
           </NavbarMenuLink>
@@ -302,6 +307,27 @@ const navbarLinks: LinkItemType[] = [
 export default function Layout({ children }: { children: ReactNode }) {
   return <HomeLayout
     {...baseOptions}
+    searchToggle={{
+      components: {
+        lg: (
+          <div className="flex gap-1.5 max-md:hidden">
+            <LargeSearchToggle className="flex-1" />
+            <AISearchTrigger
+              aria-label="Ask AI"
+              className={cn(
+                buttonVariants({
+                  color: 'outline',
+                  size: 'icon',
+                  className: 'text-fd-muted-foreground',
+                }),
+              )}
+            >
+              <Sparkles className="size-4" />
+            </AISearchTrigger>
+          </div>
+        ),
+      },
+    }}
     links={[
       ...navbarLinks,
     {

@@ -63,7 +63,7 @@ In this section, we will build the minting transaction.
 
 In this guide, we won't be showing how to set up RESTful APIs and backend servers. There are thousands of tutorials on YouTube, we recommend building your backend server with <Link href="https://vercel.com/docs/rest-api/reference">Vercel API</Link> or <Link href="https://www.youtube.com/results?search_query=nestjs">NestJs</Link> or <Link href="https://www.youtube.com/results?search_query=expressjs">ExpressJs</Link>.
 
-First, we initialize a <Link href="/apis/providers">blockchain provider</Link> and <Link href="/apis/wallets/meshwallet">Mesh Wallet</Link>. In this example, we use mnemonic to restore our wallet, but you can initialize a wallet with mnemonic phrases, private keys, and Cardano CLI generated keys.
+First, we initialize a <Link href="/providers">blockchain provider</Link> and <Link href="/apis/wallets/meshwallet">Mesh Wallet</Link>. In this example, we use mnemonic to restore our wallet, but you can initialize a wallet with mnemonic phrases, private keys, and Cardano CLI generated keys.
 
 ```tsx
 const provider = new BlockfrostProvider(
