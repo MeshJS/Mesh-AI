@@ -1,0 +1,337 @@
+---
+title: "Smart Contracts"
+description: "Transactions to work with smart contracts"
+icon: NewspaperIcon
+---
+import Link from "fumadocs-core/link";
+
+In this guide, you will understand all logics you need to know for interacting with smart contracts with `MeshTxBuilder`.
+
+In the code snippet, you will find `txBuilder`, which is an instance of `MeshTxBuilder`, a powerful low-level APIs that allows you to build transactions. Learn how to initialize MeshTxBuilder.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+```
+
+In Cardano, whenever you need the nodes' computing power to execute a smart contract, you need to provide collateral to prevent spamming. You will see this is everywhere when script execution is needed in below's examples, and here's how you can do so:
+
+```tsx
+txBuilder
+  .txInCollateral(txHash: string, txIndex: number, amount?: Asset[], address?: string)
+```
+
+
+## Lock Assets
+
+Locking assets meaning sending value to a script address with datum.
+
+Same as `Transaction` demo, we will lock selected assets from your wallet in an `always succeed` smart contract. We use one API to represent sending value, another API to represent attaching datum to complete the locking assets process:
+
+```tsx
+// For inline datumtxBuilder
+  .txOut(address, assets)
+  .txOutInlineDatumValue(data)
+```
+
+```tsx
+// For datum hashtxBuilder
+  .txOut(address, assets)
+  .txOutDatumHashValue(data)
+```
+
+The lower level APIs support providing your datum in all Mesh `Data` (default), JSON and CBOR representations. For details and helper utilities, please check <Link href="/apis/data">Data section</Link>.
+
+```tsx
+// For inline datum provided in JSONtxBuilder
+  .txOut(address, assets)
+  .txOutInlineDatumValue(jsonData, "JSON")
+```
+
+<Card>
+  ### Lock Assets [!toc]
+
+  Lock assets in a Plutus script
+
+  **Asset unit**
+  `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+  **Datum:** `meshsecretcode`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const script: PlutusScript = {
+    code: demoPlutusAlwaysSucceedScript,
+    version: "V2",
+  };
+  const { address: scriptAddress } = serializePlutusScript(script);
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .txOut(scriptAddress, [{ unit: "d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e", quantity: "1" }])
+    .txOutInlineDatumValue("meshsecretcode")
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Unlock Assets
+
+Unlocking with `MeshTxBuilder` starts with anyone of the below script version indicators:
+
+```tsx
+.spendingPlutusScriptV1()
+.spendingPlutusScriptV2()
+.spendingPlutusScriptV3()
+```
+
+Followed by specifying the exact script input to spend with:
+
+```tsx
+.txIn(txHash: string, txIndex: number, amount?: Asset[], address?: string)
+```
+
+In Cardano, if you want to unlock assets from a script address, you have to provide 3 other necessary information apart from `.txIn()` itself. They are:
+
+- Actual script
+- Datum of the input
+- Redeemer of the unlock
+
+**Actual script**
+The actual script can be either provided by transaction builder or referenced from an UTxO onchain.
+
+- (i) Reference script
+```tsx
+.spendingTxInReference()
+```
+
+- (ii) Supplying script
+```tsx
+.txInScript(scriptCbor: string)
+```
+
+**Datum of the input**
+
+Similar to script, datum can also either be provided by transaction builder or as inline datum.
+
+- (i) Referencing inline datum
+```tsx
+.txInInlineDatumPresent()
+```
+
+- (ii) Supplying datum
+```tsx
+.txInDatumValue(datum: Data | object | string, type?: "Mesh" | "CBOR" | "JSON")
+```
+
+**Redeemer of the unlock**
+
+Redeemer can be provided in different <Link href="/apis/data">data types</Link>. If your MeshTxBuilder does not include an `evaluator` instance, you can also provide your budget for the unlock with this redeemer endpoint
+
+```tsx
+.txInRedeemerValue(redeemer: Data | object | string, type: "Mesh" | "CBOR" | "JSON", exUnits?: Budget)
+```
+
+An example of complete set of endpoints to unlock assets from a script address:
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+txBuilder
+  .spendingPlutusScriptV2()
+  .txIn(txHash: string, txIndex: number, amount?: Asset[], address?: string)
+  .txInInlineDatumPresent() // or .txInDatumValue(datum: Data | string | object)
+  .txInRedeemerValue(redeemer: Data | object | string, type?: string, exUnits?: Budget)
+  .spendingTxInReference(txHash: string, txIndex: number, spendingScriptHash?: string) // or supplying script
+```
+
+<Card>
+  ### Unlock Assets [!toc]
+
+  Unlock assets in a Plutus script
+
+  **Asset unit**
+  `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+  **Datum:** `meshsecretcode`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const collateral = await wallet.getCollateral();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const script: PlutusScript = {
+    code: demoPlutusAlwaysSucceedScript,
+    version: "V2",
+  };
+  const { address: scriptAddress } = serializePlutusScript(script);
+
+  const assetUtxo = await fetchAssetUtxo({
+    address: scriptAddress,
+    asset: userInput,
+    datum: userInput2,
+  });
+  if (assetUtxo === undefined) {
+    throw "Asset UTXO not found";
+  }
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .spendingPlutusScriptV2()
+    .txIn(assetUtxo.input.txHash, assetUtxo.input.outputIndex)
+    .txInInlineDatumPresent()
+    .txInRedeemerValue(mConStr0([]))
+    .txInScript(demoPlutusAlwaysSucceedScript)
+    .changeAddress(changeAddress)
+    .txInCollateral(
+      collateral[0]?.input.txHash!,
+      collateral[0]?.input.outputIndex!,
+      collateral[0]?.output.amount!,
+      collateral[0]?.output.address!,
+    )
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Minting Assets with Plutus Script
+
+Minting Plutus tokens with `MeshTxBuilder` starts with anyone of the below script version indicators:
+
+```tsx
+.mintPlutusScriptV1()
+.mintPlutusScriptV2()
+.mintPlutusScriptV3()
+```
+
+Followed by specifying the minting information:
+
+```tsx
+.mint(quantity: string, policy: string, name: string)
+```
+
+Similar to unlocking assets, minting or burning Plutus tokens require providing redeemer and scripts. However, no datum information is needed in minting or burning.
+
+**Script of the token**
+
+The actual script can be either provided by transaction builder or referenced from an UTxO onchain.
+
+- (i) Reference script
+```tsx
+.mintTxInReference(txHash: string, txIndex: number)
+```
+
+- (ii) Supplying script
+```tsx
+.mintingScript(scriptCbor: string)
+```
+
+**Redeemer of the mint**
+
+Redeemer can be provided in different <Link href="/apis/data">data types</Link>. If your MeshTxBuilder does not include an `evaluator` instance, you can also provide your budget for the unlock with this redeemer endpoint
+
+```tsx
+.mintRedeemerValue(redeemer: Data | object | string, type: "Mesh" | "CBOR" | "JSON", exUnits?: Budget)
+```
+
+<Card>
+  ### Mint Assets with Plutus Script [!toc]
+
+  Mint native assets with Plutus Script. For this example, the Plutus script expects a data field of 'mesh'.
+
+  **Redeemer value:** `mesh`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const collateral: UTxO = (await wallet.getCollateral())[0]!;
+  const changeAddress = await wallet.getChangeAddress();
+
+  const policyId = resolveScriptHash(demoPlutusMintingScript, "V2");
+  const tokenName = 'mesh';
+  const tokenNameHex = stringToHex(tokenName);
+  const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } };
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .mintPlutusScriptV2()
+    .mint("1", policyId, tokenNameHex)
+    .mintingScript(demoPlutusMintingScript)
+    .mintRedeemerValue(mConStr0(['mesh']))
+    .metadataValue(721, metadata)
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .txInCollateral(
+      collateral.input.txHash,
+      collateral.input.outputIndex,
+      collateral.output.amount,
+      collateral.output.address,
+    )
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Send Reference Scripts Onchain
+
+For all smart contract executions, you have option to provide script as referencing onchain. To do so, you must send the script onchain first. You can attach the script like attaching datum to a output with this:
+
+```tsx
+.txOutReferenceScript(scriptCbor: string, version?: LanguageVersion)
+```
+
+<Card>
+  ### Send Reference Script [!toc]
+
+  Provide script as referencing onchain
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .txOut("addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr", [])
+    .txOutReferenceScript("4e4d01000033222220051200120011", "V2")
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

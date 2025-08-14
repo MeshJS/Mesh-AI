@@ -1,0 +1,357 @@
+---
+title: "Blockfrost Provider"
+description: "Featuring over 100 APIs tailored for easy access to Cardano blockchain"
+---
+import Link from "fumadocs-core/link";
+
+<Link href="https://blockfrost.io/">Blockfrost</Link> provides restful APIs which allows your app to access information stored on the blockchain.
+
+Get started:
+
+```tsx
+import { BlockfrostProvider } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+```
+
+If you are using a privately hosted Blockfrost instance, you can set the URL in the parameter:
+
+```tsx
+const provider = new BlockfrostProvider('<BLOCKFROST_URL>');
+```
+
+### Get data from URL
+
+You can fetch any data from the blockchain by providing the URL path.
+
+```tsx
+await provider.get('/addresses/addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9/transactions')
+```
+
+
+## Fetch Account Info
+
+Obtain information about a specific stake account.
+
+```tsx
+await provider.fetchAccountInfo('stake_test1uzw5mnt7g4xjgdqkfa80hrk7kdvds6sa4k0vvgjvlj7w8eskffj2n')
+```
+
+
+## Fetch Address Assets
+
+Fetch assets from an address.
+
+```tsx
+await provider.fetchAddressAssets('addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9')
+```
+
+<Card>
+  ### Fetch Address UTxOs [!toc]
+
+  Fetch UTxOs from address
+
+  **Address**
+  ```bash
+  addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9
+  ```
+
+  ```tsx
+  await provider.fetchAddressAssets(
+    'addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9'
+  );
+  ```
+</Card>
+
+<br />
+
+<Card>
+  ### Fetch assets from address [!toc]
+
+  Fetch assets given an address
+
+  **Address**
+  ```bash
+  addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9
+  ```
+
+  ```tsx
+  await provider.fetchAddressAssets(
+    'addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9'
+  );
+  ```
+</Card>
+
+
+## Fetch Address UTxOs
+
+Fetch UTxOs controlled by an address.
+
+```tsx
+await provider.fetchAddressUTxOs('addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9')
+```
+
+Optionally, you can filter UTXOs containing a particular `asset` by providing asset, where it is the concatenation of policy ID and asset.
+
+```tsx
+await fetchAddressUTxOs(address: string, asset?: string)
+```
+
+<Card>
+  ### Fetch Address UTxOs [!toc]
+
+  Fetch UTxOs from address
+
+  **Address**
+  ```bash
+  addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9
+  ```
+
+  ```tsx
+  await provider.fetchAddressUTxOs(
+    'addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9'
+  );
+  ```
+</Card>
+
+<br />
+
+<Card>
+  ### Fetch UTxOs with Asset [!toc]
+
+  Fetch UTxOs from address with asset
+
+  **Address**
+  ```bash
+  addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9
+  ```
+
+  **Asset**:
+  `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+  ```tsx
+  await provider.fetchAddressUTxOs(
+    'addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9'
+  );
+  ```
+</Card>
+
+
+## Fetch Asset Addresses
+
+Fetch a list of a addresses containing a specific `asset` where it is the concatenation of policy ID and asset.
+
+```tsx
+await provider.fetchAssetAddresses('d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e')
+```
+
+<Card>
+  ### Fetch Asset Addresses [!toc]
+
+  Fetch list of addresses containing a specific asset
+
+  **Asset Unit**:
+  `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+  ```tsx
+  await provider.fetchAssetAddresses(
+    'd9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e'
+  );
+  ```
+</Card>
+
+
+## Fetch Asset Metadata
+
+Fetch the asset metadata by providing asset's `unit`, which is the concatenation of policy ID and asset name in hex.
+
+
+```tsx
+// Asset Unit: `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+await provider.fetchAssetMetadata('d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e')
+```
+
+
+## Fetch Block Info
+
+Fetch block infomation. You can get the hash from `fetchTxInfo()`.
+
+```tsx
+// Block hash: `79f60880b097ec7dabb81f75f0b52fedf5e922d4f779a11c0c432dcf22c56089`
+
+await provider.fetchBlockInfo('79f60880b097ec7dabb81f75f0b52fedf5e922d4f779a11c0c432dcf22c56089')
+```
+
+
+## Fetch Collection Assets
+
+Fetch a list of assets belonging to a collection by providing its Policy ID.
+
+```tsx
+await provider.fetchCollectionAssets('d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc17255527')
+```
+
+The API will return a list of `assets` and a cursor `next`. If the cursor is not null, you can use it to fetch the next page of results.
+
+Here is an example of the response.
+```tsx
+{
+  "assets": [
+    {
+      "unit": "d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc17255527",
+      "quantity": "1"
+    },
+  ],
+  "next": 2
+}
+```
+
+The `fetchCollectionAssets` function also accepts an optional `cursor` parameter to fetch the next page of results. The default value is `1`.
+
+```tsx
+await fetchCollectionAssets(
+  policyId: string,
+  cursor = 1
+)
+```
+
+
+## Fetch Handle Address
+
+ADA Handle allows users to use a human-readable "Handle" to associate an address.
+
+Each Handle is a unique NFT, minted and issued on the Cardano blockchain. These NFTs act as unique identifiers for the UTXO that they reside in.
+
+We can resolve the handle's address with `fetchHandleAddress`.
+
+```tsx
+// Handle: `meshsdk`
+
+await provider.fetchHandleAddress('meshsdk')
+```
+
+
+## Fetch Handle
+
+ADA Handle allows users to use a human-readable "Handle" to associate an address.
+
+Each Handle is a unique NFT, minted and issued on the Cardano blockchain. These NFTs act as unique identifiers for the UTXO that they reside in.
+
+ADA Handle also released a CIP68 handle and this function will fetch the metadata of the handle.
+
+```tsx
+// Handle: `meshsdk`
+
+await provider.fetchHandle('meshsdk')
+```
+
+
+## Fetch Protocol Parameters
+
+Fetch the latest protocol parameters.
+
+```tsx
+await provider.fetchProtocolParameters()
+```
+
+Optionally, you can provide an epoch number to fetch the protocol parameters of that epoch.
+
+
+## Fetch Transaction Info
+
+Fetch transaction infomation. Only confirmed transaction can be retrieved.
+
+```tsx
+// Transaction hash: `f4ec9833a3bf95403d395f699bc564938f3419537e7fb5084425d3838a4b6159`
+
+await provider.fetchTxInfo('f4ec9833a3bf95403d395f699bc564938f3419537e7fb5084425d3838a4b6159')
+```
+
+
+## Fetch UTxOs
+
+Get UTxOs for a given hash.
+
+```tsx
+await provider.fetchUTxOs('dfd2a2616e6154a092807b1ceebb9ddcadc0f22cf5c8e0e6b0757815083ccb70')
+```
+
+Optionally, you can specify the index of the index output.
+
+```tsx
+await provider.fetchUTxOs('hash_here', 0)
+```
+
+
+## Fetch Proposal Info
+
+Get information for a given governance proposal, identified by the txHash and proposal index
+
+```tsx
+await provider.fetchGovernanceProposal('372d688faa77e146798b581b322c0f2981a9023764736ade5d12e0e4e796af8c', 0)
+```
+
+
+## Evaluate Transaction
+
+`evaluateTx()` accepts an unsigned transaction (`unsignedTx`) and it evaluates the resources required to execute the transaction. Note that, this is only valid for transaction interacting with redeemer (smart contract). By knowing the budget required, you can use this to adjust the redeemer's budget so you don't spend more than you need to execute transactions for this smart contract.
+
+```tsx
+const unsignedTx = await tx.build();
+const evaluateTx = await provider.evaluateTx(unsignedTx);
+```
+
+Example responses from unlocking assets from the always succeed smart contract.
+
+```tsx
+[
+  {
+    "index": 0,
+    "tag": "SPEND",
+    "budget": {
+      "mem": 1700,
+      "steps": 368100
+    }
+  }
+]
+```
+
+With the `mem` and `steps`, you can refine the budget for the redeemer. For example:
+
+```tsx
+const redeemer = {
+  data: { alternative: 0, fields: [...] },
+  budget: {
+    mem: 1700,
+    steps: 368100,
+  },
+};
+```
+
+
+## Submit Transaction
+
+Submit a serialized transaction to the network.
+
+```tsx
+await provider.submitTx(signedTx);
+```
+
+
+## On Transaction Confirmed
+
+Allow you to listen to a transaction confirmation. Upon confirmation, the callback will be called.
+
+```tsx
+const tx = new Transaction({ initiator: wallet });
+tx.sendLovelace('addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr', '5000000');
+
+const unsignedTx = await tx.build();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+
+provider.onTxConfirmed(txHash, () => {
+  // Transaction confirmed
+});
+```

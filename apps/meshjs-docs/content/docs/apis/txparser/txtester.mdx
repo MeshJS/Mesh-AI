@@ -1,0 +1,145 @@
+---
+title: "Unit Testing Transaction"
+description: "Parse and test transactions with various options"
+icon: ShieldCheckIcon
+---
+
+The `TxParser` is a tool where you can parse the typical transaction CBOR hex back into the `MeshTxBuilderBody`. With such capability, you can proceed with rebuilding a transaction or examing the with unit testing frameworks.
+
+In this page, we will cover how to initialize the `TxParser`.
+
+## Initialize Tx Parser
+
+To start parsing transaction, you need to first initialize `TxParser`:
+
+```tsx
+import { BlockfrostProvider, TxParser } from "@meshsdk/core";
+import { CSLSerializer } from "@meshsdk/core-csl";
+
+const fetcher = new BlockfrostProvider('<Your-API-Key>');
+const serializer = new CSLSerializer();
+const txParser = new TxParser(serializer, fetcher);
+```
+
+There are 2 fields to pass in to initialized `TxParser`:
+
+1. `serializer`: The serializer instance that will be used for parsing transaction
+2. `fetcher` (optional): `TxParser` requires all input `UTxO` information provided since the transaction CBOR hex only preserves transaction hash and output index. When you are not providing all input `UTxO` information, the `fetcher` instance is used to fetch the missing `UTxO`
+
+
+## Interpret Result
+
+After performing the tests, you can interpret the results of the tests using the `success` and `errors` methods.
+
+```tsx
+const result = txTester.success();
+console.log("Errors:", txTester.errors());
+```
+
+1. `success`: Return a boolean indicating if all tests are passed
+2. `errors`: Show all the errors that occurred during the tests . If there are no errors, it will return an empty string.
+
+
+## Testing Inputs
+
+Testing inputs starts with locating the inputs you want to test. The filtering will not reset until the filtering methods are called again.
+
+```tsx
+txTester
+  .inputsAt(
+    "addr_test1qrs3jlcsapdufgagzt35ug3nncwl26mlkcux49gs673sflmrjfm6y2eu7del3pprckzt4jaal9s7w9gq5kguqs5pf6fq542mmq",
+  )
+  .inputsValue(
+    MeshValue.fromAssets([{ unit: "lovelace", quantity: "10000000000" }]),
+  )
+```
+
+There are multiple methods available to filter the inputs:
+
+1. `allInputs`: not apply filters
+2. `inputsAt`: filtering inputs with address
+3. `inputsWith`: filtering inputs with token
+4. `inputsWithPolicy`: filtering inputs with policy id
+5. `inputsAtWith`: filtering inputs with address and token
+6. `inputsAtWithPolicy`: filtering inputs with address and policy id
+
+After applying filters, you can proceed with checking value:
+
+1. `inputsValue`: Check the total value of the filtered inputs
+
+
+## Testing Outputs
+
+Testing outputs starts with locating the outputs you want to test. The filtering will not reset until the filtering methods are called again.
+
+```tsx
+txTester
+  .outputsAt(
+    "addr_test1qrs3jlcsapdufgagzt35ug3nncwl26mlkcux49gs673sflmrjfm6y2eu7del3pprckzt4jaal9s7w9gq5kguqs5pf6fq542mmq",
+  )
+  .outputsValue(
+    MeshValue.fromAssets([{ unit: "lovelace", quantity: "10000000000" }]),
+  )
+  .outputsInlineDatumExist(datumCbor);
+```
+
+There are multiple methods available to filter the outputs:
+
+1. `allOutputs`: not apply filters
+2. `outputsAt`: filtering outputs with address
+3. `outputsWith`: filtering outputs with token
+4. `outputsWithPolicy`: filtering outputs with policy id
+5. `outputsAtWith`: filtering outputs with address and token
+6. `outputsAtWithPolicy`: filtering outputs with address and policy id
+
+After applying filters, you can proceed with checking value:
+
+1. `outputsValue`: Check the total value of the filtered outputs
+2. `outputsInlineDatumExist`: Check whether any one of the outputs contains inline datum (provided as CBOR)
+
+
+## Testing Mints
+
+Testing mints with below APIs:
+
+```tsx
+txTester
+  .tokenMinted(
+    "eab3a1d125a3bf4cd941a6a0b5d7752af96fae7f5bcc641e8a0b6762",
+    "",
+    1,
+  );
+```
+
+1. `tokenMinted`: Checks if a specific token is minted in the transaction.
+2. `onlyTokenMinted`: Checks if a specific token is minted in the transaction and that it is the only mint.
+3. `policyOnlyMintedToken`: Checks if a specific token is minted in the transaction, ensuring that it is the only mint for the given policy ID.
+4. `checkPolicyOnlyBurn`: Checks if a specific policy ID is burned in the transaction, ensuring that it is the only minting (i.e. burning item).
+
+
+## Testing Time
+
+Testing time with below APIs:
+
+```tsx
+txTester
+  .validBefore(beforeTimestamp)
+  .validAfter(afterTimestamp);
+```
+
+1. `validAfter`: Checks if the transaction is valid after a specified timestamp.
+2. `validBefore`: Checks if the transaction is valid before a specified timestamp.
+
+
+## Testing Signature
+
+Testing time with below APIs:
+
+```tsx
+txTester
+  .keySigned("fa5136e9e9ecbc9071da73eeb6c9a4ff73cbf436105cf8380d1c525c");
+```
+
+1. `keySigned`: Checks if a specific key is signed in the transaction.
+2. `oneOfKeysSigned`: Checks if any one of the specified keys is signed in the transaction.
+3. `allKeysSigned`: Checks if all specified keys are signed in the transaction.

@@ -1,0 +1,55 @@
+---
+title: "Parser Basics"
+description: "Parse transactions and rebuild"
+icon: PaperAirplaneIcon
+---
+import Link from "fumadocs-core/link";
+
+The `TxParser` is a tool where you can parse the typical transaction CBOR hex back into the `MeshTxBuilderBody`. With such capability, you can proceed with rebuilding a transaction or examing the with unit testing frameworks.
+
+In this page, we will cover how to initialize the `TxParser`.
+
+## Initialize Tx Parser
+
+To start parsing transaction, you need to first initialize `TxParser`:
+
+```tsx
+import { BlockfrostProvider, TxParser } from "@meshsdk/core";
+import { CSLSerializer } from "@meshsdk/core-csl";
+
+const fetcher = new BlockfrostProvider('<Your-API-Key>');
+const serializer = new CSLSerializer();
+const txParser = new TxParser(serializer, fetcher);
+```
+
+There are 2 fields to pass in to initialized `TxParser`:
+
+1. `serializer`: The serializer instance that will be used for parsing transaction
+2. `fetcher` (optional): `TxParser` requires all input `UTxO` information provided since the transaction CBOR hex only preserves transaction hash and output index. When you are not providing all input `UTxO` information, the `fetcher` instance is used to fetch the missing `UTxO`
+
+
+## Rebuild Transaction
+
+To parse a transaction, you only need:
+
+```tsx
+const txBuilderBody = await txParser.parse(txHex, utxos);
+```
+
+With the parsed `txBuilderBody` in type `MeshTxBuilderBody`, you can proceed with adding / removing elements and rebuilding the transaction.
+
+There are 2 necessary fields to pass in:
+
+1. `txHex`: The transaction CBOR to be parsed
+2. `providedUtxos`: The input information, for all inputs, reference inputs, and collateral. You can either construct it manually or obtain it from `fetcher`.
+
+## Unit Testing Transaction
+
+To unit test a transaction, you can parse the transaction and then convert the instance to `TxTester`:
+
+```tsx
+await txParser.parse(txHex, utxos);
+const txTester = txParser.toTester();
+```
+
+The detailed testing APIs can be found in the <Link href="/apis/txparser/txtester">documentation</Link>.

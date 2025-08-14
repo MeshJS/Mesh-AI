@@ -1,0 +1,543 @@
+---
+title: "Governance Transactions"
+description: "Transactions for participating in Cardano's on-chain governance"
+icon: ScaleIcon
+---
+import Link from 'fumadocs-core/link';
+
+In **CIP-1694**, Cardano's on-chain governance system was proposed to allow the community to vote on proposals and protocol updates. This system is designed to be decentralized and transparent, allowing the community to have a say in the future of the network.
+
+In the code snippet, you will find `txBuilder`, which is an instance of `MeshTxBuilder`, a powerful low-level APIs that allows you to build transactions. Learn how to initialize <Link href="/apis/txbuilder/basics#initialize-tx-builder">MeshTxBuilder</Link>
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+```
+
+This page list the governance transactions that can be created using the Mesh SDK.
+
+## Vote Delegation
+
+Any wallet can delegate its voting power to another DRep. This is done by creating a vote delegation certificate and submitting it to the blockchain.
+
+First we need to get the wallet information. This includes the UTXOs, the reward address, and the change address.
+
+```tsx
+const utxos = await wallet.getUtxos();
+const rewardAddresses = await wallet.getRewardAddresses();
+const rewardAddress = rewardAddresses[0];
+const changeAddress = await wallet.getChangeAddress();
+```
+
+Next we need to select the UTXOs to use to pay for the transaction. We will select the UTXOs that have at least 5 ADA. Though the fee is less than 1 ADA.
+
+We can now start building the transaction. We will add the selected UTXOs as inputs to the transaction. We will also add the vote delegation certificate to the transaction. The vote delegation certificate requires the DRep ID of the DRep to delegate to and the reward address of the delegator. Note that we would need to have at least 5 ADA for the certificate delegation, in the `selectUtxosFrom` we will configure 10 ADA as threshold buffer.
+
+```tsx
+txBuilder
+  .voteDelegationCertificate(
+    {
+      dRepId: dRepId,
+    },
+    rewardAddress,
+  )
+  .changeAddress(changeAddress)
+  .selectUtxosFrom(utxos)
+```
+
+Finally we can build, sign the transaction and submit it to the blockchain.
+
+```tsx
+const unsignedTx = await txBuilder.complete();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+The transaction will be submitted to the blockchain and the DRep will be registered. The deposit will be taken from the DRep owner and the DRep will be added to the list of registered DReps.
+
+<Card>
+  ## DRep Vote Delegation [!toc]
+
+  Delegate your voting power to another DRep
+
+  **DRep ID**
+  `drep1yv4uesaj92wk8ljlsh4p7jzndnzrflchaz5fzug3zxg4naqkpeas3`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const rewardAddresses = await wallet.getRewardAddresses();
+  const rewardAddress = rewardAddresses[0];
+
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  txBuilder
+    .voteDelegationCertificate(
+      {
+        dRepId: 'drep1yv4uesaj92wk8ljlsh4p7jzndnzrflchaz5fzug3zxg4naqkpeas3',
+      },
+      rewardAddress,
+    )
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+
+  const unsignedTx = await txBuilder.complete();
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## DRep Registration
+
+In Voltaire, stake credentials can delegate their stake to Decentralized Representatives (DReps) for voting, in addition to the current delegation to stake pools for block production. This DRep delegation will work similarly to the current stake delegation process, using on-chain certificates. Registering as a DRep will also follow the same process as stake registration.
+
+However, registered DReps need to vote regularly to remain active. If a DRep does not vote for a set number of epochs (defined by the new protocol parameter, drepActivity), they are considered inactive and will not count towards the active voting stake. To become active again, DReps need to vote on governance actions or submit a DRep update certificate within the drepActivity period.
+
+A DRep registration certificates include:
+
+- a DRep ID
+- a deposit
+- an optional anchor
+
+An anchor is a pair of:
+
+- a URL to a JSON payload of metadata
+- a hash of the contents of the metadata URL
+
+First we need to get the DRep ID of the DRep we want to register. We can do this by calling `getDRep` method on the wallet. This will return the DRep object which contains the DRep ID.
+
+```tsx
+const dRep = await wallet.getDRep();
+const dRepId = dRep.dRepIDCip105;
+```
+
+Next we need to get the hash of the anchor. We can do this by calling the `getMeshJsonHash` function. This function fetches the anchor from the given URL and returns the hash of the anchor.
+
+```tsx
+async function getMeshJsonHash(url: string) {
+  var drepAnchor = getFile(url);
+  const anchorObj = JSON.parse(drepAnchor);
+  return hashDrepAnchor(anchorObj);
+}
+
+const anchorUrl = "https://meshjs.dev/governance/meshjs.jsonld";
+const anchorHash = await getMeshJsonHash(anchorUrl);
+```
+
+We can now build the transaction by adding the DRep registration certificate to the transaction. We also need to add the change address and the selected UTxOs to the transaction. Note that the deposit for registering a DRep is 500 ADA, we would set 505 ADA as UTxO selection threshold.
+
+```tsx
+const utxos = await wallet.getUtxos();
+const changeAddress = await wallet.getChangeAddress();
+
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+txBuilder
+  .drepRegistrationCertificate(dRepId, {
+    anchorUrl: anchorUrl,
+    anchorDataHash: anchorHash,
+  })
+  .changeAddress(changeAddress)
+  .selectUtxosFrom(selectedUtxos);
+```
+
+Finally we can sign the transaction and submit it to the blockchain.
+
+```tsx
+const unsignedTx = await txBuilder.complete();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+The transaction will be submitted to the blockchain and the DRep will be registered. The deposit will be taken from the DRep owner and the DRep will be added to the list of registered DReps.
+
+<Card>
+  ### DRep Registration [!toc]
+
+  Register a DRep certificate and pay the deposit
+
+  **Anchor Url:**  `eg: https://path.to/file-name.jsonld`
+
+  ```tsx
+  const dRep = await wallet.getDRep();
+  const dRepId = dRep.dRepIDCip105;
+
+  const anchorUrl = '';
+  const anchorHash = await getMeshJsonHash(anchorUrl);
+
+  // get utxo to pay for the registration
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  txBuilder
+    .drepRegistrationCertificate(dRepId, {
+      anchorUrl: anchorUrl,
+      anchorDataHash: anchorHash,
+    })
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos);
+
+  const unsignedTx = await txBuilder.complete();
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## DRep Update
+
+Updating a DRep is similar to registering.
+
+We build the transaction by adding the DRep update certificate to the transaction, providing the change address and the UTxOs needed for the transaction's fees.
+
+```tsx
+const utxos = await wallet.getUtxos();
+const changeAddress = await wallet.getChangeAddress();
+
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+txBuilder
+  .drepUpdateCertificate(dRepId, {
+    anchorUrl: anchorUrl,
+    anchorDataHash: anchorHash,
+  })
+  .changeAddress(utxos)
+  .selectUtxosFrom(selectedUtxos);
+```
+
+This <Link href="https://preprod.cardanoscan.io/transaction/4527e43097fb6135cf820a90f7cd30dba0b6463078ba9fa61305cbd7d1fa4e2f">transaction</Link> is an example of a successful DRep update for <Link href="https://preprod.cardanoscan.io/drep/drep1ytk3r5ddfk2cq66ygdtkwf9yck6hhy7uzhk2tgl5d53448skyutw7?tab=dRepUpdates">DRep ID</Link>.
+
+<Card>
+  ### DRep Update [!toc]
+
+  Update DRep metadata
+
+  **Anchor Url:**  `eg: https://path.to/file-name.jsonld`
+
+  ```tsx
+  const dRep = await wallet.getDRep();
+  const dRepId = dRep.dRepIDCip105;
+
+  const anchorUrl = '';
+  const anchorHash = await getMeshJsonHash(anchorUrl);
+
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  txBuilder
+    .drepUpdateCertificate(dRepId, {
+      anchorUrl: anchorUrl,
+      anchorDataHash: anchorHash,
+    })
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos);
+
+  const unsignedTx = await txBuilder.complete();
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## DRep Retirement
+
+A DRep is retired right away when the blockchain accepts a retirement certificate. The deposit is refunded immediately as part of the transaction that submits the retirement certificate, just like how deposits are returned when a stake credential is unregistered.
+
+First we need to get the DRep ID of the DRep we want to retire. We can do this by calling `getDRep` method on the wallet. This will return the DRep object which contains the DRep ID.
+
+```tsx
+const dRep = await wallet.getDRep();
+const dRepId = dRep.dRepIDCip105;
+```
+
+We then need to initialize the transaction builder by creating a new instance of `MeshTxBuilder`. We need to pass the <Link href="/providers">blockchain provider</Link> to the constructor.
+
+```tsx
+const changeAddress = await wallet.getChangeAddress();
+const utxos = await wallet.getUtxos();
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+```
+
+We can now build the transaction by adding the UTxOs as inputs to the transaction and adding the DRep deregistration certificate to the transaction.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+txBuilder
+  .drepDeregistrationCertificate(dRepId)
+  .selectUtxosFrom(selectedUtxos)
+  .changeAddress(changeAddress);
+
+const unsignedTx = await txBuilder.complete();
+```
+
+Finally we can sign the transaction and submit it to the blockchain.
+
+```tsx
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+The transaction will be submitted to the blockchain and the DRep will be retired. The deposit will be refunded to the DRep owner.
+
+<Card>
+  ### DRep Retirement [!toc]
+
+  Retire a DRep certificate and return the deposit
+
+  ```tsx
+  const dRep = await wallet.getDRep();
+  const dRepId = dRep.dRepIDCip105;
+
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  txBuilder
+    .drepDeregistrationCertificate(dRepId)
+    .selectUtxosFrom(utxos)
+    .changeAddress(changeAddress);
+
+  const unsignedTx = await txBuilder.complete();
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Vote
+
+Each vote transaction consists of the following:
+
+- a governance action ID
+- a role - constitutional committee member, DRep, or SPO
+- a governance credential witness for the role
+- an optional anchor (as defined above) for information that is relevant to the vote
+- a 'Yes'/'No'/'Abstain' vote
+
+First, we get the DRep ID from the wallet, the DRep ID voting for this governance action.
+
+```tsx
+const dRep = await wallet.getDRep();
+const dRepId = dRep.dRepIDCip105;
+```
+
+Then we get the utxos and the change address from the wallet.
+
+```tsx
+const utxos = await wallet.getUtxos();
+const changeAddress = await wallet.getChangeAddress();
+```
+
+We then create the vote transaction using the `vote()` function.
+
+```tsx
+txBuilder
+  .vote(
+    {
+      type: "DRep",
+      drepId: dRepId,
+    },
+    {
+      txHash: 'aff2909f8175ee02a8c1bf96ff516685d25bf0c6b95aac91f4dfd53a5c0867cc',
+      txIndex: 0,
+    },
+    {
+      voteKind: "Yes",
+    },
+  )
+  .selectUtxosFrom(utxos)
+  .changeAddress(changeAddress);
+```
+
+The `vote()` takes 3 parameters:
+
+- `voter` - The voter, can be a Constitutional Commitee, a DRep or a StakePool
+- `govActionId` - The transaction hash and transaction id of the governance action
+- `votingProcedure` - The voting kind (Yes, No, Abstain) with an optional anchor
+
+Check the <Link href="https://docs.meshjs.dev/transactions/classes/MeshTxBuilder">full documentation</Link> or the source code for more details.
+
+Finally, we sign the transaction and submit it to the blockchain.
+
+```tsx
+const unsignedTx = await txBuilder.complete();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+You can check <Link href="https://preprod.cardanoscan.io/transaction/278d887adc913416e6851106e7ce6e89f29aa7531b93d11e1986550e7a128a2f?tab=votes">here</Link> a successful vote transaction for this <Link href="https://preprod.cardanoscan.io/govAction/gov_action14lefp8upwhhq92xph7t075txshf9huxxh9d2ey05ml2n5hqgvlxqqp92kfl?tab=votes">governance action</Link>.
+
+Here is another example of a vote transaction:
+
+```tsx
+txBuilder
+  .changeAddress(
+    "addr_test1qpsmz8q2xj43wg597pnpp0ffnlvr8fpfydff0wcsyzqyrxguk5v6wzdvfjyy8q5ysrh8wdxg9h0u4ncse4cxhd7qhqjqk8pse6",
+  )
+  .txIn(
+    "2cb57168ee66b68bd04a0d595060b546edf30c04ae1031b883c9ac797967dd85",
+    3,
+    [
+      {
+        unit: "lovelace",
+        quantity: "9891607895",
+      },
+    ],
+    "addr_test1vru4e2un2tq50q4rv6qzk7t8w34gjdtw3y2uzuqxzj0ldrqqactxh",
+  )
+  .vote(
+    {
+      type: "DRep",
+      drepId: "drep1j6257gz2swty9ut46lspyvujkt02pd82am2zq97p7p9pv2euzs7",
+    },
+    {
+      txHash:
+        "2cb57168ee66b68bd04a0d595060b546edf30c04ae1031b883c9ac797967dd85",
+      txIndex: 3,
+    },
+    {
+      voteKind: "Yes",
+      anchor: {
+        anchorUrl: "https://path-to.jsonld",
+        anchorDataHash:
+          "2aef51273a566e529a2d5958d981d7f0b3c7224fc2853b6c4922e019657b5060",
+      },
+    },
+  )
+```
+
+And another example of a vote transaction with a Plutus script and a redeemer:
+
+```tsx
+txBuilder
+  .changeAddress(
+    "addr_test1qpsmz8q2xj43wg597pnpp0ffnlvr8fpfydff0wcsyzqyrxguk5v6wzdvfjyy8q5ysrh8wdxg9h0u4ncse4cxhd7qhqjqk8pse6",
+  )
+  .txIn(
+    "2cb57168ee66b68bd04a0d595060b546edf30c04ae1031b883c9ac797967dd85",
+    3,
+    [
+      {
+        unit: "lovelace",
+        quantity: "9891607895",
+      },
+    ],
+    "addr_test1vru4e2un2tq50q4rv6qzk7t8w34gjdtw3y2uzuqxzj0ldrqqactxh",
+  )
+  .txInCollateral(
+    "2cb57168ee66b68bd04a0d595060b546edf30c04ae1031b883c9ac797967dd85",
+    3,
+    [
+      {
+        unit: "lovelace",
+        quantity: "9891607895",
+      },
+    ],
+    "addr_test1vru4e2un2tq50q4rv6qzk7t8w34gjdtw3y2uzuqxzj0ldrqqactxh",
+  )
+  .votePlutusScriptV3()
+  .vote(
+    {
+      type: "DRep",
+      drepId: resolveScriptHashDRepId(
+        resolveScriptHash(
+          applyCborEncoding(
+            "5834010100323232322533300232323232324a260106012004600e002600e004600a00260066ea8004526136565734aae795d0aba201",
+          ),
+          "V3",
+        ),
+      ),
+    },
+    {
+      txHash:
+        "2cb57168ee66b68bd04a0d595060b546edf30c04ae1031b883c9ac797967dd85",
+      txIndex: 3,
+    },
+    {
+      voteKind: "Yes",
+      anchor: {
+        anchorUrl: "https://path-to.jsonld",
+        anchorDataHash:
+          "2aef51273a566e529a2d5958d981d7f0b3c7224fc2853b6c4922e019657b5060",
+      },
+    },
+  )
+  .voteScript(
+    applyCborEncoding(
+      "5834010100323232322533300232323232324a260106012004600e002600e004600a00260066ea8004526136565734aae795d0aba201",
+    ),
+  )
+  .voteRedeemerValue("")
+```
+
+<Card>
+  ### Vote [!toc]
+
+  Vote on a governance action
+
+  ```tsx
+  const dRep = await wallet.getDRep();
+  const dRepId = dRep.dRepIDCip105;
+
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  txBuilder
+    .vote(
+      {
+        type: "DRep",
+        drepId: dRepId,
+      },
+      {
+        txHash: 'aff2909f8175ee02a8c1bf96ff516685d25bf0c6b95aac91f4dfd53a5c0867cc',
+        txIndex: 0,
+      },
+      {
+        voteKind: "Yes",
+      },
+    )
+    .selectUtxosFrom(utxos)
+    .changeAddress(changeAddress);
+
+  const unsignedTx = await txBuilder.complete();
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

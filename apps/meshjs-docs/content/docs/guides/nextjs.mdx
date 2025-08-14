@@ -1,0 +1,171 @@
+---
+title: "Develop your first Web3 App"
+icon: "guides/develop-first-web-app.png"
+---
+import Link from "fumadocs-core/link";
+
+In this guide, we will set up a Next.js application and connect it to the Cardano blockchain using Mesh. We will create a simple application that allows users to connect their wallets and view the assets in their wallets.
+
+Though this guide is focused on Next.js which uses <Link href="/react">Mesh React</Link> you can also use Mesh with other frameworks like Remix, React, and Vue. Mesh SDK has <Link href="/svelte">Svelte UI components</Link> too.
+
+You may follow this guide to setup your project or use the <Link href="/">Mesh CLI</Link> to scaffold a new project.
+
+```tsx
+npx meshjs your-app-name
+```
+
+## Setup Next.js
+
+Next.js is a web development framework built on top of Node.js enabling React-based web applications functionalities such as server-side rendering and generating static websites.
+
+Next.js and Mesh are JavaScript libraries, and so we will assume that you have some familiarity with HTML and JavaScript language, but you should be able to follow along even if you are coming from a different programming language. If you don't feel very confident, we recommend going through this <Link href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Language_overview">JS tutorial</Link>, or the <Link href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">MDN JavaScript</Link> Reference or my preferred method, watching a <Link href="https://www.youtube.com/results?search_query=get+started+with+nextjs">few videos from YouTube</Link>.
+
+### 1. Create project folder and open Visual Studio Code [!toc]
+
+Create a new folder for your project, and give the folder a meaningful name. Open the Visual Studio Code application and drag your project folder into Visual Studio Code.
+
+### 2. Create Next.js app [!toc]
+
+From the menu options in on your Visual Studio Code, open the **Terminal** and execute this command to create a new NextJs application:
+
+```tsx
+npx create-next-app@latest --typescript .
+```
+
+```tsx
+Need to install the following packages:
+Ok to proceed? (y)
+
+✔ Would you like to use ESLint? … Yes
+✔ Would you like to use Tailwind CSS? … Yes
+✔ Would you like your code inside a `src/` directory? … Yes
+✔ Would you like to use App Router? … No
+✔ Would you like to use Turbopack for next dev? … No
+✔ Would you like to customize the import alias (@/* by default)? … No
+```
+
+### 3. Start development server [!toc]
+
+After the installation is complete, start the development server with:
+
+```tsx
+npm run dev
+```
+
+Visit http://localhost:3000 to view your application. `CTRL+C` to stop the application.
+
+## Setup Mesh
+
+Mesh is a JavaScript library that provides a simple way to interact with the Cardano blockchain. It provides a set of APIs that allow you to interact with the Cardano blockchain without having to deal with the complexities of the Cardano blockchain.
+
+Install the latest version of Mesh with npm:
+
+```tsx
+npm install @meshsdk/core @meshsdk/react
+```
+
+Your Next.js application is ready to connect wallet, browse assets and make some transactions.
+
+## Connect wallet and view assets
+
+### 1. Add MeshProvider [!toc]
+
+React context is an essential tool for building web applications. It allow you to easily share state in your applications, so you can use the data in any component within the app. This means that when the user has connected their wallet, visiting different pages on the app ensure their wallet is still connected.
+
+Open **pages/_app.tsx**, import and include <Link href="/react/getting-started#meshProvider">MeshProvider</Link>. Your **_app.tsx** should look similar to this:
+
+```tsx
+import "../styles/globals.css";
+import "@meshsdk/react/styles.css";
+import type { AppProps } from "next/app";
+import { MeshProvider } from "@meshsdk/react";
+
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <MeshProvider>
+      <Component {...pageProps} />
+    </MeshProvider>
+  );
+}
+
+export default MyApp;
+```
+
+### 2. Add connect wallet component and check wallet's assets [!toc]
+
+Lets add the <Link href="/react/ui-components#connectWallet">connect wallet component</Link> to allow users to connect wallets they have installed on their device. Connecting to wallets will ask the user for permission if not granted, and proceed to connect the selected wallet.
+
+Lastly, we link those components together, allowing users to choose a wallet to connect, and query for assets in the wallet with **wallet.getAssets()**.
+
+Open **pages/index.tsx** and replace it with the following codes:
+
+```tsx
+import { useState } from "react";
+import type { NextPage } from "next";
+import { useWallet } from '@meshsdk/react';
+import { CardanoWallet } from '@meshsdk/react';
+
+const Home: NextPage = () => {
+  const { connected, wallet } = useWallet();
+  const [assets, setAssets] = useState<null | any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function getAssets() {
+    if (wallet) {
+      setLoading(true);
+      const _assets = await wallet.getAssets();
+      setAssets(_assets);
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <h1>Connect Wallet</h1>
+      <CardanoWallet />
+      {connected && (
+        <>
+          <h1>Get Wallet Assets</h1>
+          {assets ? (
+            <pre>
+              <code className="language-js">
+                {JSON.stringify(assets, null, 2)}
+              </code>
+            </pre>
+          ) : (
+            <button
+              type="button"
+              onClick={() => getAssets()}
+              disabled={loading}
+              style={{
+                margin: "8px",
+                backgroundColor: loading ? "orange" : "grey",
+              }}
+            >
+              Get Wallet Assets
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default Home;
+```
+
+Start the development server and try it:
+
+```tsx
+npm run dev
+```
+
+Visit http://localhost:3000 to connect available wallets and view the assets in wallet.
+
+If you do not have any assets in your wallet, you can receive test ADA (tADA) from the <Link href="https://docs.cardano.org/cardano-testnets/tools/faucet">official faucet</Link>.
+
+If you are new to Cardano, you will first have to download one of the Cardano wallets. Tall Nupinks has written a detailed <Link href="https://cutedumborcs.substack.com/p/cardano-wallets-101">Cardano Wallets 101 guide</Link> to help you understand the fundamentals of a Cardano wallet, including its features and how it works. With this guide, you will be able to make an informed decision on the best Cardano wallet for your needs.
+
+### 3. Try on your own [!toc]
+
+Implement another component to display wallet's address and the amount of lovelace in your Next.js application. Check out the <Link href="/apis/wallets/browserwallet">wallet</Link> page for more details.

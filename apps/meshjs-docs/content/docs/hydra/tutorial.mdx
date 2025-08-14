@@ -1,0 +1,366 @@
+---
+title: "End-to-end Hydra Tutorial"
+description: "Open a layer 2 state channel between two participants, build transactions, and close the Hydra head"
+---
+import Link from "fumadocs-core/link";
+
+This tutorial demonstrates how to use Hydra Head protocol on Cardano's preprod testing environment to open a layer 2 state channel between two participants using Mesh.
+
+Hydra Head is a layer 2 scaling solution for Cardano that enables fast, low-cost transactions between participants.
+
+This tutorial is adapted from <Link href="https://hydra.family/head-protocol/docs/tutorial">the Hydra documentation</Link>.
+
+### Initialize Hydra with Mesh [!toc]
+
+To initialize Hydra with Mesh, you need to set the `HydraProvider` with the Hydra API URL and then use it to initialize the `HydraInstance`. You can use one of the cardano <Link href="/providers">providers</Link>, example: `blockfrostProvider`, or `maestroProvider`, to initialize the `HydraInstance`.
+
+```tsx
+import { HydraInstance, HydraProvider } from "@meshsdk/hydra";
+
+const provider = new HydraProvider({
+  url: "<URL>",
+});
+
+const hydraInstance = new HydraInstance({
+  provider:  provider,
+  fetcher:   "<blockchainProvider>",
+  submitter: "<blockchainProvider>",
+});
+```
+
+
+## Prerequisites
+
+- A running cardano node is required to access `cardano-cli`
+- A `Hydra-node`
+- Another participant following this tutorial (recommended), or
+- Access to two such machines
+- 100 test ada per participant in a wallet on the `preprod` network
+
+Hydra-node and cardano-node running, check <Link href="https://hydra.family/head-protocol/docs/tutorial#step-0-installation">Installation</Link>.
+
+You could also set-up a Docker container for a `cardano-node` and `Hydra-node` to quickly follow this tutorial. Check the setup example/demo for a devnet <Link href="https://github.com/cardano-scaling/hydra/tree/master/demo">here</Link>
+
+
+## Step 1. Prepare keys and funding
+
+In a Hydra head, each participant is authenticated using two sets of keys. The first set identifies a participant on the Cardano layer 1 and is used to hold ada for paying fees. Each hydra-node requires a `cardano-signing-key`, and you must provide the `cardano-verification-key` for each participant. First, generate Cardano key pairs and addresses for both participants with `cardano-cli` to identify the hydra-node and manage funds on layer 1.
+
+Alice's keys:
+
+```bash
+mkdir -p credentials
+
+cardano-cli address key-gen \
+  --verification-key-file credentials/alice-node.vk \
+  --signing-key-file credentials/alice-node.sk
+
+cardano-cli address build \
+  --payment-verification-key-file credentials/alice-node.vk \
+  --out-file credentials/alice-node.addr \
+  --testnet-magic 1
+
+cardano-cli address key-gen \
+  --verification-key-file credentials/alice-funds.vk \
+  --signing-key-file credentials/alice-funds.sk
+
+cardano-cli address build \
+  --payment-verification-key-file credentials/alice-funds.vk \
+  --out-file credentials/alice-funds.addr \
+  --testnet-magic 1
+```
+
+Bob's keys:
+
+```bash
+mkdir -p credentials
+
+cardano-cli address key-gen \
+  --verification-key-file credentials/bob-node.vk \
+  --signing-key-file credentials/bob-node.sk
+
+cardano-cli address build \
+  --payment-verification-key-file credentials/bob-node.vk \
+  --out-file credentials/bob-node.addr \
+  --testnet-magic 1
+
+cardano-cli address key-gen \
+  --verification-key-file credentials/bob-funds.vk \
+  --signing-key-file credentials/bob-funds.sk
+
+cardano-cli address build \
+  --payment-verification-key-file credentials/bob-funds.vk \
+  --out-file credentials/bob-funds.addr \
+  --testnet-magic 1
+```
+
+After generating the addresses, make sure to fund both Alice's and Bob's addresses with test ADA. if you don't have testAda, you can use <Link href="https://docs.cardano.org/cardano-testnets/tools/faucet">cardano-faucet</Link> to fund the generated addresses
+
+- Send at least `30 tADA` to `alice-node.addr` and `bob-node.addr` addresses.
+- Send any amount of `tADA` to `alice-funds.addr` and `bob-funds.addr` addresses.
+
+Next, generate Hydra key pairs for use on layer 2. Use this Hydra-node command to generate the keys for alice and/or bob respectively:
+
+```tsx
+hydra-node gen-hydra-key --output-file credentials/alice-hydra
+```
+
+```tsx
+hydra-node gen-hydra-key --output-file credentials/bob-hydra
+```
+
+The next step involves configuring the protocol parameters for the ledger within our Hydra head. For the purposes of this tutorial, we'll modify the default Cardano layer 1 parameters to eliminate transaction fees,
+
+```tsx
+cardano-cli query protocol-parameters --testnet-magic 1 --socket-path /"${socketPath}" --out-file protocol-parameters.json
+```
+
+Simplifying Hydra fees and environments, change the following parameters:
+
+- `txFeeFixed` to 0
+- `txFeePerByte` to 0
+- `executionUnitPrices.priceMemory` to 0
+- `executionUnitPrices.priceSteps` to 0
+
+
+## Step 2. Configure Hydra nodes
+
+Configure your Hydra nodes with the generated keys and network settings. Each participant needs to set up their hydra-node with the correct configuration.
+
+Alice:
+
+```tsx
+hydra-node \
+  --node-id alice-node \
+  --api-host 0.0.0.0 \
+  --api-port 4001 \
+  --listen 172.16.239.10:5001 \
+  --monitoring-port 6001 \
+  --peer 172.16.239.20:5001 \
+  --hydra-scripts-tx-id c9c4d820d5575173cfa81ba2d2d1096fc40f84d16d8c17284da410a4fb5e64eb,ae4443b46f550289337fc5c2c52b24f1288dab36d1a229167a6e04f056a966fe,48bd29e43dd01d12ab464f75fe40eed80e4051c8d3409e1cb20b8c01120b425e \
+  --cardano-signing-key /credentials/alice-node.sk \
+  --cardano-verification-key /credentials/bob-node.vk \
+  --hydra-signing-key /keys/alice-hydra.sk \
+  --hydra-verification-key /keys/bob-hydra.vk \
+  --ledger-protocol-parameters ./testnet/protocol-parameters.json \
+  --testnet-magic 1 \
+  --node-socket /cardano-node/db/node.socket \
+  --contestation-period 300s
+```
+
+Bob:
+
+```tsx
+hydra-node \
+  --node-id bob-node \
+  --api-host 0.0.0.0 \
+  --api-port 4002 \
+  --listen 172.16.239.20:5001 \
+  --monitoring-port 6001 \
+  --peer 172.16.239.10:5001 \
+  --hydra-scripts-tx-id c9c4d820d5575173cfa81ba2d2d1096fc40f84d16d8c17284da410a4fb5e64eb,ae4443b46f550289337fc5c2c52b24f1288dab36d1a229167a6e04f056a966fe,48bd29e43dd01d12ab464f75fe40eed80e4051c8d3409e1cb20b8c01120b425e \
+  --cardano-signing-key /credentials/bob-node.sk \
+  --cardano-verification-key /credentials/alice-node.vk \
+  --hydra-signing-key /keys/bob-hydra.sk \
+  --hydra-verification-key /keys/alice-hydra.vk \
+  --ledger-protocol-parameters ./testnet/protocol-parameters.json \
+  --testnet-magic 1 \
+  --node-socket /cardano-node/db/node.socket \
+  --contestation-period 300s
+```
+
+Fields in the Hydra node configuration:
+
+- `node-id`: Unique identifier for each Hydra node. This distinguishes Alice's node from Bob's node.
+- `api-host`: as the API is not authenticated by default, the node is only binding to `0.0.0.0`.
+- `api-port`: The port on which the API will listen.
+- `listen`: The IP address and port on which the Hydra node will listen for incoming connections.
+- `peer`: The IP address of another Hydra node to connect to. This is how nodes discover and communicate with each other.
+- `monitoring-port`: The port on which the monitoring API will listen. This is used to monitor the Hydra node's performance.
+- `cardano-signing-key`: These keys authenticate on-chain transactions and ensure that only authorized participants can control the head's lifecycle used to hold ada for paying fees
+- `hydra-signing-key`: Used for multi-signing snapshots within a head. Although these keys may eventually support an aggregated multi-signature scheme, they currently use the Ed25519 format.
+- `hydra-scripts-tx-id`: The hydra-node uses reference scripts to reduce transaction sizes driving the head's lifecycle. For public (test) networks, you can use the <Link href="https://github.com/cardano-scaling/hydra/blob/master/hydra-node/networks.json">pre-published Hydra scripts</Link> with each new release, listing transaction IDs in the release notes and networks.json. Note: The value of above `--hydra-scripts-tx-id` comes from the hydra-node release 0.22.2.
+- `ledger-protocol-parameters`: This defines the updatable protocol parameters to be used on L2 such as fees or transaction sizes. These parameters follow the same format as the `cardano-cli query protocol-parameters` output.
+- `contestation-period`:This is an important protocol parameter, defined in seconds The contestation period is used to set the contestation deadline. That is, after `Close`, all participants have at minimum `CP` to submit a `Contest` transaction
+
+More on hydra <Link href="https://hydra.family/head-protocol/docs/configuration">configuration</Link>.
+
+Ensure both nodes can communicate with each other and change to your correct file paths in the above configuration. This configuration sets up Alice's node to listen to API connection on port 4001 Bob's node on port 4002.
+
+
+## Step 3. Open a Hydra head
+
+### Connect to the Hydra head [!toc]
+
+Now that both Hydra nodes are running and connected, we can start using the head API url and port together with Mesh `HydraProvider` in connecting to the Hydra head.
+
+```tsx
+await provider.connect();
+```
+
+### Initialize the Head [!toc]
+
+Send the initialization command to start the Hydra head:
+
+```tsx
+await provider.init();
+```
+
+### Commit Funds [!toc]
+
+After initialization, both participants need to commit funds to the head. In this tutorial we use the `commitFunds` function on `HydraInstance` by selecting specific UTxOs and make them available for layer 2 transactions:
+
+```tsx
+import { HydraInstance , HydraProvider} from "@meshsdk/hydra";
+
+const provider = new HydraProvider({
+  url: "<URL>",
+});
+const hInstance = new HydraInstance({
+  provider: provider,
+  fetcher: "<blockchainProvider>",
+  submitter: "<blockchainProvider>",
+});
+
+const wallet = new MeshWallet({
+  networkId: 0, // 0: testnet
+  fetcher: "<blockchainProvider>",
+  submitter: "<blockchainProvider>",
+  key: {
+    type: 'cli',
+    payment: 'alice-funds.sk',
+  },
+});
+
+const outputIndex = 0;
+const txHash = "00000000000000000000000000000000000000000000000000000000000000000";
+
+const commitTx = await hInstance.commitFunds(txHash, outputIndex);
+const signedTx = await wallet.signTx(commitTx, true);
+const commitTxHash = await wallet.submitTx(signedTx);
+console.log(commitTxHash);
+```
+
+The hydra-node will create a draft commit transaction for you to sign. Once signed and submitted to the Cardano network, you'll see a `Committed` message in your WebSocket connection.
+
+When both parties have committed their funds, the Hydra head will open automatically. You'll see a `HeadIsOpen` message confirming the head is operational and ready for transactions.
+
+### Hydra Head Status Flow [!toc]
+
+The head goes through these status changes:
+
+- `HeadIsInitializing` - Head is being initialized
+- `Committed` - Funds are committed to the head
+- `HeadIsOpen` - Head is open and ready for transactions
+
+
+## Step 4. Use the Hydra head
+
+Now that the Hydra head is open, you can perform transactions within the layer 2 state channel. Hydra Head operates as an isomorphic protocol, meaning that functionalities available on Cardano layer 1 are also available on layer 2. This allows us to use Mesh SDK for transaction creation within the head.
+
+### Fetch UTxOs [!toc]
+
+First, let's see what UTxOs are available in the Hydra head:
+
+```tsx
+const utxos = await provider.fetchUTxOs();
+```
+
+### Fetch Address UTxOs [!toc]
+
+Alternatively, you can fetch Head UTxOs for a specific address:
+
+```tsx
+const utxos = await provider.fetchAddressUTxOs("alice-funds.addr")
+```
+
+### Build and Submit Transaction [!toc]
+
+You can build transactions just like on layer 1 assuming you are sending from alice to bob:
+
+```tsx
+const pp = await provider.fetchProtocolParameters();
+const utxos = await provider.fetchAddressUTxOs("address");
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+  isHydra: true,
+  params: pp,
+});
+
+const unsignedTx = await txBuilder
+  .txOut(
+    "bob-funds.addr",
+    [{ unit: "lovelace", quantity: "3000000" }]
+  )
+  .changeAddress("alice-funds.addr")
+  .selectUtxosFrom(utxos)
+  .setNetwork("preprod")
+  .complete();
+
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await provider.submitTx(signedTx);
+console.log(txHash);
+```
+
+The transaction will be validated by both hydra-nodes and either result in a `TxValid` message or a `TxInvalid` message If valid, you'll see a `SnapshotConfirmedmessage` shortly after with the new UTxO set.
+
+### Transaction Flow [!toc]
+
+The transaction goes through these steps:
+
+- `NewTx` - Transaction submitted to head
+- `TxValid` - Transaction validated by all nodes
+- `SnapshotConfirmed` - New state confirmed
+
+
+## Step 5. Close the Hydra head
+
+You can close the head to return head utxos to layer 1. This process involves closing the head, waiting for the contestation period, and then fan out the final state.
+
+### Close the Head [!toc]
+
+Any participant can initiate closing the Hydra head. Once closed, no more transactions can be submitted to the head. The head enters a contestation period where participants can challenge the closing snapshot.
+
+```tsx
+await provider.close()
+```
+
+### Contestation Period [!toc]
+
+After closing, there's a contestation period (configurable with `--contestation-period`). During this time:
+
+- Participants can contest the closing snapshot
+- If contested, a more recent snapshot can be used
+- After the deadline, fanout becomes possible
+
+### Fanout the Head [!toc]
+
+After the contestation period, the head participants can use the `fanout` to fully close the `hydra-head` and return the head utxos to layer one.
+
+```tsx
+await provider.fanout()
+```
+
+### Check Final Balances [!toc]
+
+After fanout, check the final balances on layer one:
+
+```tsx
+const aliceFundsBalance = await blockchainProvider.fetchAddressUTxOs("alice-funds.addr");
+const bobFundsBalance = await blockchainProvider.fetchAddressUTxOs("bob-funds.addr");
+```
+
+### Head Lifecycle [!toc]
+
+The complete head lifecycle:
+
+- `INITIALIZE` - Initial state
+- `COMMIT` - Committing to Hydra head
+- `OPEN` - Head open for transactions
+- `NEW TX` - New transaction submitted in Hydra head
+- `CLOSE` - Ready to fanout
+- `CONTEST` - Head closed, contestation period
+- `FANOUT` - Head finalized on layer one
+
+Congratulations! You've completed the full lifecycle of a Hydra head from initialization to finalization.

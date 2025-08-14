@@ -1,0 +1,57 @@
+---
+title: "Deserializers"
+description: "Parse CBOR or bech32 into objects"
+icon: ArrowTurnRightUpIcon
+---
+
+## Deserialize Address
+
+Deserialize bech32 address into payment and staking parts, with visibility of whether they are script or key hash.
+
+<Card>
+  ### Deserialize Address [!toc]
+
+  Convert bech32 address to The deserialized address object
+
+  **Address:** `addr_test1qpvx0...93swx9`
+
+  ```tsx
+  deserializeAddress('addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9');
+  ```
+</Card>
+
+
+## Deserialize Datum
+
+Deserialize a datum from a CBOR string to JSON object.
+
+<Card>
+  ### Deserialize Datum [!toc]
+
+  Deserialize a datum from a CBOR string to JSON object
+
+  **Datum**
+  `167a4a048d87fcee0425ed200615ff2356f472c6413472c6106b8c5da52e3fd0`
+
+  ```tsx
+  deserializeDatum('167a4a048d87fcee0425ed200615ff2356f472c6413472c6106b8c5da52e3fd0');
+  ```
+</Card>
+
+
+## Deserialize Pool Id
+
+Deserialize a script from a pool id to Ed25519 key hash.
+
+<Card>
+  ### Deserialize Pool Id [!toc]
+
+  Deserialize a script from a pool id to Ed25519 key hash
+
+  **Pool Id**
+  `pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx`
+
+  ```tsx
+  deserializePoolId('pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx');
+  ```
+</Card>

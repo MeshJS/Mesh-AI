@@ -1,0 +1,114 @@
+---
+title: "GiftCard"
+description: "Create a giftcard with native tokens"
+icon: GiftIcon
+---
+import Link from "fumadocs-core/link";
+
+Giftcard contract allows users to create a transactions to lock assets into the smart contract, which can be redeemed by any user.
+
+Creating a giftcard will mint a token and send the assets to the contract. While redeeming will burn the token and send the assets to the redeemer.
+
+There are 2 actions (or endpoints) available to interact with this smart contract:
+
+- create giftcard
+- redeem giftcard
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the contract [!toc]
+
+To initialize the contract, we need to initialize a provider, `MeshTxBuilder` and `MeshGiftCardContract`.
+
+```tsx
+import { MeshGiftCardContract } from "@meshsdk/contract";
+import { MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshGiftCardContract({
+  mesh: meshTxBuilder,
+  fetcher: provider,
+  wallet: wallet,
+  networkId: 0,
+});
+```
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/giftcard">Mesh Github Repository</Link>.
+
+
+## Create Giftcard
+
+`createGiftCard()` create a gift card. The function accepts the following parameters:
+
+- tokenName (string) - name of the token
+- giftValue (Asset[]) - a list of assets
+
+The function returns a transaction hash if the gift card is successfully created.
+
+The function returns a transaction hex if giftcard has been created successfully.
+
+<Card>
+  ### Create Giftcard [!toc]
+
+  Create a gift card with a given amount of lovelace
+
+  **Gitfcard amount** `10000000`
+
+  **Giftcard name** `Mesh_Gift_Card`
+
+  ```tsx
+  const giftValue: Asset[] = [
+    {
+      unit: "lovelace",
+      quantity: '10000000',
+    },
+  ];
+
+  const tx = await contract.createGiftCard('Mesh_Gift_Card', giftValue);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Redeem Giftcard
+
+`redeemGiftCard()` redeem a gift card. The function accepts the following parameters:
+
+- giftCardUtxo (UTxO) - unspent transaction output in the script
+
+The function returns a transaction hash if the gift card is successfully redeemed. It will burn the gift card and transfer the value to the wallet signing this transaction.
+
+The function returns a transaction hex if the gift card has been redeemed successfully.
+
+We have provided a very handle function, `getUtxoByTxHash`, which will return the UTxO object for a given transaction hash. You can always create another function that searches by token name.
+
+A <Link href="https://preprod.cardanoscan.io/transaction/2bc1c39337de3ebcb2650aa41c73b1a873288282b8c7e1ed130d31f5c34090b7">successful redemption</Link> will send the value to the wallet that signed the transaction to redeem the gift card.
+
+<Card>
+  ### Redeem Giftcard [!toc]
+
+  Redeem a gift card given the gift card UTxO
+
+  **Tx hash** `Tx hash`
+
+  ```tsx
+  const utxo = await contract.getUtxoByTxHash('');
+
+  const tx = await contract.redeemGiftCard(utxo);
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

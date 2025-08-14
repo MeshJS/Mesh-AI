@@ -1,0 +1,238 @@
+---
+title: "Hydra Provider (beta)"
+desceription: "Layer 2 scaling solution for Cardano that increases transaction throughput and ensures cost efficiency while maintaining security."
+---
+import Link from "fumadocs-core/link";
+
+The <Link href="https://hydra.family/head-protocol/">Hydra Head protocol</Link> is a layer 2 scaling solution for Cardano rooted in peer-reviewed research that increases transaction throughput and ensures cost efficiency while maintaining rigorous security.
+
+Get started:
+
+```tsx
+import { HydraProvider } from "@meshsdk/hydra";
+
+// Hydra Head URL and PORT: e.g. http://123.45.67.890:4001
+
+const provider = new HydraProvider('<URL>');
+await provider.connect();
+```
+
+
+## Connect Hydra Head
+
+Connects to the Hydra Head. This command is a no-op when a Head is already open.
+
+```tsx
+await provider.connect();
+```
+
+
+## Initializes a new Hydra Head
+
+Initializes a new Head. This command is a no-op when a Head is already open and the server will output an `CommandFailed` message should this happen.
+
+```tsx
+await provider.init();
+```
+
+
+## Commit to Hydra Head
+
+Commit a particular UTxO to the head. This will make the UTxO available on the layer 2.
+
+```tsx
+// Params: CommitUtxo, KeyToSign
+await instance.commit("", undefined);
+```
+
+
+## Aborts a head
+
+Aborts a head before it is opened. This can only be done before all participants have committed. Once opened, the head can't be aborted anymore but it can be closed using: `Close`.
+
+```tsx
+await provider.abort();
+```
+
+
+## New Transaction
+
+Submit a transaction through the head. Note that the transaction is only broadcast if well-formed and valid.
+
+You can also the `await provider.submitTx(signedTx)` method to submit a signed transaction.
+
+The `newTx` method accepts the following arguments:
+
+```tsx
+async newTx(
+  cborHex: string,
+  type:
+    | "Tx ConwayEra"
+    | "Unwitnessed Tx ConwayEra"
+    | "Witnessed Tx ConwayEra",
+  description = "",
+  txId?: string
+)
+```
+
+Here is an example of how to create a transaction using the Hydra provider, Mesh wallet and Mesh transaction builder:
+
+```tsx
+async function makeTx() {
+  const walletA = {
+    addr: "addr_test1vpsthwvxgfkkm2lm8ggy0c5345u6vrfctmug6tdyx4rf4mqn2xcyw",
+    key: "58201aae63d93899640e91b51c5e8bd542262df3ecf3246c3854f39c40f4eb83557d",
+  };
+
+  const wallet = new MeshWallet({
+    networkId: 0,
+    key: {
+      type: "cli",
+      payment: walletA.key,
+    },
+    fetcher: provider,
+    submitter: provider,
+  });
+
+  const pp = await provider.fetchProtocolParameters();
+  const utxos = await wallet.getUtxos("enterprise");
+  const changeAddress = walletA.addr;
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider,
+    params: pp,
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .txOut(
+      "addr_test1vpd5axpq4qsh8sxvzny49cp22gc5tqx0djf6wmjv5cx7q5qyrzuw8",
+      [{ unit: "lovelace", quantity: "3000000" }],
+    )
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  console.log("txHash", txHash);
+}
+```
+
+
+## Decommit
+
+Request to decommit a UTxO from a Head by providing a decommit tx. Upon reaching consensus, this will eventually result in corresponding transaction outputs becoming available on the layer 1.
+
+The decommit method accepts the following arguments:
+
+```tsx
+async decommit(
+  cborHex: string,
+  type:
+    | "Tx ConwayEra"
+    | "Unwitnessed Tx ConwayEra"
+    | "Witnessed Tx ConwayEra",
+  description = "",
+)
+```
+
+
+## Close Hydra Head
+
+Terminate a head with the latest known snapshot. This effectively moves the head from the Open state to the Close state where the contestation phase begin. As a result of closing a head, no more transactions can be submitted via NewTx.
+
+```tsx
+await provider.close();
+```
+
+
+## Contest
+
+Challenge the latest snapshot announced as a result of a head closure from another participant. Note that this necessarily contest with the latest snapshot known of your local Hydra node. Participants can only contest once.
+
+```tsx
+await provider.contest();
+```
+
+
+## Fanout
+
+Finalize a head after the contestation period passed. This will distribute the final (as closed and maybe contested) head state back on the layer 1.
+
+```tsx
+await provider.fanout();
+```
+
+
+## Listens for new messages from Hydra node
+
+Listens for new messages from Hydra node. The callback function will be called with the message as the only argument. Check <Link href="https://hydra.family/head-protocol/api-reference">all events emitted</Link> by the Hydra node.
+
+```tsx
+provider.onMessage((message) => {
+  console.log("HydraProvider received message", message);
+  // do something with the message
+});
+```
+
+The callback function is typed, so you can access the message properties directly.
+
+```tsx
+provider.onMessage((message) => {
+  if (message.tag === "Greetings") {
+    console.log("message.snapshotUtxo", message.snapshotUtxo);
+  }
+});
+```
+
+
+## Fetch Address UTxOs
+
+Fetch UTxOs controlled by an address.
+
+```tsx
+await provider.fetchAddressUTxOs('addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9')
+```
+
+Optionally, you can filter UTXOs containing a particular asset by providing `asset`, where it is the concatenation of policy ID and asset.
+
+```tsx
+// Assest f.e. d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e
+await fetchAddressUTxOs(address: string, asset?: string)
+```
+
+
+## Fetch Protocol Parameters
+
+Fetch the latest protocol parameters.
+
+```tsx
+await provider.fetchProtocolParameters()
+```
+
+Optionally, you can provide an epoch number to fetch the protocol parameters of that epoch.
+
+
+## Fetch UTxOs
+
+Get UTxOs for a given hash.
+
+```tsx
+await provider.fetchUTxOs('dfd2a2616e6154a092807b1ceebb9ddcadc0f22cf5c8e0e6b0757815083ccb70')
+```
+
+Optionally, you can specify the index of the index output.
+
+```tsx
+await provider.fetchUTxOs('hash_here', 0)
+```
+
+
+## Submit Transaction
+
+Submit a serialized transaction to the network.
+
+```tsx
+await provider.submitTx(signedTx);
+```

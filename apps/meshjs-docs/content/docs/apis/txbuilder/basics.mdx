@@ -1,0 +1,479 @@
+---
+title: "Transaction Basics"
+description: "Working with transactions and its various options"
+icon: PaperAirplaneIcon
+---
+import Link from 'fumadocs-core/link';
+
+In the code snippet, you will find `txBuilder`, which is an instance of `MeshTxBuilder`, a powerful low-level APIs that allows you to build transactions. Learn how to initialize **MeshTxBuilder**.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+```
+
+The `MeshTxBuilder` is a powerful interface where the higher level `Transaction` class is indeed a pre-built combination of the `MeshTxBuilder` APIs. With these lower level APIs, it builds the object to be passing to the serialization libraries like `cardano-sdk` and `Whisky SDK` to construct transactions.
+
+In this page, we will cover how to initialize the `MeshTxBuilder` and the basic operations of building a transaction.
+
+
+## Initialize Tx Builder
+
+To start building an customized transaction, you need to first initialize `MeshTxBuilder`:
+
+```tsx
+import { BlockfrostProvider, MeshTxBuilder } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  verbose: true,
+});
+```
+
+The `MeshTxBuilder` instance has the following signature:
+
+```tsx
+{
+  fetcher?: IFetcher;
+  submitter?: ISubmitter;
+  evaluator?: IEvaluator;
+  serializer?: IMeshTxSerializer;
+  isHydra?: boolean;
+  params?: Partial<Protocol>;
+  verbose?: boolean;
+}
+```
+
+There are 6 optional fields to pass in to initialized the lower level APIs instance:
+
+- `serializer`: The default serializer is `CSLSerializer`. You can pass in your own serializer instance.
+- `fetcher`: When you build the transaction without sufficient fields as required by the serialization library, we would index the blockchain to fill the information for you. Affected APIs are `txIn`, `txInCollateral`, `spendingTxInReference`.
+- `submitter`: It is used if you would like to use the `submitter` submitTx API directly from the instance.
+- `evaluator`: It would perform redeemer execution unit optimization, returning error message in case of invalid transaction.
+- `isHydra`: Use another set of default protocol parameters for building transactions.
+- `params`: You can pass in the protocol parameters directly.
+- `verbose`: Set to `true` to enable verbose logging.
+
+
+## Send Value
+
+Sending value with `MeshTxBuilder` come with the `.txOut()` endpoint:
+
+```tsx
+.txOut(address: string, amount: Asset[])
+```
+
+In order to send values (so as every transaction), we have to fund the transaction to do so. There are 2 ways to provide values in a transaction:
+
+- Specifying which input to spend with
+
+```tsx
+.txIn(txHash: string, txIndex: number, amount?: Asset[], address?: string)
+```
+
+
+- Providing an array of UTxOs, and perform auto UTxO selection:
+
+```tsx
+.selectUtxosFrom(extraInputs: UTxO[])
+```
+
+Since the input and output values might not be the same, we have to specify the address (usually own's address) to receive change:
+
+```tsx
+.changeAddress(addr: string)
+```
+
+The following shows a simple example of building a transaction to send values with UTxO selection:
+
+```tsx
+txBuilder
+  .txOut(address, [{ unit: "lovelace", quantity: amount }])
+  .changeAddress(changeAddress)
+  .selectUtxosFrom(utxos)
+  .complete();
+```
+
+<Card>
+  ### Send Value [!toc]
+
+  Send assests to a recipient
+
+  **Address**: `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Amount**: `1000000`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .txOut('addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr', [{ unit: "lovelace", quantity: '1000000' }])
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Multi-signature Transaction
+
+The main idea of a multi-signature (multisig) transaction is to have multiple signatures to authorize a transaction.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+const unsignedTx = await txBuilder
+  .mint("1", policyId, stringToHex("MeshToken"))
+  .mintingScript(forgingScript)
+  .metadataValue(721, { [policyId]: { [assetName]: demoAssetMetadata } })
+  .changeAddress(address)
+  .selectUtxosFrom(utxos)
+  .complete();
+
+const signedTx = await wallet1.signTx(unsignedTx, true);
+const signedTx2 = await mintingWallet.signTx(signedTx, true);
+const txHash = await wallet.submitTx(signedTx2);
+```
+
+In the above code snippet, we are signing the transaction with the user wallet and then signing the transaction with the minting wallet. The `signTx` function is used to sign the transaction. The second argument is a boolean value that indicates whether the transaction is a multi-signature transaction.
+
+
+```tsx
+await wallet.signTx(unsignedTx, true);
+```
+
+
+<Card>
+  ### Multi-signature Transaction [!toc]
+
+  Create a multi-signature transaction. In this demo, we will create a transaction with two signatures, where one signature is from the user wallet and the other is from a minting wallet.
+
+  ```tsx
+  const mintingWallet = new MeshWallet({
+  networkId: 0,
+  fetcher: provider,
+  submitter: provider,
+  key: {
+    type: "mnemonic",
+    words: ['your','mnemonic','here'],
+  },
+  });
+
+  const forgingScript = ForgeScript.withOneSignature(
+    await mintingWallet.getChangeAddress(),
+  );
+
+  const assetName = "MeshToken";
+  const policyId = resolveScriptHash(forgingScript);
+
+  const usedAddress = await wallet.getUsedAddresses();
+  const utxos = await wallet.getUtxos();
+  const address = usedAddress[0]!;
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .mint("1", policyId, stringToHex("MeshToken"))
+    .mintingScript(forgingScript)
+    .metadataValue(721, { [policyId]: { [assetName]: demoAssetMetadata } })
+    .changeAddress(address)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx, true);
+  const signedTx2 = await mintingWallet.signTx(signedTx, true);
+  const txHash = await wallet.submitTx(signedTx2);
+  ```
+</Card>
+
+
+## Multi-signature Transaction with Native Script
+
+Here is an example of creating a multi-signature (multisig) transaction with a native script, where you need to spend from a script address.
+
+**Create native script**
+
+First, we need to create a native script. In this example, we will create a native script with two signatures. That means we need to get the key hashes of the two wallets.
+
+```tsx
+const { pubKeyHash: keyHash1 } = deserializeAddress(walletAddress1);
+const { pubKeyHash: keyHash2 } = deserializeAddress(walletAddress2);
+```
+
+Next, we will create a native script object with the two key hashes. The native script object will be used to create a multi-signature transaction.
+
+```tsx
+const nativeScript: NativeScript = {
+  type: "all",
+  scripts: [
+    {
+      type: "sig",
+      keyHash: keyHash1,
+    },
+    {
+      type: "sig",
+      keyHash: keyHash2,
+    },
+  ],
+};
+```
+
+The native script object is then serialized into a CBOR object and an address.
+
+```tsx
+const { address: scriptAddress, scriptCbor } =
+  serializeNativeScript(nativeScript);
+```
+
+**Create transaction**
+
+Now that we have the native script, we can create a transaction with the script. We first need to get the UTXO from the script address.
+
+```tsx
+// get utxo from script
+const utxos = await provider.fetchAddressUTxOs(scriptAddress);
+const utxo = utxos[0];
+
+// create tx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+const unsignedTx = await txBuilder
+  .txIn(
+    utxo.input.txHash,
+    utxo.input.outputIndex,
+    utxo.output.amount,
+    utxo.output.address,
+  )
+  .txInScript(scriptCbor)
+  .txOut(
+    "addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr",
+    [{ unit: "lovelace", quantity: "2000000" }],
+  )
+  .changeAddress(scriptAddress)
+  .selectUtxosFrom(utxos)
+  .complete();
+```
+
+Finally, we sign the transaction with the two wallets and submit the transaction.
+
+```tsx
+const signedTx1 = await wallet1.signTx(unsignedTx, true);
+const signedTx2 = await wallet2.signTx(signedTx1, true);
+
+const txHash = await wallet.submitTx(signedTx2);
+```
+
+
+## Build with Object
+
+One alternative to use the lower level APIs is to build the transaction with JSON.
+
+The following shows a simple example of building a transaction to send values to a recipient:
+
+```tsx
+const meshTxBody: Partial<MeshTxBuilderBody> = {
+  outputs: [
+    {
+      address: address,
+      amount: [{ unit: "lovelace", quantity: amount }],
+    },
+  ],
+  changeAddress: changeAddress,
+  extraInputs: utxos,
+  selectionConfig: {
+    threshold: "5000000",
+    strategy: "largestFirst",
+    includeTxFees: true,
+  },
+};
+
+const unsignedTx = await txBuilder.complete(meshTxBody);
+```
+
+
+## Coin selection
+
+You can select UTxOs from a list of UTxOs using the `selectUtxosFrom` method. This method allows you to specify the conditions for selecting UTxOs. The method signature is as follows:
+
+```tsx
+selectUtxosFrom(
+  extraInputs: UTxO[]
+  strategy?: UtxoSelectionStrategy
+  threshold?: string
+  includeTxFees?: boolean
+)
+```
+
+The second parameter of `selectUtxosFrom` is the strategy to be used for selecting UTxOs. There are 4 strategies (`UtxoSelectionStrategy`) available for selecting UTxOs:
+
+- experimental
+- keepRelevant
+- largestFirst
+- largestFirstMultiAsset
+
+We may introduce more strategies in the future. Check the <Link href="https://docs.meshjs.dev/"> Mesh Docs</Link> for more details.
+
+The `threshold` parameter is used to specify the minimum amount of lovelace to be selected. You may specify a larger amount to if the transactions requires it.
+
+The last parameter is `includeTxFees` which is a boolean value to include transaction fees in the selection.
+
+
+## Set Metadata - Taransaction message
+
+Add messages / comments / memos as transaction metadata. This is useful for attaching additional information to a transaction. This is an example of setting metadata with transaction message.
+
+```tsx
+txBuilder
+  .metadataValue(label, metadata)
+```
+
+The specification for the individual strings follow the general design specification for JSON metadata, which is already implemented and in operation on the cardano blockchain. The used metadatum label is `674`: this number was chosen because it is the T9 encoding of the string `msg`. The message content has the key `msg`: and consists of an array of individual message-strings. The number of theses message-strings must be at least one for a single message, more for multiple messages/lines. Each of theses individual message-strings array entries must be at most 64 bytes when UTF-8 encoded.
+
+<Card>
+  ### Transaction message [!toc]
+
+  Add messages/comments/memos as transaction metadata
+
+  **Message (breakline for new line)**
+  ```
+  Invoice-No: 1234567890
+  Customer-No: 555-1234
+  ```
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const label = 674;
+  const metadata = {
+    msg: [
+      'Invoice-No: 1234567890',
+      'Customer-No: 555-1234',
+    ],
+  });
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .changeAddress(changeAddress)
+    .metadataValue(label, metadata)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Set Required Signers
+
+Sets the required signers for the transaction. This is useful when you want to include multiple signers, such as in a multi-signature transaction or smart contracts.
+
+```tsx
+txBuilder
+  .requiredSignerHash(pubKeyHash)
+```
+
+
+## Set Start and Expire Time
+
+We can define the time-to-live (TTL) for the transaction. TTL is the time limit for our transaction to be included in a blockchain, if it is not in a blockchain by then the transaction will be cancelled. This time limit is defined as `slot`.
+
+In order to get the `slot` of the time you wish the transaction would expire, you can use `resolveSlotNo`. For example, if you would like the transaction to expire in 5 minutes, you can get the `slot` in the following way:
+
+```tsx
+import { resolveSlotNo } from '@meshsdk/core';
+let minutes = 5; // add 5 minutes
+let nowDateTime = new Date();
+let dateTimeAdd5Min = new Date(nowDateTime.getTime() + minutes*60000);
+const slot = resolveSlotNo('mainnet', dateTimeAdd5Min.getTime());
+```
+
+Next, we set the TTL with `invalidHereafter` and providing the `slot`, this means that if the transaction is submitted after after `slot` will not be valid.
+
+```tsx
+txBuilder
+  .invalidHereafter(Number(slot));
+```
+
+Likewise, we can set a "validity start interval" for the transaction, where it is the time the transaction will be valid. We can define the start time with `invalidBefore` and providing the `slot`:
+
+```tsx
+txBuilder
+  .invalidBefore(Number(slot));
+```
+
+
+## Set Network
+
+Sets the network to use, this is mainly to know the cost models to be used to calculate script integrity hash. You can set the network for the transaction with `setNetwork`.
+
+`
+txBuilder.setNetwork(network: Network)
+```
+
+The network parameter is a string that can be one of the following:
+
+```tsx
+"testnet" | "preview" | "preprod" | "mainnet"
+```
+
+
+## Set Fee
+
+Set the fee for the transaction.
+
+```tsx
+.setFee(fee: string)
+```
+
+The following shows a simple example of building a transaction to send values with UTxO selection:
+
+
+```tsx
+const unsignedTx = await txBuilder
+  .txOut(...)
+  .changeAddress(...)
+  .setFee("0")
+  .complete();
+```
+
+
+## Custom Protocol Parameter
+
+Custom protocol parameters can be fetched from the provider and passed to the transaction builder. This is useful when the provider does not provide the protocol parameters, or when the user wants to use a custom set of parameters.
+
+```tsx
+const pp = await provider.fetchProtocolParameters();
+
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  params: pp,
+});
+```

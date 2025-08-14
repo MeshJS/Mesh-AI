@@ -1,0 +1,169 @@
+---
+title: "JSON Data"
+description: "Parse and manipulate data with JSON"
+icon: Bars3Icon
+---
+
+Mesh offers a full set of utility functions to help constructing the JSON data you need for your Web3 app, with the naming philosophy similar to Mesh `Data` type, with extra utilities mimicing the data type names in PlutusTx and Aiken.
+
+**Types Support**
+
+All the utilities are designed to return a type with the same naming as the utilities function, with capitalizing first letter, you can build your data in JSON with robust type supports, some examples:
+
+- `constr` returns `Constr` type
+- `integer` returns `Integer` type
+- `byteString` returns `ByteString` type
+
+
+## Utilities in Building Constructor Data in JSON
+
+`conStr` build the constructor object, with parameters:
+
+- constructor (number) - the constructor index
+- fields (any[]) - the constructor fields in array
+
+There are also some quick utilities only taking in **fields** as parameters for 0 - 2 indices:
+
+- `conStr0` - building index 0 constructor
+- `conStr1` - building index 1 constructor
+- `conStr2` - building index 2 constructor
+
+<Card>
+  ### Constructor [!toc]
+
+  Building JSON constructor object
+
+  ```tsx
+  import { conStr } from "@meshsdk/core";
+  conStr(0, []);
+  ```
+</Card>
+
+
+## Utilities in Building Integer Data in JSON
+
+`integer` build the integer object, with parameters:
+
+- int (number | bigint) - the integer to be built
+
+This utility is compatible for both number and bigint type, which allow big integer exceeding the JS precision limit.
+
+**Aliases**
+- `posixTime` - for the same functionality.
+
+<Card>
+  ### Constructor [!toc]
+
+  Building JSON integer object
+
+  **int** `1000000`
+
+  ```tsx
+  import { integer } from "@meshsdk/core";
+  integer(1000000);
+  ```
+</Card>
+
+
+## Utilities in Building ByteString Data in JSON
+
+`byteString` build the byte string object, with parameters:
+
+- bytes (string) - the byte string in hex to be built, validation would be performed on whether the bytes is a valid hex string
+
+**Aliases**
+
+- `builtinByteString` - for the same functionality, for developers more familiar to the PlutusTx naming convention.
+- `scriptHash` / `pubKeyHash` / `policyId` / `currencySymbol` / `assetName` / token`Name - same building the byte string JSON but with further input validation.
+
+<Card>
+  ### Constructor [!toc]
+  Building JSON byteString object
+
+  **byteString**
+  `a0bd47e8938e7c41d4c1d7c22033892319d28f86fdace791d45c51946553791b`
+
+  ```tsx
+  import { byteString } from "@meshsdk/core";
+  byteString("a0bd47e8938e7c41d4c1d7c22033892319d28f86fdace791d45c51946553791b");
+  ```
+</Card>
+
+
+## Utilities in Building Boolean Data in JSON
+
+`bool` build the boolean object, with parameters:
+
+- b (boolean | boolean) - the boolean to be built
+
+<Card>
+  ### Constructor [!toc]
+
+  Building JSON bool object
+
+  ```tsx
+  import { bool } from "@meshsdk/core";
+  bool(true);
+  ```
+</Card>
+
+
+## Utilities in Building List Data in JSON
+
+`list` build the list object, with parameters:
+
+- pList (T[]) - the list with items to be built. The items in the
+- optional - validation (boolean) - indicate if the current data construction should perform basic validation of whether it is of typeobject (where all JSON data is in type of object)
+
+<Card>
+  ### Constructor [!toc]
+
+  Building JSON list object
+
+  ```tsx
+  import { bool, byteString, integer, list } from "@meshsdk/core";
+  list([
+    byteString(
+      "a0bd47e8938e7c41d4c1d7c22033892319d28f86fdace791d45c51946553791b"
+    ),
+    integer(1000000),
+    bool(false),
+  ]);
+  ```
+</Card>
+
+
+## Utilities in Building Map Data in JSON
+
+`assocMap` build the (associative) map object, with parameters:
+
+- mapItems - ([KeyType, ValueType][]) - the array of map item in JS tuple format (array of array).
+- optional - validation (boolean) - indicate if the current data construction should perform basic validation of whether it is of typeobject (where all JSON data is in type of object)
+
+<Card>
+  ### Constructor [!toc]
+
+  Building JSON list object
+
+  ```tsx
+  import { assocMap, byteString, integer } from "@meshsdk/core";
+  assocMap([
+    [byteString("aa"), integer(1000000)],
+    [byteString("bb"), integer(2000000)],
+  ]);
+  ```
+</Card>
+
+
+## Other Utilities
+
+The code example showing above does not cover all utilities, please checkout the hosted documentation for more details. The not covered utilities are as below:
+
+- `assetClass`
+- `outputReference`
+- `txOutRef`
+- `dict`
+- `tuple`
+- `maybeStakingHash`
+- `pubKeyAddress`
+- `scriptAddress`

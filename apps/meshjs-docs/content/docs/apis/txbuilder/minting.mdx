@@ -1,0 +1,581 @@
+---
+title: "Mint and Burn Assets"
+description: "Minting and burning assets with Native Script and Plutus Script"
+icon: FireIcon
+---
+import Link from "fumadocs-core/link";
+
+Minting and burning assets with Native Script and Plutus Script
+
+Minting and burning assets is a common operation in blockchain applications. In the Cardano ecosystem, minting and burning are achieved through Native Scripts and Plutus Scripts.
+
+To view a video demonstration of this feature of the MeshSDK, navigate to the video guide <Link href="/apis//guides/nft-collection">Mint an NFT Collection</Link>.
+
+In the code snippet, you will find `txBuilder`, which is an instance of `MeshTxBuilder`, a powerful low-level APIs that allows you to build transactions. Learn how to initialize MeshTxBuilder.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+```
+
+In this page, you will find the APIs to create transactions for minting and burning assets.
+
+
+## Minting with One Signature
+
+In this section, we will see how to mint native assets with a `MeshTxBuilder`. For minting assets with smart contract, visit MeshTxBuilder - Smart Contract - Minting Assets with Smart Contract.
+
+Firstly, we need to define the `forgingScript` with `ForgeScript`. We use the first wallet address as the "minting address" (you can use other addresses).
+
+```tsx
+const changeAddress = await wallet.getChangeAddress();
+const forgingScript = ForgeScript.withOneSignature(changeAddress);
+```
+
+Then, we define the metadata.
+
+```tsx
+const demoAssetMetadata = {
+  name: "Mesh Token",
+  image: "ipfs://QmRzicpReutwCkM6aotuKjErFCUD213DpwPq6ByuzMJaua",
+  mediaType: "image/jpg",
+  description: "This NFT was minted by Mesh (https://meshjs.dev/).",
+};
+const policyId = resolveScriptHash(forgingScript);
+const tokenName = "MeshToken";
+const tokenNameHex = stringToHex(tokenName);
+const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } };
+```
+
+Finally, we create a transaction and mint the asset with the lower level APIs.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+const unsignedTx = await txBuilder
+  .txIn(utxo.input.txHash, utxo.input.outputIndex)
+  .mint("1", policyId, tokenName)
+  .mintingScript(forgingScript)
+  .changeAddress(changeAddress)
+  .complete();
+```
+
+<Card>
+  ### Mint Asset
+
+  Mint an asset with a ntive script
+
+  ```tsx
+  import { MeshTxBuilder, ForgeScript, resolveScriptHash, stringToHex } from '@meshsdk/core';
+  import type { Asset } from '@meshsdk/core';
+
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+  const forgingScript = ForgeScript.withOneSignature(changeAddress);
+
+  const demoAssetMetadata = {
+    name: "Mesh Token",
+    image: "ipfs://QmRzicpReutwCkM6aotuKjErFCUD213DpwPq6ByuzMJaua",
+    mediaType: "image/jpg",
+    description: "This NFT was minted by Mesh (https://meshjs.dev/).",
+  };
+  const policyId = resolveScriptHash(forgingScript);
+  const tokenName = "MeshToken";
+  const tokenNameHex = stringToHex(tokenName);
+  const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } };
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .mint("1", policyId, tokenNameHex)
+    .mintingScript(forgingScript)
+    .metadataValue(721, metadata)
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Minting Multiple Assets
+
+Minting multiple assets with a single transaction is a common operation in blockchain applications. Like minting single assets, you can mint multiple assets by calling `mint()` and `mintingScript` multiple times.
+
+```tsx
+const metadata = {};
+metadata[policyId] = {};
+for (let i = 1; i < 3; i++) {
+  const tokenName = `MeshToken${i}`;
+  const tokenNameHex = stringToHex(tokenName);
+  metadata[policyId][tokenName] = {
+    ...demoAssetMetadata,
+    name: tokenName,
+  };
+  txBuilder.mint("1", policyId, tokenNameHex);
+  txBuilder.mintingScript(forgingScript);
+}
+```
+
+You appending the metadata into one object and pass it to `metadataValue()` method.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+txBuilder
+  .metadataValue(721, metadata)
+  .changeAddress(changeAddress)
+  .selectUtxosFrom(utxos);
+
+const unsignedTx = await txBuilder.complete();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+<Card>
+  ### Mint Multiple Assets [!toc]
+
+  Mint multiple assets with a single transaction
+
+  ```tsx
+  import { MeshTxBuilder, ForgeScript, resolveScriptHash, stringToHex } from '@meshsdk/core';
+  import type { Asset } from '@meshsdk/core';
+
+  const { wallet, connected } = useWallet();
+
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+  const forgingScript = ForgeScript.withOneSignature(changeAddress);
+
+  const policyId = resolveScriptHash(forgingScript);
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const metadata = {};
+  metadata[policyId] = {};
+  for (let i = 1; i < 3; i++) {
+    const tokenName = `MeshToken${i}`;
+    const tokenNameHex = stringToHex(tokenName);
+    metadata[policyId][tokenName] = {
+      ...demoAssetMetadata,
+      name: tokenName,
+    };
+    txBuilder.mint("1", policyId, tokenNameHex);
+    txBuilder.mintingScript(forgingScript);
+  }
+
+  txBuilder
+    .metadataValue(721, metadata)
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos);
+
+  const unsignedTx = await txBuilder.complete();
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Burning assets
+
+Like minting assets, we need to define the `forgingScript` with `ForgeScript`. We use the first wallet address as the "minting address". Note that, assets can only be burned by its minting address.
+
+```tsx
+const usedAddress = await wallet.getUsedAddresses();
+const address = usedAddress[0];
+const forgingScript = ForgeScript.withOneSignature(address);
+```
+
+Then, we resolve the policy ID and hex of token name, setting set `txBuilder.mint("-1", policyId, tokenNameHex)`
+
+```tsx
+const policyId = resolveScriptHash(forgingScript);
+const tokenNameHex = stringToHex("MeshToken");
+```
+
+Finally, we create a transaction and burn the asset with the lower level APIs.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+
+const unsignedTx = await txBuilder
+  .mint("-1", policyId, tokenNameHex)
+  .mintingScript(forgingScript)
+  .changeAddress(changeAddress)
+  .selectUtxosFrom(utxos)
+  .complete();
+```
+
+<Card>
+  ### Burn Native Assets [!toc]
+
+  Burn native assets
+
+  **Asset Unit**
+  `d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e`
+
+  ```tsx
+  import { ForgeScript, resolveScriptHash, stringToHex } from "@meshsdk/core";
+  import { useWallet } from "@meshsdk/react";
+
+  const { wallet, connected } = useWallet();
+
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const forgingScript = ForgeScript.withOneSignature(changeAddress);
+
+  const policyId = resolveScriptHash(forgingScript);
+  const tokenNameHex = stringToHex("MeshToken");
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .mint("-1", policyId, tokenNameHex)
+    .mintingScript(forgingScript)
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Minting Assets with Native Script
+
+The above minting and burning one signature are indeed the mint and burn with native script examples. Here we would explain the logic you need to know for native script minting.
+
+With `MeshTxBuilder`, you just need `.mint()` and provide script to mint or burn native script tokens:
+
+```tsx
+txBuilder
+  .mint("1", policyId, tokenNameHex)
+  .mintingScript(forgingScript)
+```
+
+On top on these 2 core logics, you can attach metadata if needed with `.metadataValue()`, and construct the transaction as needed.
+
+<Card>
+  ### Mint Assets with Native Script [!toc]
+
+  Mint native assets with Native Script
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const changeAddress = await wallet.getChangeAddress();
+
+  const { pubKeyHash: keyHash } = deserializeAddress(changeAddress);
+
+  const nativeScript: NativeScript = {
+    type: "all",
+    scripts: [
+      {
+        type: "before",
+        slot: "99999999",
+      },
+      {
+        type: "sig",
+        keyHash: keyHash,
+      },
+    ],
+  };
+  const forgingScript = ForgeScript.fromNativeScript(nativeScript);
+
+  const policyId = resolveScriptHash(forgingScript);
+  const tokenName = "MeshToken";
+  const tokenNameHex = stringToHex(tokenName);
+  const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } };
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+
+  const unsignedTx = await txBuilder
+    .mint("1", policyId, tokenNameHex)
+    .mintingScript(forgingScript)
+    .metadataValue(721, metadata)
+    .changeAddress(changeAddress)
+    .invalidHereafter(99999999)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Minting Assets with Plutus Script
+
+Minting Plutus tokens with `MeshTxBuilder` starts with anyone of the below script version indicators:
+
+```tsx
+.mintPlutusScriptV1()
+.mintPlutusScriptV2()
+.mintPlutusScriptV3()
+```
+
+Followed by specifying the minting information:
+
+```tsx
+.mint(quantity: string, policy: string, name: string)
+```
+
+Similar to unlocking assets, minting or burning Plutus tokens require providing redeemer and scripts. However, no datum information is needed in minting or burning.
+
+**Script of the token**
+
+The actual script can be either provided by transaction builder or referenced from an UTxO onchain.
+
+- (i) Reference script
+```tsx
+.mintTxInReference(txHash: string, txIndex: number)
+```
+
+- (ii) Supplying script
+```tsx
+.mintingScript(scriptCbor: string)
+```
+
+**Redeemer of the mint**
+
+Redeemer can be provided in different **data types**. If your MeshTxBuilder does not include an `evaluator` instance, you can also provide your budget for the unlock with this redeemer endpoint
+
+```tsx
+.mintRedeemerValue(redeemer: Data | object | string, type: "Mesh" | "CBOR" | "JSON", exUnits?: Budget)
+```
+
+<Card>
+  ### Mint Assets with Plutus Script [!toc]
+
+  Mint native assets with Plutus Script. For this example, the Plutus script expects a data field of 'mesh'.
+
+  **Redeemer value:** `mesh`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const collateral: UTxO = (await wallet.getCollateral())[0]!;
+  const changeAddress = await wallet.getChangeAddress();
+
+  const policyId = resolveScriptHash(demoPlutusMintingScript, "V2");
+  const tokenName = 'mesh';
+  const tokenNameHex = stringToHex(tokenName);
+  const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } };
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .mintPlutusScriptV2()
+    .mint("1", policyId, tokenNameHex)
+    .mintingScript(demoPlutusMintingScript)
+    .mintRedeemerValue(mConStr0(['mesh']))
+    .metadataValue(721, metadata)
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .txInCollateral(
+      collateral.input.txHash,
+      collateral.input.outputIndex,
+      collateral.output.amount,
+      collateral.output.address,
+    )
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Minting Assets with CIP-68 Metadata standard
+
+Minting CIP-68 tokens with `MeshTxBuilder` means 2 consecutive sets of minting APIs. The first is to mint the 100 token, and the second is the mint the 222 tokens:
+
+```tsx
+txBuilder
+  .mintPlutusScriptV2()
+  .mint("1", policyId, CIP68_100(tokenNameHex))
+  .mintingScript(scriptCode)
+  .mintRedeemerValue(mConStr0([]))
+  .mintPlutusScriptV2()
+  .mint("1", policyId, CIP68_222(tokenNameHex))
+  .mintingScript(scriptCode)
+  .mintRedeemerValue(mConStr0([]))
+```
+
+A side note, Mesh also provides the utility function of `CIP68_100(tokenNameHex: string)` and `CIP68_222(tokenNameHex: string)` to help easily construct the token names as needed. So you dont have to memorize the prefix bytes to correctly mint the CIP68-compliant tokens.
+
+<Card>
+  ### Mint Assets with CIP68 metadata standard [!toc]
+
+  Mint assets with CIP68 metadata standard where two assets are issued, one referencing the other user token.
+
+  **Token Name:** `Test1`
+
+  ```tsx
+  const usedAddress = await wallet.getUsedAddresses();
+  const address = usedAddress[0];
+
+  if (address === undefined) {
+    throw "Address not found";
+  }
+
+  const userTokenMetadata = {
+    name: userInput,
+    image: "ipfs://QmRzicpReutwCkM6aotuKjErFCUD213DpwPq6ByuzMJaua",
+    mediaType: "image/jpg",
+    description: "Hello world - CIP68",
+  };
+
+  const alawysSucceedPlutusScript: PlutusScript = {
+    code: demoPlutusAlwaysSucceedScript,
+    version: "V1",
+  };
+
+  const { address: scriptAddress } = serializePlutusScript(
+    alawysSucceedPlutusScript,
+  );
+
+  const utxos = await wallet.getUtxos();
+
+  if (!utxos || utxos.length <= 0) {
+    throw "No UTxOs found in wallet";
+  }
+
+  const scriptCode = applyParamsToScript(oneTimeMintingPolicy, [
+    mTxOutRef(utxos[0]?.input.txHash!, utxos[0]?.input.outputIndex!),
+  ]);
+
+  const collateral: UTxO = (await wallet.getCollateral())[0]!;
+  const changeAddress = await wallet.getChangeAddress();
+
+  const policyId = resolveScriptHash(scriptCode, "V2");
+  const tokenName = 'Test1';
+  const tokenNameHex = stringToHex(tokenName);
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .txIn(
+      utxos[0]?.input.txHash!,
+      utxos[0]?.input.outputIndex!,
+      utxos[0]?.output.amount!,
+      utxos[0]?.output.address!,
+    )
+    .mintPlutusScriptV2()
+    .mint("1", policyId, CIP68_100(tokenNameHex))
+    .mintingScript(scriptCode)
+    .mintRedeemerValue(mConStr0([]))
+    .mintPlutusScriptV2()
+    .mint("1", policyId, CIP68_222(tokenNameHex))
+    .mintingScript(scriptCode)
+    .mintRedeemerValue(mConStr0([]))
+    .txOut(scriptAddress, [
+      { unit: policyId + CIP68_100(tokenNameHex), quantity: "1" },
+    ])
+    .txOutInlineDatumValue(metadataToCip68(userTokenMetadata))
+    .changeAddress(changeAddress)
+    .selectUtxosFrom(utxos)
+    .txInCollateral(
+      collateral.input.txHash,
+      collateral.input.outputIndex,
+      collateral.output.amount,
+      collateral.output.address,
+    )
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Minting Royalty Token
+
+Royalty tokens is a special type of token that allows the creator to collect a royalty fee, this proposed standard will allow for uniform royalties' distributions across the secondary market space. Read CIP-27 for more information.
+
+The implementation of royalty tokens is very simple, minting a token with `777` label, with "rate" and "addr" in the metadata.
+
+Here is the example of the metadata:
+
+```tsx
+const assetMetadata = {
+  rate: '0.2',
+  addr: 'addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr'
+};
+```
+
+<Card>
+  ### Mint Native Assets [!toc]
+
+  Mint native assets with ForgeScript
+
+  **Rate:** `0.2`
+
+  **Address:** `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const usedAddress = await wallet.getUsedAddresses();
+  const address = usedAddress[0];
+
+  if (address === undefined) {
+    throw "No address found";
+  }
+
+  const forgingScript = ForgeScript.withOneSignature(address);
+  const policyId = resolveScriptHash(forgingScript);
+
+  const assetMetadata: RoyaltiesStandard = {
+    rate: '0.2',
+    address: 'addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr',
+  };
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .mint("1", policyId, "")
+    .mintingScript(forgingScript)
+    .metadataValue(777, assetMetadata)
+    .changeAddress(address)
+    .selectUtxosFrom(utxos)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>

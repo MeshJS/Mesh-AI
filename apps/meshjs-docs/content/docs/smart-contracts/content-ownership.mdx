@@ -1,0 +1,358 @@
+---
+title: "Content Ownership"
+description: "Manage ownership of digital content and assets"
+icon: DocumentCheckIcon
+---
+import Link from "fumadocs-core/link";
+
+This contract allows you to create a content registry and users can create content that is stored in the registry.
+
+It facilitates on-chain record of content (i.e. file on IPFS) ownership and transfer. While one cannot prefer others from obtaining a copy of the content, the app owner of the contract can serve the single source of truth of who owns the content. With the blockchain trace and record in place, it provides a trustless way to verify the ownership of the content and facilitates further application logics such as royalties, licensing, etc.
+
+### Install package [!toc]
+
+First you can to install the `@meshsdk/contracts` package:
+
+```tsx
+npm install @meshsdk/contract
+```
+
+### Initialize the contract [!toc]
+
+To initialize the contract, we need to initialize a <Link href="/providers/">provider</Link>, `MeshTxBuilder` and `MeshContentOwnershipContract`.
+
+
+```tsx
+import { MeshContentOwnershipContract } from "@meshsdk/contract";
+import { MeshTxBuilder, BlockfrostProvider } from "@meshsdk/core";
+
+const provider = new BlockfrostProvider('<Your-API-Key>');
+
+const meshTxBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  submitter: provider,
+});
+
+const contract = new MeshContentOwnershipContract(
+  {
+    mesh: meshTxBuilder,
+    fetcher: provider,
+    wallet: wallet,
+    networkId: 0,
+  },
+  {
+    operationAddress: operationAddress, // the address of the app owner, where most of the actions should be signed by the spending key of this address
+    paramUtxo: { outputIndex: 0, txHash: "0000000000000000000000000000000000000000000000000000000000000000" }, // you can get this from the output of mintOneTimeMintingPolicy() transaction
+    refScriptUtxos?: { // you can get these from the output of sendRefScriptOnchain() transactions
+      contentRegistry: { outputIndex: 0, txHash: "0000000000000000000000000000000000000000000000000000000000000000" },
+      contentRefToken: { outputIndex: 0, txHash: "0000000000000000000000000000000000000000000000000000000000000000" },
+      ownershipRegistry: { outputIndex: 0, txHash: "0000000000000000000000000000000000000000000000000000000000000000" },
+      ownershipRefToken: { outputIndex: 0, txHash: "0000000000000000000000000000000000000000000000000000000000000000" },
+    },
+  },
+);
+```
+
+Both on-chain and off-chain codes are open-source and available on <Link href="https://github.com/MeshJS/mesh/tree/main/packages/mesh-contract/src/content-ownership">Mesh Github Repository</Link>.
+
+
+## Mint One Time Minting Policy
+
+This is the first transaction you need to setup the contract.
+
+This transaction mints the one-time minting policy (a NFT) for the contract.
+
+It will be attached with the datum which serves as the single source of truth for the contract oracle.
+
+Note: You must save the `paramUtxo` for future transactions.
+
+<Card>
+  ### Mint One Time Minting Policy [!toc]
+
+  This transaction mints the one-time minting policy (a NFT) for the contract.
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  ```tsx
+  const { tx, paramUtxo } = await contract.mintOneTimeMintingPolicy();
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Setup Oracle Utxo
+
+This transaction send the NFT to a oracle contract locking the datum, which serves as the single source of truth for the contract oracle with data integrity.
+
+This is the second transaction you need to setup the contract.
+
+Note: You must provide the `paramUtxo` from the `mintOneTimeMintingPolicy` transaction.
+
+<Card>
+  ### Setup Oracle Utxo [!toc]
+
+  This transaction send the NFT to a oracle contract locking the datum.
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Param UTxO**
+  `{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02...f3f8bded3df2359"}`
+
+  ```tsx
+  const tx = await contract.setupOracleUtxo();
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Send Ref-Script Onchain
+
+This are the next transactions you need to setup the contract. You need to run once for each script, and you would likely have to run one after the previous one is confirmed.
+
+This transaction sends the reference scripts to the blockchain for later transactions, boosting efficiency and avoid exceeding 16kb of transaction size limits enforced by protocol parameter.
+
+Note: You must provide the `paramUtxo` from the `mintOneTimeMintingPolicy` transaction.
+
+Note: You must save txHash (after signed and submitted) for `ContentRegistry`, `ContentRefToken`, `OwnershipRegistry`,`OwnershipRefToken` transactions for future transactions.
+
+<Card>
+  ### Send Ref-Script Onchain [!toc]
+
+  This transaction sends the reference scripts to the blockchain for later transactions.
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Param UTxO**
+  `{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02...f3f8bded3df2359"}`
+
+  **Select script index**
+  `OracleNFT`
+
+  ```tsx
+  const tx = await contract.sendRefScriptOnchain('OracleNFT');
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Create Content Registry
+
+This is the next transaction you need to setup the contract after completing all the `sendRefScriptOnchain` transactions.
+
+This transaction creates one content registry. Each registry should comes in pair with one ownership registry and each pair of registry serves around 50 records of content ownership. The application can be scaled indefinitely according to the number of parallelization needed and volumes of content expected to be managed.
+
+Note: You must provide the `paramUtxo` from the `mintOneTimeMintingPolicy` transaction.
+
+Note: You must provide the txHash `forContentRegistry`, `ContentRefToken`, `OwnershipRegistry`, `OwnershipRefToken` transactions.
+
+<Card>
+### Create Ownership Registry [!toc]
+
+This transaction creates one content registry
+
+**Operation address**
+`addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+**Param UTxO**
+`{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02...f3f8bded3df2359"}`
+
+**Content Registry Tx Hash**
+`dfd2a2616e6154a092807b1ceebb9ddcadc0f22cf5c8e0e6b0757815083ccb70`
+
+**Content Ref Token Tx Hash**
+`8f731be135171df172c07578a5d74589ec8fb30b37c12fdbe2639d69b7587f5e`
+
+**Ownership Registry Tx Hash**
+`ec874b61eec4e5e8e395dead6c9bb18690e6d6ea64d773760c5e654ec9ff5f97`
+
+**Ownership Ref Token Tx Hash**
+`e1bdfc7ae6929f934cf9d418273dde143cbb65ec0eec23bdb6c342e4cd91dbd0`
+
+```tsx
+const tx = await contract.createContentRegistry();
+const signedTx = await wallet.signTx(tx);
+const txHash = await wallet.submitTx(signedTx);
+```
+</Card>
+
+
+## Create Ownership Registry
+
+This is the last transaction you need to setup the contract after completing all the `sendRefScriptOnchain` transactions.
+
+This transaction creates one content registry. Each registry should comes in pair with one content registry and each pair of registry serves around 50 records of content ownership. The application can be scaled indefinitely according to the number of parallelization needed and volumes of content expected to be managed.
+
+**Note**: You must provide the `paramUtxo` from the `mintOneTimeMintingPolicy` transaction.
+
+**Note**: You must provide the txHash for `ContentRegistry`, `ContentRefToken`, `OwnershipRegistry`,`OwnershipRefToken` transactions.
+
+<Card>
+  ### Create Ownership Registry [!toc]
+
+  This transaction creates one content registry
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Param UTxO**
+  `{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02e4e2c8b7...ed3df2359"}`
+
+  **Content Registry Tx Hash**
+  `dfd2a2616e6154a092807b1ceebb9ddcadc0f22cf5c8e0e6b0757815083ccb70`
+
+  **Content Ref Token Tx Hash**
+  `8f731be135171df172c07578a5d74589ec8fb30b37c12fdbe2639d69b7587f5e
+  `
+
+  **Ownership Registry Tx Hash**
+  `ec874b61eec4e5e8e395dead6c9bb18690e6d6ea64d773760c5e654ec9ff5f97`
+
+  **Ownership Ref Token Tx Hash**
+  `e1bdfc7ae6929f934cf9d418273dde143cbb65ec0eec23bdb6c342e4cd91dbd0`
+
+  ```tsx
+  const tx = await contract.createOwnershipRegistry();
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Get Oracle Data
+
+Getting the oracle data is essential to fetch the current state of the registry.
+
+To facilitate this process, you must provide the `paramUtxo` that contains the output index and transaction hash of the NFT minting policy.
+
+The `getOracleData()` function will return the current oracle data.
+
+```tsx
+const oracleData = await contract.getOracleData();
+```
+
+For example:
+
+```tsx
+{
+  "contentNumber": 2,
+  "ownershipNumber": 2
+}
+```
+
+
+## Mint User Token
+
+This transaction mints a token that users can use to create content.
+
+Note that you can actually use any tokens for `createContent()`, this `mintUserToken()` function is just helpful if you want to mint a token specifically for this purpose.
+
+Note that you signTx with `true` to mint the token to enable partial signing.
+
+<Card>
+  ### Mint User Token [!toc]
+
+  Mint a token that users can use to create content
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Param UTxO**
+  `{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02e4e2c8b7...ed3df2359"}`
+
+  ```tsx
+  const tx = await contract.mintUserToken("MeshContentOwnership", {
+    name: "Mesh Content Ownership",
+    description: "Demo at https://meshjs.dev/smart-contracts/content-ownership",
+  });
+  const signedTx = await wallet.signTx(tx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Create Content
+
+This transaction creates a content attached to the registry reference by a token. You can use any token for `ownerAssetHex` and the `contentHashHex` is a string to identify the content.
+
+**Note**: You must provide the `paramUtxo` from the `mintOneTimeMintingPolicy` transaction.
+
+**Note**: You must provide the txHash for `ContentRegistry`, `ContentRefToken`, `OwnershipRegistry`,`OwnershipRefToken` transactions.
+
+<Card>
+  ### Create Content [!toc]
+
+  For users to create a content attached to the registry reference by a token
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Param UTxO**
+  `{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02e4e2c8b7...ed3df2359"}`
+
+  **Content Registry Tx Hash**
+  `dfd2a2616e6154a092807b1ceebb9ddcadc0f22cf5c8e0e6b0757815083ccb70`
+
+  **Content Ref Token Tx Hash**
+  `8f731be135171df172c07578a5d74589ec8fb30b37c12fdbe2639d69b7587f5e
+  `
+
+  **Ownership Registry Tx Hash**
+  `ec874b61eec4e5e8e395dead6c9bb18690e6d6ea64d773760c5e654ec9ff5f97`
+
+  **Ownership Ref Token Tx Hash**
+  `e1bdfc7ae6929f934cf9d418273dde143cbb65ec0eec23bdb6c342e4cd91dbd0`
+
+  ```tsx
+  const asset = demoAsset;
+  const contentHashHex = "ipfs://contentHashHex";
+  const registryNumber = 0;
+
+  const tx = await contract.createContent(
+    asset,
+    contentHashHex,
+    registryNumber,
+  );
+  const signedTx = await wallet.signTx(tx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Get Content
+
+This transaction fetches the content data from the registry.
+
+<Card>
+  ### Get Oracle Data [!toc]
+
+  Fetch the current oracle data
+
+  **Operation address**
+  `addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr`
+
+  **Param UTxO**
+  `{"outputIndex":0,"txHash":"2aba4d6705cfe6405cf02e4e2c8b7...ed3df2359"}`
+
+  **Content Registry Tx Hash**
+  `dfd2a2616e6154a092807b1ceebb9ddcadc0f22cf5c8e0e6b0757815083ccb70`
+
+  **Content Ref Token Tx Hash**
+  `8f731be135171df172c07578a5d74589ec8fb30b37c12fdbe2639d69b7587f5e
+  `
+
+  **Ownership Registry Tx Hash**
+  `ec874b61eec4e5e8e395dead6c9bb18690e6d6ea64d773760c5e654ec9ff5f97`
+
+  **Ownership Ref Token Tx Hash**
+  `e1bdfc7ae6929f934cf9d418273dde143cbb65ec0eec23bdb6c342e4cd91dbd0`
+
+  ```tsx
+  const content = await contract.getContent(0, 0);
+  ```
+</Card>

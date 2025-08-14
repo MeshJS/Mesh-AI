@@ -1,0 +1,118 @@
+---
+title: "Offline Evaluator"
+description: "An offline Plutus script evaluator for testing and validation."
+---
+import Link from "fumadocs-core/link";
+
+The OfflineEvaluator calculates execution costs (memory and CPU steps) for Plutus scripts in transactions without requiring network connectivity. It works with an <Link href="/providers/offline-fetcher">OfflineFetcher</Link> to resolve the UTXOs needed for script validation. This is also compatible with any other fetchers to provide online data fetching.
+
+Get started:
+
+```tsx
+import { OfflineEvaluator } from "@meshsdk/core-csl";
+
+import { OfflineFetcher } from "@meshsdk/core";
+
+// Create fetcher for resolving UTXOs
+const fetcher = new OfflineFetcher();
+
+// Add UTXOs required for script evaluation
+fetcher.addUTxOs([
+  {
+    input: {
+      txHash: "5de23a2...",
+      outputIndex: 0
+    },
+    output: {
+      address: "addr1...",
+      amount: [{ unit: "lovelace", quantity: "1000000" }],
+      scriptHash: "32b7e3d..." // For script UTXOs
+    }
+  }
+]);
+
+// Create evaluator for the desired network
+const evaluator = new OfflineEvaluator(fetcher, "preprod");
+```
+
+Once initialized, you can evaluate Plutus scripts in transactions:
+
+```tsx
+// Evaluate Plutus scripts in a transaction
+try {
+  const actions = await evaluator.evaluateTx(transactionCbor);
+  // Example result:
+  // [{
+  //   index: 0,
+  //   tag: "MINT",
+  //   budget: {
+  //     mem: 508703,    // Memory units used
+  //     steps: 164980381 // CPU steps used
+  //   }
+  // }]
+} catch (error) {
+  console.error('Script evaluation failed:', error);
+}
+```
+
+The evaluator is particularly useful for testing Plutus scripts, ensuring they execute within memory and CPU limits:
+
+```tsx
+// In your test file
+describe("Plutus Script Tests", () => {
+  let evaluator: OfflineEvaluator;
+  let fetcher: OfflineFetcher;
+
+  beforeEach(() => {
+    fetcher = new OfflineFetcher();
+    evaluator = new OfflineEvaluator(fetcher, "preprod");
+
+    // Add test UTXOs
+    fetcher.addUTxOs([...]);
+  });
+
+  it("should evaluate minting policy", async () => {
+    const result = await evaluator.evaluateTx(txCbor);
+    expect(result[0].tag).toBe("MINT");
+    expect(result[0].budget.mem).toBeLessThan(600000);
+  });
+});
+```
+
+The evaluation results include memory units and CPU steps required for each script execution, helping you optimize your scripts and ensure they meet protocol constraints.
+
+## Evaluate Transaction
+
+`evaluateTx()` accepts an unsigned transaction (`unsignedTx`) and it evaluates the resources required to execute the transaction. Note that, this is only valid for transaction interacting with redeemer (smart contract). By knowing the budget required, you can use this to adjust the redeemer's budget so you don't spend more than you need to execute transactions for this smart contract.
+
+```tsx
+const unsignedTx = await tx.build();
+const evaluateTx = await provider.evaluateTx(unsignedTx);
+```
+
+Example responses from unlocking assets from the always succeed smart contract.
+
+```tsx
+[
+  {
+    "index": 0,
+    "tag": "SPEND",
+    "budget": {
+      "mem": 1700,
+      "steps": 368100
+    }
+  }
+]
+```
+
+With the `mem` and `steps`, you can refine the budget for the redeemer. For example:
+
+```tsx
+const redeemer = {
+  data: { alternative: 0, fields: [...] },
+  budget: {
+    mem: 1700,
+    steps: 368100,
+  },
+};
+```

@@ -1,0 +1,571 @@
+---
+title: "Browser Wallet"
+description: "For connecting, querying and performing wallet functions in accordance to CIP-30."
+icon: BanknotesIcon
+---
+
+`BrowserWallet` provides APIs for interacting with browser-based wallets in accordance with CIP-30. This standard defines the communication protocol between applications and user wallets, ensuring compatibility and security.
+
+In addition to the CIP-30 APIs, `BrowserWallet` includes utility functions that simplify common tasks such as retrieving wallet balances, signing transactions, and managing UTXOs.
+
+This section allows you to explore and test the available APIs for browser wallets, enabling seamless integration into your applications.
+
+
+## Get Available Wallets
+
+Returns a list of wallets available on user's device. Each wallet is an object with the following properties:
+
+- A name is provided to display wallet's name on the user interface.
+- A version is provided to display wallet's version on the user interface.
+- An icon is provided to display wallet's icon on the user interface.
+
+<Card>
+  #### Get Available Wallets [!toc]
+
+  Get a list of wallets on user's device
+
+  ```tsx
+  import { BrowserWallet } from 'meshsdk/core';
+
+  await BrowserWallet.getAvailableWallets()
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  {
+    "name": "eternl",
+    "icon": "data:image/png;base64,ICONBASE64HERE",
+    "version": "0.1.0"
+  }
+]
+```
+
+
+## Connect Wallet
+
+This is the entrypoint to start communication with the user's wallet. The wallet should request the user's permission to connect the web page to the user's wallet, and if permission has been granted, the wallet will be returned and exposing the full API for the app to use.
+
+Query `BrowserWallet.getAvailableWallets()` to get a list of available wallets, then provide the wallet `name` for which wallet the user would like to connect with.
+
+You can also provide an `extensions` object to enable specific CIPs. For Example response, to enable CIP95, you would pass:
+
+```tsx
+await BrowserWallet.enable('eternl', [95]);
+```
+
+<Card>
+  #### Connect Wallet [!toc]
+
+  Connect to a CIP30 compatible wallet
+
+  ```tsx
+  import { BrowserWallet } from '@meshsdk/core';
+
+  const wallet = await BrowserWallet.enable('eternl');
+  ```
+</Card>
+
+
+## Get Balance
+
+This API retrieves a list of all assets in the connected wallet. Each asset is represented as an object containing the following properties:
+
+- Unit: A unique identifier for the asset, which can be used to display its name in the user interface.
+- Quantity: The amount of the asset held in the wallet.
+
+This information is useful for applications that need to display wallet balances or perform operations involving specific assets.
+
+
+<Card>
+  #### Get Balance [!toc]
+
+  Get all assets in the connected wallet
+
+  ```tsx
+  await wallet.getBalance();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  {
+    "unit": "lovelace",
+    "quantity": "796105407"
+  },
+  {
+    "unit": "0f5560dbc05282e05507aedb02d823d9d9f0e583cce579b81f9d1cd8",
+    "quantity": "1"
+  },
+  {
+    "unit": "9c8e9da7f81e3ca90485f32ebefc98137c8ac260a072a00c4aaf142d4d657368546f6b656e",
+    "quantity": "2"
+  },
+]
+```
+
+
+## Get Change Address
+
+This API returns an address owned by the wallet that should be used as a change address. A change address is where leftover assets from a transaction are returned during its creation. This ensures that any unspent assets are sent back to the connected wallet.
+
+Applications can use this API to manage transaction outputs effectively, ensuring proper handling of change during transactions.
+
+<Card>
+  #### Get Change Address [!toc]
+
+  Get address that should be used for transaction's change
+
+  ```tsx
+  await wallet.getChangeAddress();
+  ```
+</Card>
+
+
+## Get Collateral
+
+This API retrieves a list of UTXOs (unspent transaction outputs) controlled by the wallet that can be used as collateral inputs for transactions involving Plutus scripts. The returned UTXOs must meet or exceed the specified ADA value target.
+
+If the target cannot be met, an error message will be returned explaining the issue. Wallets may return UTXOs with a greater total ADA value than requested but must never return UTXOs with a smaller total value.
+
+This functionality is essential for applications that need to create transactions requiring collateral inputs.
+
+<Card>
+  #### Get Collateral [!toc]
+
+  Get list of UTXOs that used as collateral inputs for transactions with plutus script inputs
+
+  ```tsx
+  await wallet.getCollateral();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  {
+    "input": {
+      "outputIndex": 1,
+      "txHash": "ff8d1e97c60989b4f...02ee937595ad741ff597af1"
+    },
+    "output": {
+      "address": "addr_test1qzm...z0fr8c3grjmysm5e6yx",
+      "amount": [ { "unit": "lovelace", "quantity": "5000000" } ]
+    }
+  }
+]
+```
+
+
+## Get Network ID
+
+This API retrieves the network ID of the currently connected account. The network ID indicates the blockchain network the wallet is connected to. For example:
+
+- 0: Testnet
+- 1: Mainnet
+
+Other network IDs may be returned by wallets, but these are not governed by CIP-30. The network ID remains consistent unless the connected account changes.
+
+Applications can use this information to ensure compatibility with the connected network.
+
+<Card>
+  #### Get Network ID [!toc]
+
+  Get currently connected network
+
+  ```tsx
+  await wallet.getNetworkId();
+  ```
+</Card>
+
+
+## Get Reward Addresses
+
+Returns a list of reward addresses owned by the wallet. A reward address is a stake address that is used to receive rewards from staking, generally starts from `stake` prefix.
+
+<Card>
+  #### Get Reward Addresses [!toc]
+
+  Get stake addresses
+
+  ```tsx
+  await wallet.getRewardAddresses();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  "stake_test1uzx0ksy9f4qnj2mzfdncqyjy84sszh64w43853nug5pedjgytgke9"
+]
+```
+
+
+## Get Unused Addresses
+
+Returns a list of unused addresses controlled by the wallet.
+
+<Card>
+  #### Get Unused Addresses [!toc]
+
+  Get addresses that are unused
+
+  ```tsx
+  await wallet.getUnusedAddresses();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  "addr_test1qzk9x08mtre4jp8f7j8zu8802...r8c3grjmys7fl22c",
+  "addr_test1qrmf35xyw2petfr0e0p4at0r7...8sc3grjmysm73dk8",
+  "addr_test1qq6ts58hdaasd2q78fdjj0arm...i8c3grjmys85k8mf",
+]
+```
+
+
+## Get Used Addresses
+
+Returns a list of used addresses controlled by the wallet.
+
+<Card>
+  #### Get Used Addresses [!toc]
+
+  Get addresses that are used
+
+  ```tsx
+  await wallet.getUsedAddresses();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  "addr_test1qzk9x08mtre4jp8f7j8zu8802...r8c3grjmys7fl88a",
+  "addr_test1qrmf35xyw2petfr0e0p4at0r7...8sc3grjmysm76gt3",
+  "addr_test1qq6ts58hdaasd2q78fdjj0arm...i8c3grjmys85dn39",
+]
+```
+
+
+## Get UTXOs
+
+Return a list of all UTXOs (unspent transaction outputs) controlled by the wallet.
+
+<Card>
+  #### Get UTXOs [!toc]
+
+  Get UTXOs of the connected wallet
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  {
+    "input": {
+      "outputIndex": 0,
+      "txHash": "16dcbb1f93b4f9d5e...9106c7b121463c210ba"
+    },
+    "output": {
+      "address": "addr_test1qzag7whju08xwrq...z0fr8c3grjmysgaw9y8",
+      "amount": [
+        {
+          "unit": "lovelace",
+          "quantity": "1314550"
+        },
+        {
+          "unit": "f05c91a850...3d824d657368546f6b656e3032",
+          "quantity": "1"
+        }
+      ]
+    }
+  }
+]
+```
+
+
+## Sign Data
+
+This endpoint utilizes the CIP-8 - Message Signing to sign arbitrary data, to verify the data was signed by the owner of the private key.
+
+`signData` takes two arguments, the first one is the payload to sign and the second one is the address (optional).
+
+By default, we get the first wallet's address with `wallet.getRewardAddresses()`, alternativelly you can specify the address to use.
+
+<Card>
+  #### Sign Data [!toc]
+
+  Define a payload and sign it with wallet.
+
+  `Payload: mesh`
+
+  ```tsx
+  const signature =  await wallet.signData(mesh);
+  ```
+</Card>
+
+Example response:
+```tsx
+{
+  "signature": "845846a2012...f9119a18e8977d436385cecb08",
+  "key": "a4010103272006215...b81a7f6ed4fa29cc7b33186c"
+}
+```
+
+Continue reading this guide to learn how to verify the signature.
+
+
+## Sign Transaction
+
+Requests user to sign the provided transaction (`tx`). The wallet should ask the user for permission, and if given, try to sign the supplied body and return a signed transaction. `partialSign` should be `true` if the transaction provided requires multiple signatures.
+
+<Card>
+  #### Sign Transaction [!toc]
+
+  Create a transaction and sign it
+
+  ```tsx
+  const signedTx = await wallet.signTx(tx, partialSign?);
+  ```
+
+  Check out Transaction to learn more on how to use this API.
+</Card>
+
+
+## Submit Transaction
+
+Wallets inherently have the ability to submit transactions. This API allows applications to request the wallet to send a transaction. If the wallet accepts the transaction and successfully sends it, it will return the transaction ID, enabling the application to track its status. In case of errors during submission, the wallet will provide error messages or failure details.
+
+This functionality is useful for applications that need to interact with the blockchain by submitting signed transactions through the user's wallet.
+
+<Card>
+  #### Submit Transaction [!toc]
+
+  Submit a signed transaction with wallet
+
+  ```tsx
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+
+  Check out Transaction to learn more on how to use this API.
+</Card>
+
+
+## Get Assests
+
+Returns a list of assets in wallet excluding lovelace.
+
+<Card>
+  #### Get Assets [!toc]
+
+  Get assets in the connected wallet
+
+  ```tsx
+  const assets = await wallet.getAssets();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  {
+    "unit": "1207329a668cf5c42b80a220a8c85d5e82ac0b6f5ecedda4c07a8acc4d657368486f6e6f72546f6b656e2d3530343935",
+    "policyId": "1207329a668cf5c42b80a220a8c85d5e82ac0b6f5ecedda4c07a8acc",
+    "assetName": "Mesh Token Of Appreciation",
+    "fingerprint": "asset1dw74h0w0meqg9cxkc9sezp8zqcxu8nl93fzfpz",
+    "quantity": "1"
+  }
+  {
+    "unit": "9c8e9da7f81e3ca90485f32ebefc98137c8ac260a072a00c4aaf142d4d657368546f6b656e",
+    "policyId": "9c8e9da7f81e3ca90485f32ebefc98137c8ac260a072a00c4aaf142d",
+    "assetName": "MeshToken",
+    "fingerprint": "asset177e7535dclmkkph8ewt9fsghllkwmpspa3n98p",
+    "quantity": "10"
+  }
+]
+```
+
+
+## Get Lovelace
+
+This API retrieves the Lovelace balance in the connected wallet. Lovelace is the smallest denomination of ADA, where 1 ADA equals 1,000,000 Lovelace.
+
+Applications can use this information to display the wallet's balance or perform operations involving ADA.
+
+<Card>
+  #### Get Lovelace [!toc]
+
+  Get amount of ADA in connected wallet
+
+  ```tsx
+  await wallet.getLovelace();
+  ```
+</Card>
+
+
+## Get Policy IDs
+
+This API retrieves a list of policy IDs for all assets in the connected wallet. A policy ID is a unique identifier for a group of assets, often used to manage collections or verify asset ownership.
+
+Applications can use this information to query assets belonging to specific policy IDs or display asset details to the user.
+
+<Card>
+  #### Get Policy IDs [!toc]
+
+  Get a list of policy IDs from all assets in wallet
+
+  ```tsx
+  await wallet.getPolicyIds();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  "0f5560dbc05282e05507aedb02d823d9d9f0e583cce579b81f9d1cd8",
+  "5bed9e89299c69d9a54bbc82d88aa5a86698b2b7b9d0ed030fc4b0ff",
+  "9c8e9da7f81e3ca90485f32ebefc98137c8ac260a072a00c4aaf142d",
+]
+```
+
+
+## Get a Collection of Assets
+
+This API retrieves a list of assets associated with a specific policy ID. If no assets in the wallet belong to the specified policy ID, an empty list is returned.
+
+Applications can use this API to query assets belonging to a particular policy ID, which is useful for managing collections of assets or verifying ownership.
+
+To obtain a list of all policy IDs in the wallet, use `wallet.getPolicyIds()`.
+
+<Card>
+  #### Get a Collection of Assets [!toc]
+
+  Get a list of assets belonging to the policy ID
+
+  `Policy ID: d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc17255527`
+
+  ```tsx
+  await wallet.getPolicyIdAssets('d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc17255527');
+  ```
+</Card>
+
+
+## Get Supported Extensions
+
+`getSupportedExtensions` is a static function that returns a list of CIPs that are supported by a wallet. You can query this function without connecting to a wallet, by providing the wallet name.
+
+You can get the list of wallet on user's device with `await BrowserWallet.getAvailableWallets()`.
+
+<Card>
+  #### Get Supported Extensions [!toc]
+
+  Get a list of CIPs that are supported by a wallet
+
+  `Wallet Name: eternl`
+
+  ```tsx
+  await wallet.getSupportedExtensions('eternl');
+  ```
+</Card>
+
+
+## Get Extensions
+
+This API retrieves a list of CIP-30 extensions enabled by the connected wallet. CIP-30 extensions define additional capabilities that wallets can support, enhancing their functionality.
+
+Applications can use this information to determine the features supported by the wallet and adapt their behavior accordingly.
+
+
+<Card>
+  #### Get Extensions [!toc]
+
+  Get a list of CIPs that are supported by the connected wallet
+
+  ```tsx
+  await wallet.getExtensions();
+  ```
+</Card>
+
+Example response:
+```tsx
+[
+  {
+    "cip": 30
+  }
+]
+```
+
+
+## Get DRep
+
+This API retrieves the key, hash, and bech32 encoding of the DRep ID associated with the wallet. The DRep ID is a unique identifier used for delegation representation in the Cardano blockchain.
+
+Applications can use this information to interact with delegation-related features or display the DRep ID details to the user.
+
+<Card>
+  #### Get DRep ID Key [!toc]
+
+  Get the key, hash, and bech32 address of the DRep ID
+
+  ```tsx
+  await wallet.getDRep();
+  ```
+</Card>
+
+Example response:
+```tsx
+{
+  "publicKey": "6984e406dd81...39e43d798fe1a89ab",
+  "publicKeyHash": "9f7f4b78...df83bd227e943e9808450",
+  "dRepIDCip105": "drep1vz0h7jmc...0axqgg5q4dls5u"
+}
+```
+
+
+## Get Registered Pub Stake Keys
+
+Get a list of registered public stake keys.
+
+<Card>
+  #### Get Registered Pub Stake Keys [!toc]
+
+  Get a list of registered public stake keys
+
+  ```tsx
+  await wallet.getRegisteredPubStakeKeys();
+  ```
+</Card>
+
+Example response:
+```tsx
+{
+  "pubStakeKeys": [
+    "d7eb3004c14647646...40f89c1a4b8a2eb0a3"
+  ],
+  "pubStakeKeyHashes": [
+    "8cfb40854d41392b..5575627a467c450396c9"
+  ]
+}
+```
+
+
+## Get Unregistered Pub Stake Keys
+
+Get a list of unregistered public stake keys.
+
+<Card>
+  #### Get Unregistered Pub Stake Keys [!toc]
+
+  Get a list of unregistered public stake keys
+
+  ```tsx
+  await wallet.getUnregisteredPubStakeKeys();
+  ```
+</Card>

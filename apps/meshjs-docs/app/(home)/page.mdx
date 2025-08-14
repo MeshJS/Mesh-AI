@@ -1,0 +1,163 @@
+import { Card, Cards } from "fumadocs-ui/components/card";
+import Link from "fumadocs-core/link";
+import { CloudIcon, BanknotesIcon, WalletIcon, MagnifyingGlassIcon, WrenchScrewdriverIcon, ComputerDesktopIcon, DocumentCheckIcon } from "@heroicons/react/24/solid";
+import { iconResolver } from "@/lib/iconResolver"
+
+<main className="flex flex-1 flex-col container mx-auto px-2 lg:px-4">
+  <h1 className="mb-4 mt-16 text-5xl font-bold">Web3 TypeScript SDK</h1>
+  <h3 className="text-fd-muted-foreground">
+    Mesh is a TypeScript open-source framework and library, providing <br /> numerous tools to build on UTXO-based blockchains.
+  </h3>
+
+  <Cards className="mt-16 mb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <Card
+      title="Wallets"
+      href="/apis/wallets"
+      icon={<WalletIcon />}
+    >
+      Wallets APIs for interacting with the blockchain
+    </Card>
+
+    <Card
+      title="Transaction Builder"
+      href="/apis/txbuilder"
+      icon={<BanknotesIcon />}
+    >
+      Build transactions with cardano-cli like APIs
+    </Card>
+
+    <Card
+      title="Transaction Parser"
+      href="/apis/txparser"
+      icon={<MagnifyingGlassIcon />}
+    >
+      Parse transactions for testing and rebuilding
+    </Card>
+
+    <Card
+      title="Providers"
+      href="/providers"
+      icon={<CloudIcon />}
+    >
+      Data providers for connecting to the blockchain
+    </Card>
+
+    <Card
+      title="Utilities"
+      href="/apis/utilities"
+      icon={<WrenchScrewdriverIcon />}
+    >
+      Serializers, resolvers and data types for converting between different formats
+    </Card>
+
+    <Card
+      title="React Components"
+      href="/react"
+      icon={<ComputerDesktopIcon />}
+    >
+      Frontend React UI components and React hooks
+    </Card>
+
+    <Card
+      title="Svelte Components"
+      href="/svelte"
+      icon={<ComputerDesktopIcon />}
+    >
+      Svelte UI components for wallet connections
+    </Card>
+
+    <Card
+      title="Smart Contract Library"
+      href="/smart-contracts"
+      icon={<DocumentCheckIcon />}
+    >
+      Open-source smart contracts, complete with documentation, and live demos
+    </Card>
+
+    <Card
+      title="Aiken"
+      href="/aiken"
+      icon={iconResolver("icons/aiken.png")}
+    >
+      Function programming language created for Cardano smart contract development
+    </Card>
+
+    <Card
+      title="Hydra"
+      href="/hydra"
+      icon={iconResolver("icons/hydra.svg")}
+    >
+      Layer 2 scaling solution for Cardano
+    </Card>
+
+    <Card
+      title="Yaci"
+      href="/yaci"
+      icon={iconResolver("icons/yaci.png")}
+    >
+      Custom devnet to tailor your devnet needs with a builtin indexer
+    </Card>
+
+    <Card
+      title="Midnight"
+      href="https://midnight.meshjs.dev/en"
+      icon={iconResolver("icons/midnight.svg", "invert dark:invert-0")}
+    >
+      Leveraging zero-knowledge technology to enable data protection
+    </Card>
+
+    <Card
+      title="Polkadot"
+      href="https://polkadot.meshjs.dev/en"
+      icon={iconResolver("icons/polkadot.svg", "invert dark:invert-0")}
+    >
+      Tools and resources for developers to build on Polkadot
+    </Card>
+
+    <Card
+      title="Wallet as a Service"
+      href="https://web3.meshjs.dev/"
+      icon={iconResolver("icons/mesh.svg", "invert dark:invert-0")}
+    >
+      Access self-custodial wallet using social logins
+    </Card>
+  </Cards>
+
+  <h1 className="mb-2 text-3xl font-bold">Getting Started</h1>
+  <hr className="mb-6 border-fd-muted-foreground border-t-2 w-24" />
+
+  <div className="flex flex-col gap-8">
+    <div className="space-y-2">
+      <h2 className="text-xl font-medium">Get started with one command</h2>
+      <h3 className="text-fd-muted-foreground">Instantly set up a new project with a single command using Mesh CLI and start building.</h3>
+
+      <div className="relative text-sm p-3 rounded-md w-96 bg-gray-200 dark:bg-[#272727] text-black dark:text-white">
+        <code>npx meshjs your-app-name</code>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+       <h2 className="text-xl font-medium">Explore documentation with live demos</h2>
+      <h3 className="text-fd-muted-foreground">
+        In Mesh Playground, most endpoints have live demo for you to try to see how it works, then copy the code snippet and use it.
+      </h3>
+      <Link className="underline underline-offset-6" href="/apis">Explore Mesh APIs ></Link>
+    </div>
+
+    <div className="space-y-2">
+      <h2 className="text-xl font-medium">Pre-built smart contracts</h2>
+      <h3 className="text-fd-muted-foreground">
+        Most popular smart contracts are available for you to use in your app. End-to-end implementation useful for learning too.
+      </h3>
+      <Link className="underline underline-offset-6" href="/smart-contracts">Start using smart contracts ></Link>
+    </div>
+
+    <div className="space-y-2">
+      <h2 className="text-xl font-medium">Resources to learn more and go deeper</h2>
+      <h3 className="text-fd-muted-foreground">
+        Whether you're a new or seasoned full-stack developer, these guides and resources are here to help you.
+      </h3>
+      <Link className="underline underline-offset-6" href="/apis/resources">Check out resources ></Link>
+    </div>
+  </div>
+</main>

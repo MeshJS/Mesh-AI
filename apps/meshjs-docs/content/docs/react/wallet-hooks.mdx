@@ -1,0 +1,215 @@
+---
+title: "Wallet Hooks"
+description: "React hooks for interacting with connected wallets."
+icon: BoltIcon
+---
+import Link from "fumadocs-core/link";
+
+React Hooks allow function components to have access to state and other React features. With Mesh Hooks, you can easily interact and access wallet data.
+
+## useWallet Hook
+
+Provide information on the current wallet's state, and functions for connecting and disconnecting user wallet.
+
+```tsx
+const { wallet, state, connected, name, connecting, connect, disconnect, error } = useWallet();
+```
+
+`wallet` is a <Link href="/apis/wallets/browserwallet">Browser Wallet</Link> instance, which expose all CIP wallets functions from getting assets to signing tranasction.
+
+`state`, a enum string, the state of the wallet, can be `NOT_CONNECTED`, `CONNECTING` or `CONNECTED`.
+
+`connected`, a boolean, `true` if user's wallet is connected.
+
+`name`, a string, the name of the connect wallet.
+
+`connecting`, a boolean, `true` if the wallet is connecting and initializing.
+
+`connect(walletName: string)`, a function, provide the wallet name to connect wallet. Retrive a list of available wallets with `useWalletList()`.
+
+`disconnect()`, a function, to disconnect the connected wallet.
+
+`error`, returns the error object if any error occurs during wallet connection, such as "account not set".
+
+<Card>
+  ### useWallet Hook [!toc]
+
+  Interact with user's wallet
+
+  ```tsx
+  import { useWallet } from '@meshsdk/react';
+
+  export default function Page() {
+    const { wallet, state, connected, name, connecting, connect, disconnect, error } = useWallet();
+
+    return (
+      <div>
+        <p>
+          <b>State: </b> {state}
+        </p>
+        <p>
+          <b>Connected?: </b> {connected ? 'Is connected' : 'Not connected'}
+        </p>
+        <p>
+          <b>Connecting wallet?: </b> {connecting ? 'Connecting...' : 'No'}
+        </p>
+        <p>
+          <b>Name of connected wallet: </b>
+          {name}
+        </p>
+        <button onClick={() => disconnect()}>Disconnect Wallet</button>
+      </div>
+    );
+  }
+  ```
+</Card>
+
+
+## useWalletList Hook
+
+Returns a list of wallets installed on user's device.
+
+```tsx
+const wallets = useWalletList();
+```
+
+You can define a function to be injected into the wallet provider by passing it as the `injectFn` prop.
+
+```tsx
+const wallets = useWalletList({injectFn={async () => await checkIfMetamaskInstalled("preprod")})}
+```
+
+<Card>
+  ### useWalletList Hook [!toc]
+
+  List of wallets installed on user's device
+
+  ```tsx
+  const wallets = useWalletList();
+  ```
+
+  ```tsx
+  []
+  ```
+
+  ```tsx
+  import { useWalletList } from '@meshsdk/react';
+
+  export default function Page() {
+    const wallets = useWalletList();
+
+    return (
+      <>
+        {wallets.map((wallet, i) => {
+          return (
+            <p key={i}>
+              <img src={wallet.icon} style={{ width: '48px' }} />
+              <b>{wallet.name}</b>
+            </p>
+          );
+        })}
+      </>
+    );
+  }
+  ```
+</Card>
+
+
+## useAddress Hook
+
+Return address of connected wallet.
+
+`accountId` is an optional parameter, that allows you to choose which address to return.
+
+```tsx
+const address = useAddress(accountId = 0);
+```
+
+<Card>
+  ### useAddress Hook [!toc]
+
+  List of wallets installed on user's device
+
+  ```tsx
+  import { useAddress } from '@meshsdk/react';
+
+  const address = useAddress();
+
+  <p>
+    Your wallet address is: <code>{address}</code>
+  </p>
+  ```
+</Card>
+
+
+## useAssets Hook
+
+Return a list of assets in connected wallet from all UTXOs.
+
+```tsx
+const assets = useAssets();
+```
+
+<Card>
+  ### useAssets Hook [!toc]
+
+  List assets of connected wallet
+
+  ```tsx
+  import { useAssets } from '@meshsdk/react';
+
+  const assets = useAssets();
+
+  {JSON.stringify(assets, null, 2)}
+  ```
+</Card>
+
+
+## useLovelace Hook
+
+Return amount of lovelace in wallet.
+
+```tsx
+const lovelace = useLovelace();
+```
+
+<Card>
+  ### useLovelace Hook [!toc]
+
+  Fetch the lovelace balance of the connected wallet
+
+  ```tsx
+  import { useLovelace } from '@meshsdk/react';
+
+  const lovelace = useLovelace();
+
+  <p>
+    Your lovelace balance is: <code>{lovelace}</code>
+  </p>
+  ```
+</Card>
+
+
+## useNetwork Hook
+
+Return the network of connected wallet.
+
+```tsx
+const network = useNetwork();
+```
+
+<Card>
+  ### useNetwork Hook [!toc]
+
+  Fetch the network of the connected wallet
+
+  ```tsx
+  import { useNetwork } from '@meshsdk/react';
+
+  const network = useNetwork();
+
+  <p>
+    Connected network: <code>{network}</code>.
+  </p>
+  ```
+</Card>

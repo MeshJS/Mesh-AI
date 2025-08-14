@@ -1,0 +1,305 @@
+---
+title: "Staking Transactions"
+description: "Transactions for delegating ADA and managing stakepools"
+icon: ArrowsPointingInIcon
+---
+
+In the code snippet, you will find `txBuilder`, which is an instance of `MeshTxBuilder`, a powerful low-level APIs that allows you to build transactions. Learn how to initialize MeshTxBuilder.
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider, // get a provider https://meshjs.dev/providers
+  verbose: true,
+});
+```
+
+## Register Stake Address
+
+Same as Transaction, with `MeshTxBuilder` you have to register a stake address before delegate to stakepools. Here's the 2 APIs you need:
+
+```tsx
+txBuilder
+  .registerStakeCertificate(rewardAddress)
+  .delegateStakeCertificate(rewardAddress, poolIdHash)
+```
+
+Since we need to provide the deserilized hash of pool id, we can use the following util to get it:
+
+```tsx
+const poolIdHash = deserializePoolId(
+  "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
+);
+```
+
+<Card>
+  ### Register Stake Address [!toc]
+
+  Register a stake address before delegate to stakepools.
+
+  **Pool ID**
+  `pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const address = await wallet.getChangeAddress();
+  const addresses = await wallet.getRewardAddresses();
+  const rewardAddress = addresses[0]!;
+  const poolIdHash = deserializePoolId("pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx");
+
+  if (rewardAddress === undefined) {
+    throw "No address found";
+  }
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .registerStakeCertificate(rewardAddress)
+    .delegateStakeCertificate(rewardAddress, poolIdHash)
+    .selectUtxosFrom(utxos)
+    .changeAddress(address)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Delegate Stake
+
+Delegation with `MeshTxBuilder` is exactly the same as first delegate, but without registering stake key, so only one API is needed:
+
+```tsx
+txBuilder
+  .delegateStakeCertificate(rewardAddress, poolIdHash)
+```
+
+<Card>
+  ### Delegate Stake [!toc]
+
+  Delegate stake to a stake pool
+
+  **Pool ID**
+  `pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const address = await wallet.getChangeAddress();
+  const addresses = await wallet.getRewardAddresses();
+  const rewardAddress = addresses[0]!;
+  const poolIdHash = deserializePoolId("pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx");
+
+  if (rewardAddress === undefined) {
+    throw "No address found";
+  }
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .delegateStakeCertificate(rewardAddress, poolIdHash)
+    .selectUtxosFrom(utxos)
+    .changeAddress(address)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Withdraw Rewards
+
+Withdrawal with `MeshTxBuilder` comes with only one API, to specify the reward address and the amount to withdraw.
+
+- rewardAddress (string) - the reward address to withdraw from
+- lovelace (number) - the amount to withdraw in Lovelace
+
+```tsx
+txBuilder
+  .withdrawal(rewardAddress, lovelace)
+```
+
+<Card>
+  ### Withdraw Rewards [!toc]
+
+  Withdraw staking rewards.
+
+  **Amount in lovelace:** `1000000`
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const address = await wallet.getChangeAddress();
+  const addresses = await wallet.getRewardAddresses();
+  const rewardAddress = addresses[0]!;
+
+  if (rewardAddress === undefined) {
+    throw "No address found";
+  }
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .withdrawal(rewardAddress, "1000000")
+    .selectUtxosFrom(utxos)
+    .changeAddress(address)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Deregister Stake
+
+Deregister a stake address. The function accepts the following parameters:
+
+- rewardAddress (string) - the bech32 reward address to deregister
+
+```tsx
+txBuilder
+  .deregisterStakeCertificate(rewardAddress: string)
+```
+
+<Card>
+  ### Deregister Stake [!toc]
+
+  Deregister a stake address.
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const address = await wallet.getChangeAddress();
+  const addresses = await wallet.getRewardAddresses();
+  const rewardAddress = addresses[0]!;
+
+  if (rewardAddress === undefined) {
+    throw "No address found";
+  }
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .deregisterStakeCertificate(rewardAddress)
+    .selectUtxosFrom(utxos)
+    .changeAddress(address)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+
+## Script Withdrawal - Supporting Withdraw Zero
+
+Withdrawal from script is supported by `MeshTxBuilder` with this set of APIs:
+
+```tsx
+txBuilder
+   .withdrawalPlutusScriptV2()
+   .withdrawal(rewardAddress, withdrawalAmount)
+   .withdrawalScript(stakeScriptCbor)
+   .withdrawalRedeemerValue(redeemer)
+```
+
+**Withdraw Zero**
+
+With that capability, it supports a Cardano technique - withdraw zero - which is a technique to trigger withdrawal script validation without actually withdrawing any value. This is a technique to help boost script ExUnits performance especially comes to validating multiple script inputs. In order to perform withdraw zero, 2 steps are involved:
+
+- Register script stake key
+
+```tsx
+txBuilder
+  .registerStakeCertificate(stakeScriptHash)
+```
+
+- Withdraw Zero
+
+```tsx
+txBuilder
+  .withdrawalPlutusScriptV2()
+  .withdrawal(rewardAddress, "0")
+  .withdrawalScript(stakeScriptCbor)
+  .withdrawalRedeemerValue(redeemer)
+```
+
+<Card>
+  ### Register Script Stake Key [!toc]
+
+  One off setup before triggering withdraw zero
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const address = await wallet.getChangeAddress();
+  const txBuilder = getTxBuilder();
+  const stakeScriptCbor = alwaysSucceedMintingStakingScriptCbor(
+    deserializeAddress(address).pubKeyHash,
+  );
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .registerStakeCertificate(resolveScriptHash(stakeScriptCbor, "V2"))
+    .selectUtxosFrom(utxos)
+    .changeAddress(address)
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
+
+<br />
+
+<Card>
+  ### Withdraw Zero [!toc]
+
+  Actual withdrawal of zero to trigger script validation
+
+  ```tsx
+  const utxos = await wallet.getUtxos();
+  const collateral = await wallet.getCollateral();
+  const address = await wallet.getChangeAddress();
+  const stakeScriptCbor = alwaysSucceedMintingStakingScriptCbor(
+    deserializeAddress(address).pubKeyHash,
+  );
+  const rewardAddress = serializeRewardAddress(
+    resolveScriptHash(stakeScriptCbor, "V2"),
+    true,
+    0,
+  );
+
+  const txBuilder = new MeshTxBuilder({
+    fetcher: provider, // get a provider https://meshjs.dev/providers
+    verbose: true,
+  });
+
+  const unsignedTx = await txBuilder
+    .withdrawalPlutusScriptV2()
+    .withdrawal(rewardAddress, "0")
+    .withdrawalScript(stakeScriptCbor)
+    .withdrawalRedeemerValue("")
+    .selectUtxosFrom(utxos)
+    .changeAddress(address)
+    .txInCollateral(...utxoToTxIn(collateral[0]!))
+    .complete();
+
+  const signedTx = await wallet.signTx(unsignedTx, true);
+  const txHash = await wallet.submitTx(signedTx);
+  ```
+</Card>
