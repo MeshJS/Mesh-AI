@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Request, HTTPException, status, Depends
+import os
+from dotenv import load_dotenv
+load_dotenv()
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import pathlib
 import asyncio
 import openai
 from supabase import AsyncClient
-from typing import Dict
 from tenacity import RetryError
 
 from app.utils.get_file_paths import get_file_paths
@@ -16,6 +19,7 @@ from app.utils.extract_title import extract_chunk_title
 
 router = APIRouter()
 openai_service = OpenAIService()
+security = HTTPBearer()
 
 ###########################################################################################################
 # HELPER FUNCTIONS
@@ -181,9 +185,17 @@ async def process_file_and_update_db(file_content: str, relative_path: str, supa
 ###########################################################################################################
 
 @router.post("/")
-async def ingest_docs(supabase: AsyncClient = Depends(get_db_client)):
+async def ingest_docs(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
+
+  token = credentials.credentials
+  if not token or token != os.getenv("ADMIN_KEY"):
+    raise HTTPException(
+      status_code=status.HTTP_401_UNAUTHORIZED,
+      detail="You are not authorized"
+    )
+
   docs_dir = pathlib.Path(__file__).resolve().parents[3] / "docs"
-  print(docs_dir)
+
   try:
     file_paths = get_file_paths(docs_dir)
   except FileNotFoundError as e:
