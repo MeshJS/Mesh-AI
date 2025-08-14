@@ -1,13 +1,14 @@
-import { ProvideLinksToolSchema } from '../../../lib/chat/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { convertToModelMessages, streamText } from 'ai';
 
 //export const runtime = 'edge';
+const apiKey = process.env.API_KEY;
+const baseURL = process.env.BACKEND_BASE_URL;
 
 const mesh_api = createOpenAICompatible({
   name: 'MeshAI',
-  apiKey: "",
-  baseURL: 'https://meshjs-rag.onrender.com/api/v1/ask-mesh-ai',
+  apiKey: apiKey,
+  baseURL: baseURL || "",
 });
 
 export async function POST(req: Request) {
