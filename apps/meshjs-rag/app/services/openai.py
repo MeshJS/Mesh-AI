@@ -75,7 +75,7 @@ class OpenAIService:
     return response.data[0].embedding
 
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6), reraise=True)
-  async def get_answer_streaming(self, question: str, context: str, model="gpt-4o-mini"):
+  async def get_answer(self, question: str, context: str, model="gpt-4o-mini"):
     messages = [
       {
         "role": "system",
@@ -94,9 +94,8 @@ class OpenAIService:
 
     yield "data: [DONE]\n\n"
 
-
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6), reraise=True)
-  async def get_answer(self, question: str, context: str, model="gpt-4o-mini"):
+  async def get_mcp_answer(self, question: str, context: str, model="gpt-4o-mini"):
     messages = [
       {
         "role": "system",
@@ -108,5 +107,5 @@ class OpenAIService:
       }
     ]
 
-    response = await self._chat(messages=messages, stream=False, model=model)
+    response = await self._chat(messages=messages, model=model)
     return response.choices[0].message.content

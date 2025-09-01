@@ -57,7 +57,7 @@ async def ask_mesh_ai(body: ChatCompletionRequest, credentials: HTTPAuthorizatio
 
     embedded_query = await openai_service.embed_query(question)
     context = await get_context(embedded_query, supabase)
-    generator = openai_service.get_answer_streaming(question=question, context=context)
+    generator = openai_service.get_answer(question=question, context=context)
     return StreamingResponse(generator, media_type="text/event-stream")
 
   except (openai.APIError, openai.AuthenticationError, openai.RateLimitError) as e:
@@ -71,7 +71,8 @@ async def ask_mesh_ai(body: ChatCompletionRequest, credentials: HTTPAuthorizatio
       detail=f"An unexpected error occurred: {e}"
     )
 
-##############################################################################################################
+
+###########################################################################################################
 @router.post("/mcp")
 async def ask_mesh_ai(body: MCPRequestBody, authorization: str = Header(None), supabase: AsyncClient = Depends(get_db_client)):
 
@@ -83,15 +84,15 @@ async def ask_mesh_ai(body: MCPRequestBody, authorization: str = Header(None), s
     )
 
   try:
-    openai_api_key = authorization.split(" ")[-1]
-    openai_service = OpenAIService(openai_api_key)
+    OPENAI_KEY = authorization.split(" ")[-1]
+    openai_service = OpenAIService(OPENAI_KEY)
 
     question = body.query
     model = body.model
 
     embedded_query = await openai_service.embed_query(question)
     context = await get_context(embedded_query, supabase)
-    response = await openai_service.get_answer(question=question, context=context, model=model)
+    response = await openai_service.get_mcp_answer(question=question, context=context, model=model)
     return response
 
   except (openai.APIError, openai.AuthenticationError, openai.RateLimitError) as e:

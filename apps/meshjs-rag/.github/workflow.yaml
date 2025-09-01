@@ -1,0 +1,33 @@
+name: Publish to Hetzner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: build image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/meshai-backend:latest .
+
+      - name: push image to the docker hub
+        run: |
+          echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/meshai-backend:latest
+
+      - name: Deploy to Hetzner via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/meshai-backend:latest
+            docker stop meshai-backend || true
+            docker rm meshai-backend || true
+            docker run -d --name meshai-backend --env-file ./.env --restart always -p 127.0.0.1:8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/meshai-backend:latest

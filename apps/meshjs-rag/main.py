@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.api.v1.api import api_router
 import uvicorn
 
-app = FastAPI()
+app = FastAPI(title="MeshAI Backend")
 app.include_router(api_router, prefix="/api/v1", tags=["api"])
 
 @app.get("/")
