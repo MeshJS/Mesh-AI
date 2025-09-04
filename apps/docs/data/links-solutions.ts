@@ -5,10 +5,9 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
 import { metaSmartContract } from "./links-smart-contracts";
 
-export const linksSolutions: MenuItem[] = [
+export const linksSolutions = [
   {
     link: `https://utxos.dev/`,
     title: "Web3 Services",
@@ -30,7 +29,7 @@ export const linksSolutions: MenuItem[] = [
   },
 ];
 
-export const metaSolutions: MenuItem = {
+export const metaSolutions = {
   title: "Solutions",
   desc: "Mesh provides a set of solutions to help you build blockchain applications",
   link: "/solutions",

@@ -5,11 +5,15 @@ import {
   StarIcon,
 } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
 import { metaGuides } from "./links-guides";
 
-export const linksResources: MenuItem[] = [
+export const linksResources = [
   metaGuides,
+  {
+    title: "AI Features",
+    desc: "We've built AI tools to help you work with Mesh faster",
+    link: "/ai",
+  },
   {
     title: "Documentation",
     desc: "Full documentation for MeshJS",
@@ -30,7 +34,7 @@ export const linksResources: MenuItem[] = [
   },
 ];
 
-export const metaResources: MenuItem = {
+export const metaResources = {
   title: "Resources",
   desc: "Whether you are new to web development or a seasoned blockchain full-stack developer, Mesh is the SDK for you.",
   link: "/resources",

@@ -2,7 +2,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useAISidebar } from "@/context/AISidebarContext";
 import { MobileAISearch } from "../ai/search";
-import { AISearch as SearchAI } from "../ai/search";
+import Sidebar from "../ui/Sidebar";
 
 
 export function WrapperLayout({ isHomeLayout, children }: { isHomeLayout: boolean, children: ReactNode }) {
@@ -21,13 +21,11 @@ export function WrapperLayout({ isHomeLayout, children }: { isHomeLayout: boolea
   const usedHeight = isHomeLayout ? "56px" : "0px"
 
   return (
-    <div className="flex" style={{ minHeight: `calc(100vh - ${usedHeight})` }}>
+    <div className="flex w-full" style={{ minHeight: `calc(100vh - ${usedHeight})` }}>
       <div
-        className={`flex flex-col flex-1 ${
-          isAISidebarOpen ? 'max-w-3/4' : 'max-w-full'
-        }`}
+        className="flex-1 min-w-0"
       >
-        <div className="flex flex-col h-full w-full max-w-[1280px] px-4 mx-auto mb-16">
+        <div className="flex flex-col h-full max-w-[1280px] px-4 mx-auto mb-16">
           {children}
         </div>
       </div>
@@ -41,11 +39,11 @@ export function WrapperLayout({ isHomeLayout, children }: { isHomeLayout: boolea
         )}
 
         { !isMobile && (
-          <div className="hidden md:flex flex-col w-1/4 sticky" style={{
+          <div className="hidden md:flex flex-col sticky shrink-0" style={{
               top: usedHeight,
               height: `calc(100vh - ${usedHeight})`,
             }}>
-            <SearchAI open={isAISidebarOpen} onOpenChange={setIsAISidebarOpen} />
+            <Sidebar usedHeight={usedHeight} isAISidebarOpen={isAISidebarOpen} setIsAISidebarOpen={setIsAISidebarOpen} />
           </div>
         )}
         </>

@@ -1,5 +1,3 @@
-import { MenuItem } from "~/types/menu-item";
-
 export const metaYaciHosted = {
   title: "Hosted Yaci Devnet",
   desc: "Connect to the hosted Yaci Devnet",
@@ -20,17 +18,17 @@ export const metaYaciProvider = {
   desc: "For fetching data and submitting transactions on Yaci",
   link: "/providers/yaci",
 };
-export const linksYaci: MenuItem[] = [
+export const linksYaci = [
   metaYaciGettingStarted,
   metaYaciHosted,
   metaYaciTransactions,
   metaYaciProvider,
 ];
 
-export const metaYaci: MenuItem = {
+export const metaYaci = {
   title: "Yaci",
   desc: "Custom devnet to tailor your devnet needs with a builtin indexer",
   link: "/yaci",
   items: linksYaci,
-  icon: "/providers/yaci.png",
+  icon: "providers/yaci.png",
 };

@@ -3,6 +3,11 @@ import * as simpleIcons from '@icons-pack/react-simple-icons';
 import { createElement } from 'react';
 import type { ReactElement } from 'react';
 
+const invertIcons = [
+  "icons/mesh.svg",
+  "icons/midnight.svg",
+  "icons/polkadot.svg"
+]
 
 export function iconResolver(iconName?: string | null, className: string = ""): ReactElement | undefined {
   if (!iconName) {
@@ -19,12 +24,17 @@ export function iconResolver(iconName?: string | null, className: string = ""): 
     return createElement(simpleIcon, { className: 'w-6 h-6' });
   }
 
+  const invertClass = invertIcons.includes(iconName) ? "invert dark:invert-0" : "";
+
   return createElement('img', {
     src: `/${iconName}`,
     key: `${iconName}`,
     alt: `${iconName} icon`,
-    width: 20,
-    height: 20,
-    className: className
+    className: `${className} ${invertClass}`,
+    style: {
+      width: className?.match(/w-(\d+)/) ? undefined : "16px",
+      height: className?.match(/h-(\d+)/) ? undefined : "16px",
+      objectFit: "contain",
+    },
   });
 }

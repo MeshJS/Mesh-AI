@@ -22,5 +22,5 @@ export const metaHydra = {
   desc: "Layer 2 scaling solution for Cardano",
   link: "/hydra",
   items: linksHydra,
-  // icon: SvgHydra,
+  icon: "icons/hydra.svg",
 };

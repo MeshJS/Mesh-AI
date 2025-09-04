@@ -15,12 +15,26 @@ export const metaPolkadot = {
   title: "Polkadot",
   desc: "Tools and resources for developers to build on Polkadot",
   link: "https://polkadot.meshjs.dev/",
+  icon: "icons/polkadot.svg",
+  items: [
+    {
+      title: "Polkadot",
+      link: "https://polkadot.meshjs.dev/",
+    }
+  ]
 };
 
 export const metaWeb3Wallet = {
   title: "Wallet as a Service",
   desc: "Access self-custodial wallet using social logins",
   link: "https://utxos.dev/",
+  icon: "icons/mesh.svg",
+  items: [
+    {
+      title: "Wallet as a Service",
+      link: "https://utxos.dev/",
+    }
+  ]
 };
 
 export const linksApi = [

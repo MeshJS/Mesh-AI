@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         },
       }}
     sidebar={{
-        collapsible: false,
+        collapsible: true,
       }}
     >
         <WrapperLayout isHomeLayout={false}>

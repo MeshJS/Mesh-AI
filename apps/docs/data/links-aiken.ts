@@ -1,5 +1,3 @@
-import { MenuItem } from "~/types/menu-item";
-
 export const metaAikenGettingStarted = {
   title: "Getting Started",
   desc: "Setting up your system to compile Aiken smart contracts",
@@ -26,7 +24,7 @@ export const metaAikenCourse = {
   link: "https://www.youtube.com/playlist?list=PLCuyQuWCJVQ1Zz9ySRMH_J6EymxhnZ0Hu",
 };
 
-export const linksAiken: MenuItem[] = [
+export const linksAiken = [
   metaAikenGettingStarted,
   metaAikenFirstScript,
   metaAikenTransactions,
@@ -34,10 +32,10 @@ export const linksAiken: MenuItem[] = [
   // metaAikenCourse,
 ];
 
-export const metaAiken: MenuItem = {
+export const metaAiken = {
   title: "Aiken",
   desc: "Functional programming language created for Cardano smart contract development",
   link: "/aiken",
   items: linksAiken,
-  icon: "/images/aiken/aiken-icon.png",
+  icon: "icons/aiken.png",
 };

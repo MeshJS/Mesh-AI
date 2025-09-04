@@ -5,7 +5,6 @@ import {
   ScaleIcon,
 } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
 import { metaCatalyst } from "./catalyst";
 
 export const metaAboutUs = {
@@ -39,7 +38,7 @@ export const metaBranding = {
   icon: PaintBrushIcon,
 };
 
-export const linksAbout: MenuItem[] = [
+export const linksAbout = [
   metaAboutUs,
   metaGovernance,
   metaCatalyst,

@@ -20,11 +20,8 @@ import { iconResolver } from "@/lib/iconResolver";
 import { Cards } from "fumadocs-ui/components/card";
 import {
   Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
+  CardDescription,
   CardTitle,
 } from "@/components/ui/card";
 import {
@@ -39,6 +36,8 @@ import {
   DocumentCheckIcon,
   CloudIcon,
 } from "@heroicons/react/24/solid";
+import * as heroIcons from '@heroicons/react/24/solid';
+import {linksApi} from "@/data/links-api";
 
 <main className="min-h-screen">
   <section className="py-16 sm:py-20 lg:py-32 xl:py-36">
@@ -96,97 +95,29 @@ import {
   <section className="py-16 sm:py-20 lg:py-32 xl:py-36 relative">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-16">
-        <h2 className="font-heading font-bold text-3xl lg:text-4xl mb-4">Has everything you need</h2>
+        <h2 className="font-heading font-bold text-3xl lg:text-4xl mb-4">Mesh has everything you need</h2>
         <div className="text-xl max-w-2xl mx-auto">
           Comprehensive suite of tools and libraries to help you build amazing applications
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-        {[
-          {
-            title: "Wallets",
-            href: "/apis/wallets",
-            icon: <WalletIcon />,
-            description: "Wallets APIs for interacting with the blockchain"
-          },
-          {
-            title: "Transaction Builder",
-            href: "/apis/txbuilder",
-            icon: <BanknotesIcon />,
-            description: "Build transactions with cardano-cli like APIs"
-          },
-          {
-            title: "Transaction Parser",
-            href: "/apis/txparser",
-            icon: <MagnifyingGlassIcon />,
-            description: "Parse transactions for testing and rebuilding"
-          },
-          {
-            title: "Providers",
-            href: "/providers",
-            icon: <CloudIcon />,
-            description: "Data providers for connecting to the blockchain"
-          },
-          {
-            title: "Utilities",
-            href: "/apis/utilities",
-            icon: <WrenchScrewdriverIcon />,
-            description: "Serializers, resolvers and data types for converting between different formats"
-          },
-          {
-            title: "React Components",
-            href: "/react",
-            icon: <ComputerDesktopIcon />,
-            description: "Frontend React UI components and React hooks"
-          },
-          {
-            title: "Svelte Components",
-            href: "/svelte",
-            icon: <ComputerDesktopIcon />,
-            description: "Svelte UI components for wallet connections"
-          },
-          {
-            title: "Smart Contract Library",
-            href: "/smart-contracts",
-            icon: <DocumentCheckIcon />,
-            description: "Open-source smart contracts, complete with documentation, and live demos"
-          },
-          {
-            title: "Aiken",
-            href: "/aiken",
-            icon: iconResolver("icons/aiken.png"),
-            description: "Function programming language created for Cardano smart contract development"
-          },
-          {
-            title: "Hydra",
-            href: "/hydra",
-            icon: iconResolver("icons/hydra.svg"),
-            description: "Layer 2 scaling solution for Cardano"
-          },
-          {
-            title: "Yaci",
-            href: "/yaci",
-            icon: iconResolver("icons/yaci.png"),
-            description: "Custom devnet to tailor your devnet needs with a builtin indexer"
-          },
-          {
-            title: "Midnight",
-            href: "https://midnight.meshjs.dev/en",
-            icon: iconResolver("icons/midnight.svg", "invert dark:invert-0"),
-            description: "Leveraging zero-knowledge technology to enable data protection"
-          },
-          {
-            title: "Wallet as a Service",
-            href: "https://utxos.dev/",
-            icon: iconResolver("icons/mesh.svg", "invert dark:invert-0"),
-            description: "Access self-custodial wallet using social logins"
-          }
-        ].map((card) => (
-          <Link key={card.title} href={card.href}>
-            <Card className="h-full text-center hover:border-primary/50 transition-colors px-4 py-8">
-              <CardTitle className="font-heading">{card.title}</CardTitle>
-              <CardDescription>{card.description}</CardDescription>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        {linksApi.map((item) => (
+          <Link key={item.title} href={item.link}>
+            <Card className="h-full hover:border-primary/50 transition-colors px-4 py-8">
+              <CardHeader>
+              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                {typeof item.icon === typeof heroIcons ? (
+                  <item.icon className="w-6 h-6" />
+                  ) :
+                  <div>
+                    {iconResolver(item.icon, "w-6 h-6 object-contain")}
+                  </div>
+                }
+              </div>
+              <CardTitle className="font-heading">{item.title}</CardTitle>
+              <CardDescription>{item.desc}</CardDescription>
+              </CardHeader>
             </Card>
           </Link>
         ))}

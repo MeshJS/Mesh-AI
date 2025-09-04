@@ -1,7 +1,5 @@
 import { NewspaperIcon } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
-
 export const articleNew16 = {
   title: "What's new in Mesh 1.6",
   desc: "",
@@ -24,9 +22,9 @@ export const articleElementsOfCardano = {
   image: "/articles/spices-4185324_640.jpg",
 };
 
-export const linksArticles: MenuItem[] = [articleElementsOfCardano,articleMesh20, articleNew16];
+export const linksArticles = [articleElementsOfCardano,articleMesh20, articleNew16];
 
-export const metaArticles: MenuItem = {
+export const metaArticles = {
   link: `/blogs`,
   title: "Blogs",
   desc: "Read the latest blogs and articles about Mesh",
