@@ -10,7 +10,7 @@ export default function Sidebar({ usedHeight, isAISidebarOpen, setIsAISidebarOpe
 
   useEffect(() => {
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       if(!isResized.current) return;
 
       setWidth((previousWidth) => {
@@ -38,7 +38,7 @@ export default function Sidebar({ usedHeight, isAISidebarOpen, setIsAISidebarOpe
   return (
     <div className="flex">
       <div
-        className="w-1 cursor-col-resize select-none"
+        className="w-2 cursor-col-resize select-none"
         onMouseDown={() => {
           isResized.current = true;
         }}

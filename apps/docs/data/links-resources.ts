@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 import { metaGuides } from "./links-guides";
+import { Wand2Icon } from "lucide-react";
 
 export const linksResources = [
   metaGuides,
@@ -13,6 +14,7 @@ export const linksResources = [
     title: "AI Features",
     desc: "We've built AI tools to help you work with Mesh faster",
     link: "/ai",
+    icon: Wand2Icon
   },
   {
     title: "Documentation",

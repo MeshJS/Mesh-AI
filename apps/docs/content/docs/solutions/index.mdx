@@ -1,8 +1,8 @@
 ---
-title: "Resources"
-description: "Whether you are new to web development or a seasoned blockchain full-stack developer, Mesh is the SDK for you."
+title: "Solutions"
+description: "Mesh provides a set of solutions to help you build blockchain applications"
 ---
-import {linksResources} from "@/data/links-resources";
+import {metaSolutions} from "@/data/links-solutions";
 import Link from "next/link";
 import {
   Card,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 
 <div className="grid md:grid-cols-2 gap-6 items-stretch">
-  {linksResources.map((card) => (
+  {metaSolutions.items.map((card) => (
     <Link key={card.title} href={card.link} className="no-underline">
       <Card className="h-full text-center hover:border-primary/50 transition-colors px-4 py-8">
         <CardTitle className="font-heading">{card.title}</CardTitle>
