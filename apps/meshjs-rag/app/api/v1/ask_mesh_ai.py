@@ -5,8 +5,6 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from supabase import AsyncClient
 import openai
-from dotenv import load_dotenv
-load_dotenv()
 import os
 
 from app.services.openai import OpenAIService

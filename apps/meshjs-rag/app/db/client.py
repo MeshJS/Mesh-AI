@@ -1,5 +1,3 @@
-from dotenv import load_dotenv
-load_dotenv()
 import os
 from supabase import acreate_client, AsyncClient as Client
 
