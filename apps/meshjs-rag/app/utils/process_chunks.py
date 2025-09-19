@@ -30,7 +30,9 @@ async def process_chunks_and_update_db(
     chunk_title = title_extractor(chunk, idx, chunks)
 
     if not chunk_title:
-      continue
+      filepath = relative_path.split("/")
+      chunk_title = f"{filepath[-2]}/{filepath[-1]}_1" if len(filepath) > 1 else f"{relative_path}_1"
+
     current_chunk_data[chunk_title] = {
       "chunk": chunk,
       "chunk_id": idx,
@@ -65,9 +67,6 @@ async def process_chunks_and_update_db(
     existing = existing_records.get(key)
 
     if current and existing:
-      if current["checksum"] == existing["checksum"]:
-        print(f"Skipping the unchanged chunk: {chunk_title}")
-
       if current["checksum"] != existing["checksum"]:
         print(f"Updating chunk: {chunk_title}")
         try:
@@ -91,12 +90,15 @@ async def process_chunks_and_update_db(
 
       elif current["chunk_id"] != existing.get("chunk_id"):
         print(f"Updating chunk order for {chunk_title}")
-        updated_title = chunk_title.split("_")[0] + f"_{current["chunk_id"]}" if "_" in chunk_title else chunk_title
+        updated_title = chunk_title.split("_")[0] + f"_{current['chunk_id']}" if "_" in chunk_title else chunk_title
         await safe_db_operation(
           supabase.table("docs").update({"chunk_id": current["chunk_id"], "chunk_title": updated_title}).eq("id", existing["id"]).execute()
         )
         # reorder after update
         needs_reorder = True
+
+      else:
+        print(f"Skipping the unchanged chunk: {chunk_title}")
 
     elif current and not existing:
       print(f"New chunk {chunk_title}")

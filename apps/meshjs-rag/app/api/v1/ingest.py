@@ -28,7 +28,7 @@ async def ingest_docs(credentials: HTTPAuthorizationCredentials = Depends(securi
       detail="You are not authorized"
     )
   
-  github = GithubService()
+  github = GithubService(owner="MeshJS", repo="mimir", doc_path="apps/docs/content/docs", output_path="docs")
   await github.download_docs()
 
   docs_dir = pathlib.Path(__file__).resolve().parents[3] / "docs"
@@ -106,4 +106,52 @@ async def ingest_packages(credentials: HTTPAuthorizationCredentials = Depends(se
     
   return {
     "message": "Ingestion process successful for package docs"
+  }
+
+
+@router.post("/aiken-docs")
+async def ingest_packages(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
+
+  token = credentials.credentials
+  if not token or token != os.getenv("ADMIN_KEY"):
+    raise HTTPException(
+      status_code=status.HTTP_401_UNAUTHORIZED,
+      detail="You're not authorized"
+    )
+  
+  github = GithubService(owner="aiken-lang", repo="site", doc_path="src/pages", output_path="aiken-docs")
+  await github.download_docs()
+  
+  aiken_docs_md_path = pathlib.Path(__file__).resolve().parents[3] / "aiken-docs"
+
+  try:
+    file_paths = get_docs_file_paths(aiken_docs_md_path)
+  except FileNotFoundError as e:
+    raise HTTPException(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail=f"The documents directory was not found: {e}"
+    )
+  except IOError as e:
+    raise HTTPException(
+      status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+      detail=f"An I/O error occurred while accessing the documents directory: {e}"
+    )
+
+  for relative_path in file_paths:
+    abs_path = aiken_docs_md_path / relative_path
+    try:
+      file_content = get_file_content(abs_path)
+      await process_docs_file_and_update_db(file_content, relative_path, supabase)
+    except (FileNotFoundError, IOError) as e:
+      print(f"Skipping file due to error: {e}")
+      continue
+
+    except Exception as e:
+      raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f"An error occured during the file ingestion: {e}"
+      )
+
+  return {
+    "message": "Ingestion process successfully completed"
   }

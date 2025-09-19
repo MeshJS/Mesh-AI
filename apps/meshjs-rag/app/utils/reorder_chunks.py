@@ -17,7 +17,7 @@ async def reorder_chunks(
             if chunk["chunk_id"] != new_idx:
                 updated_title = chunk["chunk_title"].split("_")[0] + f"_{new_idx}" if "_" in chunk["chunk_title"] else chunk["chunk_title"]
                 reorder_chunks.append(
-                    await safe_db_operation(
+                    safe_db_operation(
                     supabase.table("docs") \
                     .update({"chunk_id": new_idx, "chunk_title": updated_title}) \
                     .eq("id", chunk["id"]) \

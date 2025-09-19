@@ -9,7 +9,7 @@ def chunk_content_by_h2(content: str) -> List[str]:
     chunks = []
     current_chunk = []
     for line in content.splitlines():
-      if line.startswith("## ") and line.strip()[-6:] != "[!toc]":
+      if line and line.startswith("## ") and not line.strip().endswith("[!toc]"):
         flush_chunk(current_chunk, chunks)
         current_chunk = [line]
       else:
