@@ -57,6 +57,7 @@ export async function generateMetadata({
 
   const image = ['/docs-og', ...slug, 'image.png'].join('/');
   return {
+    metadataBase: new URL("https://meshjs.dev"),
     title: page.data.title,
     description: page.data.description,
     openGraph: {

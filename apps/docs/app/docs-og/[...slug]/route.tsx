@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 
 export async function GET(
   _req: Request,
-  { params }: RouteContext<'/docs-og/[...slug]'>,
+  { params }: { params: Promise<{ slug: string[] }> }
 ) {
   const { slug } = await params;
   const page = source.getPage(slug.slice(0, -1));

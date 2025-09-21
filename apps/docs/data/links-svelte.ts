@@ -4,8 +4,6 @@ import {
   RocketLaunchIcon,
 } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
-
 export const metaSvelteGettingstarted = {
   title: "Getting Started with Svelte",
   desc: "Svelte frontend components for wallet connections.",
@@ -19,7 +17,7 @@ export const metaSvelteUicomponents = {
   icon: PaintBrushIcon,
 };
 
-export const linksSvelte: MenuItem[] = [
+export const linksSvelte = [
   metaSvelteGettingstarted,
   metaSvelteUicomponents,
 ];

@@ -5,8 +5,6 @@ import {
   RocketLaunchIcon,
 } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
-
 export const metaReactGettingstarted = {
   title: "Getting Started with React",
   desc: "Frontend components for wallet connections, and useful React hooks to getting wallet states",
@@ -26,7 +24,7 @@ export const metaReactWallethooks = {
   icon: BoltIcon,
 };
 
-export const linksReact: MenuItem[] = [
+export const linksReact = [
   metaReactGettingstarted,
   metaReactUicomponents,
   metaReactWallethooks,

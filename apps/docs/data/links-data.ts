@@ -6,8 +6,6 @@ import {
   WrenchIcon,
 } from "@heroicons/react/24/solid";
 
-import { MenuItem } from "~/types/menu-item";
-
 export const metaOverview = {
   title: "Data Overview",
   desc: "Learn about the basics, and how Mesh handles Cardano data",
@@ -46,7 +44,7 @@ export const metaDataUtils = {
   icon: WrenchIcon,
 };
 
-export const linksData: MenuItem[] = [
+export const linksData = [
   metaOverview,
   metaDataMesh,
   metaDataJson,
