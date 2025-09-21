@@ -1,17 +1,15 @@
-from dotenv import load_dotenv
-load_dotenv()
 import os
 import httpx
 import asyncio
 import pathlib
 
 class GithubService:
-  def __init__(self):
+  def __init__(self, owner, repo, doc_path, output_path):
     self.base_url="https://api.github.com"
-    self.owner="smutyala1at"
-    self.repo="meshjs-docs"
-    self.doc_path="content/docs"
-    self.output_path="docs"
+    self.owner=owner
+    self.repo=repo
+    self.doc_path=doc_path
+    self.output_path=output_path
     self.token=os.getenv("GITHUB_TOKEN") or None
 
   def _get_headers(self):
@@ -30,7 +28,7 @@ class GithubService:
       response = await client.get(url)
       response.raise_for_status()
       return response.json()
-    except httpx.HTTPStatusException as e:
+    except httpx.HTTPError as e:
       print(f"Error fetching the directory '{remote_path}': HTTP status {e.response.status_code}")
       return None
     except httpx.RequestError as e:
@@ -83,6 +81,6 @@ class GithubService:
 
 
 if __name__ == "__main__":
-  github = GithubService()
+  github = GithubService(owner="MeshJS", repo="mimir", doc_path="apps/docs/content/docs", output_path="docs")
   asyncio.run(github.download_docs())
   print("Successfully downloaded docs from github")

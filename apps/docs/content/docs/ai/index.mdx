@@ -28,6 +28,38 @@ Mesh provides llms.txt file that is easily understood by AI tools. This file con
 AI code editors like Cursor let you add and index documentation, so you can reference it directly in your chats. For example, you can bring Mesh docs into Cursor by typing @Docs → Add new doc. A modal will open where you can paste the link to the <Link href="/llms.txt">/llms.txt</Link> file. Once added, the doc becomes available as context, making it easier and faster to build apps with AI.
 
 
-## Mesh MCP (Coming Soon)
+## Mesh MCP Setup
 
-We’re bringing Model Context Protocol (MCP) integration to Mesh, so you’ll be able to access Mesh knowledge right inside your favorite development tools. This means your editor will be able to help as you code, suggest snippets as you type, and even assist with debugging issues directly in your IDE. It’s designed to work seamlessly with tools like VS Code, Cursor, and other AI-powered editors, making your development workflow smoother and faster.
+Use Mesh MCP to access Mesh docs and get coding/debugging help directly in VS Code, Cursor, or Claude Desktop.
+
+### Add this to your MCP server settings:
+
+```ts
+{
+  "servers": {
+    "mesh-mcp": {
+      "name": "mesh-mcp-server",
+      "command": "npx",
+      "args": ["-y", "meshjs-mcp"],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-api-key",
+        "MODEL": "your-preferred-model"
+      }
+    }
+  }
+}
+```
+
+### Setup notes
+
+1. Replace your-openai-api-key with your OpenAI API key.
+
+2. Set MODEL to the model you want to use.
+
+3. Restart your editor after saving the config.
+
+4. Get help to code faster with Mesh MCP and AI editor
+
+### Example
+
+<img src="ai/mcp-example.png" alt="mcp-example" />
