@@ -1,0 +1,169 @@
+---
+title: "Hydra Instance"
+description: "The HydraInstance is a class interface for interacting with a Hydra head after initialization."
+---
+
+import Link from "fumadocs-core/link";
+
+## Overview
+
+The `HydraInstance` is intialized together with `HydraProvider`, for accessing other methods to interact with Hydra head after `HeadIsInitializing` phase.
+
+## Get started:
+
+```tsx
+import { HydraInstance, HydraProvider } from "@meshsdk/hydra";
+
+const hydraProvider = new HydraProvider({
+  httpUrl: "<hydra-API-URL>",
+});
+
+const hydraInstance = new HydraInstance({
+  provider: hydraProvider,
+  fetcher: "<blockchainProvider>",
+  submitter: "<blockchainProvider>",
+});
+```
+
+### Commit Empty
+
+If you don't want to commit any funds and only want to receive on layer 2, you can request an empty commit transaction
+to open the head
+
+```tsx
+const commit = await hydraInstance.commitEmpty();
+const submitTx = await wallet.submitTx(commit);
+console.log("submitTx", submitTx);
+```
+
+### Commit Funds
+
+Commits funds to the Hydra head by selecting specific UTxOs to make available on layer 2.
+**Parameters:**
+
+- `txHash`
+- `outputIndex`
+
+**Returns:** The transaction CBOR hex ready to be partially signed
+
+```tsx
+await commitFunds(txHash: string, outputIndex: number)
+```
+
+```tsx
+const txHash =
+  "00000000000000000000000000000000000000000000000000000000000000000";
+const outputIndex = 0;
+
+const commitTx = await hydraInstance.commitFunds(txHash, outputIndex);
+const signedTx = await wallet.signTx(commitTx, true);
+const commitTxHash = await wallet.submitTx(signedTx);
+```
+
+### Commit Blueprint
+
+Commits a Cardano transaction blueprint to the Hydra head.
+This is useful for advanced use cases such as commiting `scriptUTxOs`.
+
+**Parameters:**
+
+- `txHash`
+- `outputIndex`
+- `hydraTransaction`
+
+```tsx
+await hydraInstance.commitBlueprint("txHash", outputIndex, {
+  cborHex: "<unsignedTx>",
+  description: "commit tx",
+  type: "Tx ConwayEra",
+});
+```
+
+```tsx
+const commitTx = await hydraInstance.commitBlueprint(txHash, outputIndex, {
+  cborHex: "<unsignedTx>",
+  description: "commit tx",
+  type: "Tx ConwayEra",
+});
+const signedTx = await wallet.signTx(commitTx, true);
+const commitTxHash = await wallet.submitTx(signedTx);
+```
+
+### Incremental Commit
+
+Incremental commit methods allow you commit additional UTxOs to an open hydra head after the initial commit:
+The time it takes for it top be added after commit depends on the `hydra-node` configuration parameter `--deposit-period`
+
+To read more on incremental commit, see [the Hydra documentation](https://hydra.family/head-protocol/docs/how-to/incremental-commit).
+
+### incrementalCommitFunds
+```tsx
+await incrementalCommitFunds(txHash: string, outputIndex: number)
+```
+### incrementalBlueprintCommit
+```tsx
+await incrementalBlueprintCommit(
+  txHash,
+  outputIndex,
+   {
+    cborHex: "unsignedTx",
+    description: "commit tx",
+    type: "Tx ConwayEra",
+  }
+)
+```
+
+## Basic Workflow
+
+### commit Funds
+
+```tsx
+import { HydraInstance, HydraProvider } from "@meshsdk/hydra";
+import { BlockfrostProvider } from "@meshsdk/core";
+
+const provider = new HydraProvider({
+  httpUrl: "http://localhost:4001",
+});
+
+const hydraInstance = new HydraInstance({
+  provider: provider,
+  fetcher: "blockchainProvider",
+  submitter: "blockchainProvider",
+});
+
+await provider.connect();
+
+await provider.init();
+
+const commitTx = await hydraInstance.commitFunds(txHash, outputIndex);
+const signedTx = await wallet.signTx(commitTx, true);
+await wallet.submitTx(signedTx);
+```
+
+### Blueprint Commit
+
+```tsx
+const txBuilder = new MeshTxBuilder({
+  submitter: "blockchainProvider",
+  fetcher: "blockchainProvider",
+  verbose: true,
+});
+
+const unsignedTx = await txBuilder
+  .txIn(txHash, outputIndex)
+  .txOut(address, [{ unit: "lovelace", quantity: amount }])
+  .setFee("0")
+  .changeAddress(address)
+  .selectUtxosFrom(UTxOs)
+  .complete();
+
+const commitTx = await instance.commitBlueprint(txHash, outputIndex, {
+  type: "Tx ConwayEra",
+  cborHex: unsignedTx,
+  description: "Commit Blueprint",
+});
+
+const signedTx = await wallet.signTx(commitTx);
+const commitTxHash = await wallet.submitTx(signedTx);
+console.log(commitTxHash);
+```
