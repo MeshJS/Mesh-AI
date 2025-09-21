@@ -13,9 +13,16 @@ import clsx from 'clsx';
 import * as heroIcons from '@heroicons/react/24/solid';
 import { iconResolver } from "@/lib/iconResolver";
 
-const colors = [
-  "blue", "purple", "pink", "green", "teal", "yellow", "red", "lime"
-]
+const colorClasses = [
+  "text-blue-500",
+  "text-purple-500",
+  "text-pink-500",
+  "text-green-500",
+  "text-teal-500",
+  "text-yellow-500",
+  "text-red-500",
+  "text-lime-500",
+];
 
 export const navbarLinks: LinkItemType[] = [
   {
@@ -32,7 +39,7 @@ export const navbarLinks: LinkItemType[] = [
                   <item.icon className={
                       clsx(
                         "mr-3 h-5 w-5",
-                        index < 8 && `text-${colors[index]}-500`
+                        colorClasses[index % colorClasses.length]
                       )
                     }
                   />
@@ -68,7 +75,7 @@ export const navbarLinks: LinkItemType[] = [
                 <item.icon className={
                       clsx(
                         "mr-3 h-5 w-5",
-                        index < 8 && `text-${colors[8-(index+1)]}-500`
+                        colorClasses[8-(index+1) % colorClasses.length]
                       )
                     }
                   />
@@ -99,7 +106,7 @@ export const navbarLinks: LinkItemType[] = [
                 <item.icon className={
                       clsx(
                         "mr-3 h-5 w-5",
-                        index < 8 && `text-${colors[(index * 3 % colors.length)]}-500`
+                        colorClasses[(index * 3 % colorClasses.length)]
                       )
                     }
                   />
@@ -130,7 +137,7 @@ export const navbarLinks: LinkItemType[] = [
                 <item.icon className={
                       clsx(
                         "mr-3 h-5 w-5",
-                        index < 8 && (["About Us", "Support Us"].includes(item.title) ? "text-red-500" : `text-${colors[(index * 5 % colors.length)]}-500`)
+                        (["About Us", "Support Us"].includes(item.title) ? "text-red-500" : colorClasses[index % colorClasses.length])
                       )
                     }
                   />
