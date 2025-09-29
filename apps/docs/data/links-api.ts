@@ -11,24 +11,11 @@ import { metaUtilities } from "./links-utilities";
 import { metaWallets } from "./links-wallets";
 import { metaYaci } from "./links-yaci";
 
-export const metaPolkadot = {
-  title: "Polkadot",
-  desc: "Tools and resources for developers to build on Polkadot",
-  link: "https://polkadot.meshjs.dev/",
-  icon: "icons/polkadot.svg",
-  items: [
-    {
-      title: "Polkadot",
-      link: "https://polkadot.meshjs.dev/",
-    }
-  ]
-};
-
 export const metaWeb3Wallet = {
   title: "Wallet as a Service",
   desc: "Access self-custodial wallet using social logins",
   link: "https://utxos.dev/wallet-as-a-service",
-  icon: "icons/mesh.svg",
+  icon: "icons/utxos-white.png",
   items: [
     {
       title: "Wallet as a Service",
@@ -36,6 +23,13 @@ export const metaWeb3Wallet = {
     }
   ]
 };
+
+export const metaTransactionSponsorship = {
+  title: "Transaction Sponsorship",
+  desc: "Sponsor blockchain transaction fees for your users to eliminate friction.",
+  link: "https://utxos.dev/transaction-sponsorship",
+  icon: "icons/utxos-white.png"
+}
 
 export const linksApi = [
   metaWallets,
@@ -50,6 +44,6 @@ export const linksApi = [
   metaHydra,
   metaYaci,
   metaMidnight,
-  // metaPolkadot,
   metaWeb3Wallet,
+  metaTransactionSponsorship
 ];
