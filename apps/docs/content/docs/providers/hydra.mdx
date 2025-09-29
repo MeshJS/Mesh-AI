@@ -14,7 +14,9 @@ import { HydraProvider } from "@meshsdk/hydra";
 
 // Hydra Head URL and PORT: e.g. http://123.45.67.890:4001
 
-const provider = new HydraProvider("<httpUrl>");
+const provider = new HydraProvider({
+  httpUrl: <hydra-api-url>
+});
 ```
 
 ## connect
@@ -23,6 +25,25 @@ Establishes a connection to a Hydra Head. This is typically managed through the 
 
 ```tsx
 await provider.connect();
+```
+
+## hydra-head messages
+
+Listens to messages from hydra-head
+
+```tsx
+provider.onMessage((message) =>
+  console.log("messages received from hydra", message)
+);
+```
+
+can be used together with connect to Receive Messages after connect
+
+```tsx
+await provider.connect();
+provider.onMessage((message) =>
+  console.log("messages received from hydra", message)
+);
 ```
 
 ## disconnect
@@ -35,10 +56,10 @@ Parameter (Optional)
 
 ```tsx
 // Disconnect with default timeout (5 minutes)
-await disconnect(timeout);
+await provider.disconnect();
 
 // Disconnect with custom timeout (e.g., 10 minutes)
-await disconnect(10 * 60 * 1000);
+await provider.disconnect(10 * 60 * 1000);
 ```
 
 ## Hydra commands APIs
@@ -81,8 +102,12 @@ The `newTx` method accepts the following arguments:
 - type: Any transaction is tried to decode as a 'ConwayEra' transaction, which mostly is backward compatible to previous eras.
 - description(optional): transaction description
 
+**returns**
+
+- txId(transaction Hash)
+
 ```tsx
-async newTx({
+async provider.newTx({
     cborHex: "<unsignedTx>",
     description: "commit tx",
     type: "Tx ConwayEra",
@@ -172,34 +197,41 @@ Finalize a head UTxOs to L1 after the contestation period passed.
 await provider.fanout();
 ```
 
-```tsx
-provider.onMessage((message) => {
-  if (
-    message.headStatus === "FanoutPossible" ||
-    message.tag === "HeadIsFinalized"
-  ) {
-    provider.fanout();
-  }
-});
-```
-
 ## Hydra Query APIs
+
+### Fetch UTxOs
+
+Get UTxOs for a given hash.
+Optionally, you can specify the index of the index output.
+
+```tsx
+await provider.fetchUTxOs("txHash");
+```
 
 ### Fetch Address UTxOs
 
 Fetch UTxOs controlled by an address.
 
+Optionally, you can filter UTXOs containing a particular asset by providing `asset`, where it is the concatenation of policy ID and assetname.
+
 ```tsx
-await provider.fetchAddressUTxOs(
-  "addr_test1qpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0uafhxhu32dys6pvn6wlw8dav6cmp4pmtv7cc3yel9uu0nq93swx9"
-);
+await provider.fetchAddressUTxOs(address: string, asset?: string)
 ```
 
-Optionally, you can filter UTXOs containing a particular asset by providing `asset`, where it is the concatenation of policy ID and asset.
+### Fetch Asset Addresses
+
+Fetches the addresses and quantities for a given Cardano asset.
 
 ```tsx
-// Assest f.e. d9312da562da182b02322fd8acb536f37eb9d29fba7c49dc172555274d657368546f6b656e
-await fetchAddressUTxOs(address: string, asset?: string)
+await provider.fetchAssetAddresses(asset: string):
+```
+
+### Fetch collection Assest
+
+Fetches the list of assets for a given policy ID.
+
+```tsx
+await provider.fetchCollectionAssets(policyId: string)
 ```
 
 ### Fetch Protocol Parameters
@@ -210,34 +242,11 @@ Fetch the latest protocol parameters.
 await provider.fetchProtocolParameters();
 ```
 
-Optionally, you can provide an epoch number to fetch the protocol parameters of that epoch.
-
-### Fetch UTxOs
-
-Get UTxOs for a given hash.
-
-```tsx
-await provider.fetchUTxOs("txHash");
-```
-
-Optionally, you can specify the index of the index output.
-
-```tsx
-await provider.fetchUTxOs("txHash", 0);
-```
+Optionally, you can provide an epoch number to fetch the protocol parameters of that epoch.`
 
 ### Listens for new messages from Hydra node
 
 Listens for new messages from Hydra node. The callback function will be called with the message as the only argument. Check <Link href="https://hydra.family/head-protocol/api-reference">all events emitted</Link> by the Hydra node.
-
-```tsx
-provider.onMessage((message) => {
-  console.log("HydraProvider received message", message);
-  // do something with the message
-});
-```
-
-The callback function is typed, so you can access the message properties directly.
 
 ```tsx
 provider.onMessage((message) => {
@@ -252,5 +261,6 @@ provider.onMessage((message) => {
 Submit a serialized transaction to the network.
 
 ```tsx
-await provider.submitTx(signedTx);
+const txHash = await provider.submitTx(signedTx);
+console.log("txHash", txHash);
 ```

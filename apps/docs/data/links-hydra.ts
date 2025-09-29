@@ -11,8 +11,14 @@ export const metaHydraTutorial = {
   link: "/hydra/tutorial",
 };
 
+export const metaHydraInstance = {
+  title: "Hydra Instance",
+  desc: "The HydraInstance is a class interface for interacting with a Hydra head after initialization.",
+  link: "/hydra/instance",
+};
 export const linksHydra = [
   // metaHydraGettingStarted,
+  metaHydraInstance,
   metaHydraProvider,
   metaHydraTutorial,
 ];

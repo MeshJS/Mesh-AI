@@ -14,11 +14,11 @@ The `HydraInstance` is intialized together with `HydraProvider`, for accessing o
 ```tsx
 import { HydraInstance, HydraProvider } from "@meshsdk/hydra";
 
-const hydraProvider = new HydraProvider({
+const provider = new HydraProvider({
   httpUrl: "<hydra-API-URL>",
 });
 
-const hydraInstance = new HydraInstance({
+const instance = new HydraInstance({
   provider: hydraProvider,
   fetcher: "<blockchainProvider>",
   submitter: "<blockchainProvider>",
@@ -31,7 +31,7 @@ If you don't want to commit any funds and only want to receive on layer 2, you c
 to open the head
 
 ```tsx
-const commit = await hydraInstance.commitEmpty();
+const commit = await instance.commitEmpty();
 const submitTx = await wallet.submitTx(commit);
 console.log("submitTx", submitTx);
 ```
@@ -47,7 +47,7 @@ Commits funds to the Hydra head by selecting specific UTxOs to make available on
 **Returns:** The transaction CBOR hex ready to be partially signed
 
 ```tsx
-await commitFunds(txHash: string, outputIndex: number)
+await instance.commitFunds(txHash: string, outputIndex: number)
 ```
 
 ```tsx
@@ -55,7 +55,7 @@ const txHash =
   "00000000000000000000000000000000000000000000000000000000000000000";
 const outputIndex = 0;
 
-const commitTx = await hydraInstance.commitFunds(txHash, outputIndex);
+const commitTx = await instance.commitFunds(txHash, outputIndex);
 const signedTx = await wallet.signTx(commitTx, true);
 const commitTxHash = await wallet.submitTx(signedTx);
 ```
@@ -72,7 +72,7 @@ This is useful for advanced use cases such as commiting `scriptUTxOs`.
 - `hydraTransaction`
 
 ```tsx
-await hydraInstance.commitBlueprint("txHash", outputIndex, {
+await instance.commitBlueprint("txHash", outputIndex, {
   cborHex: "<unsignedTx>",
   description: "commit tx",
   type: "Tx ConwayEra",
@@ -80,7 +80,7 @@ await hydraInstance.commitBlueprint("txHash", outputIndex, {
 ```
 
 ```tsx
-const commitTx = await hydraInstance.commitBlueprint(txHash, outputIndex, {
+const commitTx = await instance.commitBlueprint(txHash, outputIndex, {
   cborHex: "<unsignedTx>",
   description: "commit tx",
   type: "Tx ConwayEra",
@@ -97,20 +97,19 @@ The time it takes for it top be added after commit depends on the `hydra-node` c
 To read more on incremental commit, see [the Hydra documentation](https://hydra.family/head-protocol/docs/how-to/incremental-commit).
 
 ### incrementalCommitFunds
+
 ```tsx
-await incrementalCommitFunds(txHash: string, outputIndex: number)
+await instance.incrementalCommitFunds(txHash: string, outputIndex: number)
 ```
+
 ### incrementalBlueprintCommit
+
 ```tsx
-await incrementalBlueprintCommit(
-  txHash,
-  outputIndex,
-   {
-    cborHex: "unsignedTx",
-    description: "commit tx",
-    type: "Tx ConwayEra",
-  }
-)
+await instance.incrementalBlueprintCommit(txHash, outputIndex, {
+  cborHex: "unsignedTx",
+  description: "commit tx",
+  type: "Tx ConwayEra",
+});
 ```
 
 ## Basic Workflow
@@ -125,45 +124,65 @@ const provider = new HydraProvider({
   httpUrl: "http://localhost:4001",
 });
 
-const hydraInstance = new HydraInstance({
+const instance = new HydraInstance({
   provider: provider,
   fetcher: "blockchainProvider",
   submitter: "blockchainProvider",
 });
 
 await provider.connect();
-
 await provider.init();
 
-const commitTx = await hydraInstance.commitFunds(txHash, outputIndex);
-const signedTx = await wallet.signTx(commitTx, true);
-await wallet.submitTx(signedTx);
+provider.onMessage((message) => {
+  const status =
+    message.tag === "Greetings"
+      ? { headStatus: message.headStatus }
+      : { tag: message.tag };
+  if (
+    status.tag === "HeadIsInitializing" ||
+    status.headStatus === "Initializing"
+  ) {
+  }
+  const commitTx = await instance.commitFunds(txHash, outputIndex);
+  const signedTx = await wallet.signTx(commitTx, true);
+  await wallet.submitTx(signedTx);
+});
 ```
 
 ### Blueprint Commit
 
 ```tsx
-const txBuilder = new MeshTxBuilder({
-  submitter: "blockchainProvider",
-  fetcher: "blockchainProvider",
-  verbose: true,
+provider.onMessage((message) => {
+  const status =
+    message.tag === "Greetings"
+      ? { headStatus: message.headStatus }
+      : { tag: message.tag };
+  if (
+    status.tag === "HeadIsInitializing" ||
+    status.headStatus === "Initializing"
+  ) {
+    const txBuilder = new MeshTxBuilder({
+      submitter: "<blockchainProvider>",
+      fetcher: "<blockchainProvider>",
+      verbose: true,
+    });
+
+    const unsignedTx = await txBuilder
+      .txIn(txHash, outputIndex)
+      .setFee("0")
+      .changeAddress(address)
+      .selectUtxosFrom(UTxOs)
+      .complete();
+
+    const commitTx = await instance.commitBlueprint(txHash, outputIndex, {
+      type: "Tx ConwayEra",
+      cborHex: unsignedTx,
+      description: "Commit Blueprint",
+    });
+
+    const signedTx = await wallet.signTx(commitTx);
+    const commitTxHash = await wallet.submitTx(signedTx);
+    console.log(commitTxHash);
+  }
 });
-
-const unsignedTx = await txBuilder
-  .txIn(txHash, outputIndex)
-  .txOut(address, [{ unit: "lovelace", quantity: amount }])
-  .setFee("0")
-  .changeAddress(address)
-  .selectUtxosFrom(UTxOs)
-  .complete();
-
-const commitTx = await instance.commitBlueprint(txHash, outputIndex, {
-  type: "Tx ConwayEra",
-  cborHex: unsignedTx,
-  description: "Commit Blueprint",
-});
-
-const signedTx = await wallet.signTx(commitTx);
-const commitTxHash = await wallet.submitTx(signedTx);
-console.log(commitTxHash);
 ```
