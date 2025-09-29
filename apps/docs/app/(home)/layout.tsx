@@ -21,6 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="flex flex-col">
       <HomeLayout
         {...baseOptions}
+        nav={{ transparentMode: "always", ...baseOptions.nav }}
         searchToggle={{
           components: {
             lg: (
