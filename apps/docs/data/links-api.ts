@@ -27,12 +27,12 @@ export const metaPolkadot = {
 export const metaWeb3Wallet = {
   title: "Wallet as a Service",
   desc: "Access self-custodial wallet using social logins",
-  link: "https://utxos.dev/",
+  link: "https://utxos.dev/wallet-as-a-service",
   icon: "icons/mesh.svg",
   items: [
     {
       title: "Wallet as a Service",
-      link: "https://utxos.dev/",
+      link: "https://utxos.dev/wallet-as-a-service",
     }
   ]
 };
