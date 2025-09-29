@@ -50,6 +50,6 @@ export const linksApi = [
   metaHydra,
   metaYaci,
   metaMidnight,
-  metaPolkadot,
+  // metaPolkadot,
   metaWeb3Wallet,
 ];
