@@ -13,7 +13,11 @@ openai_api_key = os.getenv("OPENAI_KEY") or None
 if openai_api_key is None:
   raise ValueError("OpenAI api key is missing")
 
-openai_service = OpenAIService(openai_api_key=openai_api_key)
+openai_service = OpenAIService(
+  embedding_api_key=openai_api_key,
+  completion_api_key=openai_api_key,
+  completion_model="gpt-4o-mini"
+)
 
 async def process_chunks_and_update_db(
     chunks: List[str],
