@@ -1,0 +1,437 @@
+---
+title: "Integration Examples"
+description: "The fastest way to build on Midnight Network with pre-built smart contracts, complete API, and ready-to-use code snippets"
+---
+
+import Link from "fumadocs-core/link";
+
+The fastest way to build on Midnight Network with pre-built smart contract, complete API, and ready-to-use code snippets.
+
+Full React integration example and a Compact contract: [midnight-setup](https://github.com/MeshJS/midnight-setup)
+
+## Installation
+
+```bash
+npm install @meshsdk/midnight-setup \
+  @midnight-ntwrk/dapp-connector-api@3.0.0 \
+  @midnight-ntwrk/midnight-js-fetch-zk-config-provider@2.0.2 \
+  @midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2 \
+  @midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2 \
+  @midnight-ntwrk/midnight-js-level-private-state-provider@2.0.2 \
+  @midnight-ntwrk/midnight-js-network-id@2.0.2
+```
+
+## Features
+
+- **Type-safe SDK** - Full TypeScript support
+- **Provider abstraction** - Easy wallet and network integration
+- **Contract state management** - Query contract and ledger states
+- **Flexible contract support** - Works with any Midnight smart contract
+- **Lightweight** - Only 10.4 KB package size
+- **ESM & CJS** - Supports both module systems
+
+## Quick Start
+
+### 1. Setup Providers
+
+```typescript
+import { FetchZkConfigProvider } from "@midnight-ntwrk/midnight-js-fetch-zk-config-provider";
+import { httpClientProofProvider } from "@midnight-ntwrk/midnight-js-http-client-proof-provider";
+import { indexerPublicDataProvider } from "@midnight-ntwrk/midnight-js-indexer-public-data-provider";
+import { levelPrivateStateProvider } from "@midnight-ntwrk/midnight-js-level-private-state-provider";
+
+import type { MidnightSetupContractProviders } from "@meshsdk/midnight-setup";
+
+export async function setupProviders(): Promise<MidnightSetupContractProviders> {
+  const wallet = window.midnight?.mnLace;
+  if (!wallet) {
+    throw new Error("Please install Lace Beta Wallet for Midnight Network");
+  }
+
+  const walletAPI = await wallet.enable();
+  const walletState = await walletAPI.state();
+  const uris = await wallet.serviceUriConfig();
+
+  return {
+    privateStateProvider: levelPrivateStateProvider({
+      privateStateStoreName: "my-dapp-state",
+    }),
+    zkConfigProvider: new FetchZkConfigProvider(
+      window.location.origin,
+      fetch.bind(window),
+    ),
+    proofProvider: httpClientProofProvider(uris.proverServerUri),
+    publicDataProvider: indexerPublicDataProvider(
+      uris.indexerUri,
+      uris.indexerWsUri,
+    ),
+    walletProvider: {
+      coinPublicKey: walletState.coinPublicKey,
+      encryptionPublicKey: walletState.encryptionPublicKey,
+      balanceTx: (tx, newCoins) => {
+        return walletAPI.balanceAndProveTransaction(tx, newCoins);
+      },
+    },
+    midnightProvider: {
+      submitTx: (tx) => {
+        return walletAPI.submitTransaction(tx);
+      },
+    },
+  };
+}
+```
+
+### 2. Deploy a Contract
+
+```typescript
+import { MidnightSetupAPI } from "@meshsdk/midnight-setup";
+
+import { setupProviders } from "./providers";
+
+async function deployContract() {
+  const providers = await setupProviders();
+  const contractInstance = new MyContract({});
+
+  const api = await MidnightSetupAPI.deployContract(
+    providers,
+    contractInstance,
+  );
+
+  console.log("Contract deployed at:", api.deployedContractAddress);
+  return api;
+}
+```
+
+### 3. Join Existing Contract
+
+```typescript
+async function joinContract(contractAddress: string) {
+  const providers = await setupProviders();
+  const contractInstance = new MyContract({});
+
+  const api = await MidnightSetupAPI.joinContract(
+    providers,
+    contractInstance,
+    contractAddress,
+  );
+
+  return api;
+}
+```
+
+### 4. Read Contract State
+
+```typescript
+// Get contract state
+const contractState = await api.getContractState();
+console.log("Contract data:", contractState.data);
+
+// Get ledger state
+const ledgerState = await api.getLedgerState();
+console.log("Message:", ledgerState.ledgerState?.message);
+```
+
+## API Reference
+
+### MidnightSetupAPI
+
+#### Static Methods
+
+##### `deployContract(providers, contractInstance, logger?)`
+
+Deploys a new smart contract to Midnight Network.
+
+**Parameters:**
+- `providers`: `MidnightSetupContractProviders` - Network and wallet providers
+- `contractInstance`: `ContractInstance` - Your compiled contract instance
+- `logger?`: `Logger` - Optional Pino logger
+
+**Returns:** `Promise<MidnightSetupAPI>`
+
+##### `joinContract(providers, contractInstance, contractAddress, logger?)`
+
+Connects to an existing deployed contract.
+
+**Parameters:**
+- `providers`: `MidnightSetupContractProviders` - Network and wallet providers
+- `contractInstance`: `ContractInstance` - Your compiled contract instance
+- `contractAddress`: `string` - Address of the deployed contract
+- `logger?`: `Logger` - Optional Pino logger
+
+**Returns:** `Promise<MidnightSetupAPI>`
+
+#### Instance Methods
+
+- **`getContractState()`** - Gets the current state of the contract
+  - **Returns:** `Promise<ContractStateData>`
+
+- **`getLedgerState()`** - Gets and parses the ledger state
+  - **Returns:** `Promise<LedgerStateData>`
+
+## TypeScript Types
+
+```typescript
+import type {
+  ContractInstance,
+  ContractStateData,
+  DeployedContract,
+  DeployedMidnightSetupAPI,
+  LedgerStateData,
+  MidnightSetupContractProviders,
+} from "@meshsdk/midnight-setup";
+```
+
+## Requirements
+
+- **Node.js** v18 or higher
+- **Midnight Lace Wallet** browser extension
+- **TypeScript** (recommended)
+
+## React Integration Example
+
+### Complete React Hook
+
+```typescript
+import { useState, useCallback } from 'react';
+import { MidnightSetupAPI } from '@meshsdk/midnight-setup';
+import { setupProviders } from './providers';
+
+export const useMidnightContract = () => {
+  const [api, setApi] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const deployContract = useCallback(async (contractInstance) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const providers = await setupProviders();
+      const newApi = await MidnightSetupAPI.deployContract(providers, contractInstance);
+      setApi(newApi);
+      return newApi;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const joinContract = useCallback(async (contractInstance, address) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const providers = await setupProviders();
+      const newApi = await MidnightSetupAPI.joinContract(providers, contractInstance, address);
+      setApi(newApi);
+      return newApi;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const getContractState = useCallback(async () => {
+    if (!api) throw new Error('No contract API available');
+    return await api.getContractState();
+  }, [api]);
+
+  const getLedgerState = useCallback(async () => {
+    if (!api) throw new Error('No contract API available');
+    return await api.getLedgerState();
+  }, [api]);
+
+  return {
+    api,
+    deployContract,
+    joinContract,
+    getContractState,
+    getLedgerState,
+    isLoading,
+    error
+  };
+};
+```
+
+### React Component Example
+
+```typescript
+import React, { useState } from 'react';
+import { useMidnightContract } from './hooks/useMidnightContract';
+
+function ContractManager() {
+  const { 
+    api, 
+    deployContract, 
+    joinContract, 
+    getContractState, 
+    getLedgerState,
+    isLoading, 
+    error 
+  } = useMidnightContract();
+  
+  const [contractAddress, setContractAddress] = useState('');
+  const [contractState, setContractState] = useState(null);
+
+  const handleDeploy = async () => {
+    try {
+      const contractInstance = new MyContract({});
+      const newApi = await deployContract(contractInstance);
+      console.log('Deployed:', newApi.deployedContractAddress);
+    } catch (err) {
+      console.error('Deploy failed:', err);
+    }
+  };
+
+  const handleJoin = async () => {
+    try {
+      const contractInstance = new MyContract({});
+      await joinContract(contractInstance, contractAddress);
+      console.log('Joined contract:', contractAddress);
+    } catch (err) {
+      console.error('Join failed:', err);
+    }
+  };
+
+  const handleGetState = async () => {
+    try {
+      const state = await getContractState();
+      setContractState(state);
+    } catch (err) {
+      console.error('Get state failed:', err);
+    }
+  };
+
+  return (
+    <div className="contract-manager">
+      <h2>Contract Manager</h2>
+      
+      {error && (
+        <div className="error">
+          Error: {error}
+        </div>
+      )}
+
+      <div className="actions">
+        <button onClick={handleDeploy} disabled={isLoading}>
+          {isLoading ? 'Deploying...' : 'Deploy Contract'}
+        </button>
+
+        <div className="join-section">
+          <input
+            type="text"
+            placeholder="Contract Address"
+            value={contractAddress}
+            onChange={(e) => setContractAddress(e.target.value)}
+          />
+          <button onClick={handleJoin} disabled={isLoading}>
+            Join Contract
+          </button>
+        </div>
+
+        {api && (
+          <button onClick={handleGetState} disabled={isLoading}>
+            Get Contract State
+          </button>
+        )}
+      </div>
+
+      {contractState && (
+        <div className="contract-state">
+          <h3>Contract State</h3>
+          <pre>{JSON.stringify(contractState, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Error Handling
+
+### Common Error Patterns
+
+```typescript
+const handleMidnightError = (error: Error) => {
+  if (error.message.includes('Please install Lace Beta Wallet')) {
+    return 'Please install Lace Beta Wallet for Midnight Network';
+  }
+  
+  if (error.message.includes('Insufficient funds')) {
+    return 'Insufficient funds for transaction';
+  }
+  
+  if (error.message.includes('Contract not found')) {
+    return 'Contract address not found or invalid';
+  }
+  
+  return 'An unexpected error occurred';
+};
+```
+
+### Error Boundary Component
+
+```typescript
+import React from 'react';
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ComponentType<{ error: Error }>;
+}
+
+export class MidnightErrorBoundary extends React.Component<
+  ErrorBoundaryProps, 
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Midnight Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      const FallbackComponent = this.props.fallback || DefaultErrorFallback;
+      return <FallbackComponent error={this.state.error!} />;
+    }
+
+    return this.props.children;
+  }
+}
+
+const DefaultErrorFallback: React.FC<{ error: Error }> = ({ error }) => (
+  <div className="error-fallback">
+    <h2>Something went wrong with Midnight Network</h2>
+    <p>{error.message}</p>
+    <button onClick={() => window.location.reload()}>
+      Reload Page
+    </button>
+  </div>
+);
+```
+
+## Best Practices
+
+1. **Always handle errors** - Wrap API calls in try-catch blocks
+2. **Use TypeScript** - Leverage type safety for better development experience
+3. **Validate inputs** - Ensure contract instances and addresses are valid
+4. **Monitor state changes** - Listen for contract state updates
+5. **Test thoroughly** - Use testnet before deploying to mainnet
+6. **Implement retry logic** - Allow users to retry failed operations
+7. **Secure key handling** - Never store private keys in localStorage

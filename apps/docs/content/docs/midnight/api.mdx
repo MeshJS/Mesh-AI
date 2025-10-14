@@ -1,0 +1,124 @@
+---
+title: "Core API Methods"
+description: "Complete reference for MidnightSetupAPI methods and provider setup"
+---
+
+import Link from "fumadocs-core/link";
+
+## MidnightSetupAPI
+
+The `MidnightSetupAPI` is the main class for interacting with Midnight Network contracts. It provides methods for deploying, joining, and managing smart contracts.
+
+### Core Methods
+
+| Method | Description | Usage |
+|--------|-------------|-------|
+| `deployContract(providers, contractInstance)` | Deploy a new contract | Creates new contract instance |
+| `joinContract(providers, contractInstance, address)` | Join existing contract | Connect to deployed contract |
+| `getContractState()` | Read contract state | Get current contract data |
+| `getLedgerState()` | Read ledger state | Get blockchain data |
+
+### Deploy Contract
+
+Deploy a new smart contract to the Midnight Network:
+
+```typescript
+import { MidnightSetupAPI } from '@meshsdk/midnight-setup';
+
+const api = await MidnightSetupAPI.deployContract(providers, contractInstance);
+console.log('Contract deployed:', api.deployedContractAddress);
+```
+
+### Join Contract
+
+Connect to an existing deployed contract:
+
+```typescript
+import { MidnightSetupAPI } from '@meshsdk/midnight-setup';
+
+const contractAddress = "contract_address_here";
+const api = await MidnightSetupAPI.joinContract(providers, contractInstance, contractAddress);
+console.log('Connected to contract:', contractAddress);
+```
+
+### Get Contract State
+
+Retrieve the current state of a contract:
+
+```typescript
+const state = await api.getContractState();
+console.log('Contract state:', state);
+```
+
+### Get Ledger State
+
+Access the current ledger state:
+
+```typescript
+const ledgerState = await api.getLedgerState();
+console.log('Ledger state:', ledgerState);
+```
+
+## Provider Setup
+
+Set up providers for Midnight Network:
+
+```typescript
+import { setupProviders } from './lib/providers';
+
+const providers = await setupProviders();
+// Returns: MidnightSetupContractProviders
+```
+
+### Provider Configuration
+
+```typescript
+const providers = {
+  fetcher: blockfrostProvider,
+  submitter: blockfrostProvider,
+  wallet: laceWallet,
+  // Additional provider configurations
+};
+```
+
+## Error Handling
+
+Always wrap API calls in try-catch blocks for proper error handling:
+
+```typescript
+try {
+  const api = await MidnightSetupAPI.deployContract(providers, contractInstance);
+  const state = await api.getContractState();
+  console.log('Success:', state);
+} catch (error) {
+  console.error('Error:', error.message);
+}
+```
+
+## TypeScript Support
+
+The package includes full TypeScript definitions:
+
+```typescript
+import { 
+  MidnightSetupAPI, 
+  MidnightSetupContractProviders,
+  ContractInstance 
+} from '@meshsdk/midnight-setup';
+
+// Type-safe provider setup
+const providers: MidnightSetupContractProviders = await setupProviders();
+
+// Type-safe contract instance
+const contractInstance: ContractInstance = {
+  // Contract configuration
+};
+```
+
+## Best Practices
+
+1. **Always handle errors** - Wrap API calls in try-catch blocks
+2. **Use TypeScript** - Leverage type safety for better development experience
+3. **Validate inputs** - Ensure contract instances and addresses are valid
+4. **Monitor state changes** - Listen for contract state updates
+5. **Test thoroughly** - Use testnet before deploying to mainnet
