@@ -1,0 +1,85 @@
+---
+title: "Getting Started"
+description: "Install and set up @meshsdk/midnight-setup for building zero-knowledge privacy dApps on Midnight Network"
+---
+
+import Link from "fumadocs-core/link";
+
+This guide will help you get started with building dApps on Midnight Network using the `@meshsdk/midnight-setup` package. Midnight Network is a zero-knowledge privacy network that enables confidential smart contracts and transactions.
+
+## Installation
+
+Install the Midnight setup package using your preferred package manager:
+
+```bash
+# Using npm
+npm install @meshsdk/midnight-setup
+
+# Using yarn
+yarn add @meshsdk/midnight-setup
+```
+
+## Quick Start
+
+### Basic Usage
+
+```typescript
+import { MidnightSetupAPI } from '@meshsdk/midnight-setup';
+
+// Deploy a new contract
+const api = await MidnightSetupAPI.deployContract(providers, contractInstance);
+
+// Join an existing contract
+const api = await MidnightSetupAPI.joinContract(providers, contractInstance, contractAddress);
+
+// Get contract state
+const state = await api.getContractState();
+
+// Get ledger state
+const ledgerState = await api.getLedgerState();
+```
+
+## What's Included
+
+This monorepo contains everything you need to build Midnight Network dApps:
+
+Example repository: [midnight-setup](https://github.com/MeshJS/midnight-setup)
+
+- **@meshsdk/midnight-setup** - Main npm package with API and types
+- **packages/ui** - Example React application
+- **packages/cli** - Command-line tools
+- **packages/api** - Core API implementation
+- **packages/contract/ - Compact contracts
+
+## Project Structure
+
+```
+├── packages/
+│   ├── api/          # Core API implementation
+│   ├── ui/           # React example app
+│   └── cli/          # Command-line tools
+│   └── contract/     # Compact contracts
+├── compact/          # Smart contract source
+└── README.md
+```
+
+## Key Features
+
+- **Zero-knowledge privacy** - Built for Midnight Network
+- **TypeScript support** - Full type safety
+- **React hooks** - Easy integration
+- **Wallet integration** - Lace Beta Wallet support
+- **CLI tools** - Development utilities
+- **Compact contract** - Compact contract integration
+
+## Next Steps
+
+- Learn about the [Core API Methods](/midnight/api)
+- Set up [Lace Wallet Integration](/midnight/wallet)
+- Explore [Integration Examples](/midnight/examples)
+
+## Resources
+
+- [Midnight Network Documentation](https://docs.midnight.network/)
+- [Mesh SDK Documentation](https://midnight.meshjs.dev/en)
+- [Lace Beta Wallet](https://chromewebstore.google.com/detail/lace-midnight-preview/hgeekaiplokcnmakghbdfbgnlfheichg)
