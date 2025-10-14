@@ -19,14 +19,35 @@ Please give a short succinct context to situate this chunk within the overall do
 Answer only with the succinct context and nothing else.
 """
 
+AI_PROMPT = """
+You are a MeshJS expert assistant. Help developers with MeshJS questions using the provided context. Use the documentation context to answer questions about MeshJS and Cardano development. Provide accurate code examples and explanations based on the context provided.
+
+When answering:
+- Give direct, helpful answers based on the context
+- Include relevant code examples when available
+- Explain concepts clearly for developers
+- Include any documentation or resource links found in the context. Handle them as follows:
+  - When you find "location: ...", include the link in your answer as a reference.
+  - If multiple links are present, include all relevant ones.
+- If the context doesn't cover the question, say so clearly.
+- Do not invent or assume APIs, methods, or functionality not in the documentation.
+
+Be concise but thorough. Focus on practical, actionable guidance for MeshJS development.
+"""
+
 class OpenAIService:
-  def __init__(self, openai_api_key):
-    self.client = AsyncOpenAI(api_key=openai_api_key)
+  def __init__(self, embedding_api_key: str, completion_api_key: str, completion_model: str, base_url: str = None):
+    self.embedding_client = AsyncOpenAI(api_key=embedding_api_key)
+    self.completion_client = AsyncOpenAI(
+      api_key=completion_api_key,
+      base_url=base_url
+    )
+    self.model = completion_model
 
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-  async def _chat(self, messages, model="gpt-4o-mini", temperature=0.0, max_tokens=None, prompt_cache_key=None, stream: bool = False):
+  async def _chat(self, messages, temperature=0.0, max_tokens=None, prompt_cache_key=None, stream: bool = False):
     kwargs = {
-      "model": model,
+      "model": self.model,
       "messages": messages,
       "temperature": temperature,
       "stream": stream
@@ -37,7 +58,7 @@ class OpenAIService:
     if max_tokens:
       kwargs["max_tokens"] = max_tokens
 
-    return await self.client.chat.completions.create(**kwargs)
+    return await self.completion_client.chat.completions.create(**kwargs)
 
   async def situate_context(self, doc: str, chunk: str, cache_key: str) -> str:
     messages = [
@@ -56,7 +77,7 @@ class OpenAIService:
 
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6), reraise=True)
   async def get_batch_embeddings(self, texts: List[str]) -> List[List[float]]:
-    response = await self.client.embeddings.create(
+    response = await self.embedding_client.embeddings.create(
       model="text-embedding-3-small",
       input=texts,
       encoding_format="float"
@@ -66,7 +87,7 @@ class OpenAIService:
 
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6), reraise=True)
   async def embed_query(self, text: str) -> List[float]:
-    response = await self.client.embeddings.create(
+    response = await self.embedding_client.embeddings.create(
       model="text-embedding-3-small",
       input=text,
       encoding_format="float"
@@ -75,11 +96,11 @@ class OpenAIService:
     return response.data[0].embedding
 
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6), reraise=True)
-  async def get_answer(self, question: str, context: str, model="gpt-4o-mini"):
+  async def get_answer(self, question: str, context: str):
     messages = [
       {
         "role": "system",
-        "content": "You are a MeshJS expert assistant. Help developers with MeshJS questions using the provided context.\n\nUse the documentation context to answer questions about MeshJS and Cardano development. Provide accurate code examples and explanations based on the context provided.\n\nWhen answering:\n- Give direct, helpful answers based on the context\n- Include relevant code examples when available\n- Explain concepts clearly for developers\n- Include any links present in the context for additional resources\n- If the context doesn't cover something, say so\n- Don't make up APIs or methods not in the documentation\n\nBe concise but thorough. Focus on practical, actionable guidance for MeshJS development."
+        "content": AI_PROMPT
       },
       {
         "role": "user",
@@ -87,7 +108,7 @@ class OpenAIService:
       }
     ]
 
-    stream = await self._chat(messages=messages, stream=True, model=model)
+    stream = await self._chat(messages=messages, stream=True)
 
     async for chunk in stream:
       yield f"data: {json.dumps(chunk.model_dump())}\n\n"
@@ -95,11 +116,11 @@ class OpenAIService:
     yield "data: [DONE]\n\n"
 
   @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6), reraise=True)
-  async def get_mcp_answer(self, question: str, context: str, model="gpt-4o-mini"):
+  async def get_mcp_answer(self, question: str, context: str):
     messages = [
       {
         "role": "system",
-        "content": "You are a MeshJS expert assistant. Help developers with MeshJS questions using the provided context.\n\nUse the documentation context to answer questions about MeshJS and Cardano development. Provide accurate code examples and explanations based on the context provided.\n\nWhen answering:\n- Give direct, helpful answers based on the context\n- Include relevant code examples when available\n- Explain concepts clearly for developers\n- Include any links present in the context for additional resources\n- If the context doesn't cover something, say so\n- Don't make up APIs or methods not in the documentation\n\nBe concise but thorough. Focus on practical, actionable guidance for MeshJS development."
+        "content": AI_PROMPT
       },
       {
         "role": "user",
@@ -107,5 +128,5 @@ class OpenAIService:
       }
     ]
 
-    response = await self._chat(messages=messages, model=model)
+    response = await self._chat(messages=messages)
     return response.choices[0].message.content

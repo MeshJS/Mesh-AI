@@ -14,7 +14,7 @@ function requireEnv(name: string) {
     return value;
 }
 
-const OPENAI_API_KEY = requireEnv("OPENAI_API_KEY");
+const API_KEY = requireEnv("API_KEY");
 const MODEL = requireEnv("MODEL");
 
 const server = new McpServer({
@@ -40,7 +40,7 @@ server.registerTool(
                 },
                 {
                     headers: {
-                        "Authorization": `Bearer ${OPENAI_API_KEY}`
+                        "Authorization": `Bearer ${API_KEY}`
                     }
                 }
             );

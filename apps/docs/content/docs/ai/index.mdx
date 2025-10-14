@@ -42,7 +42,7 @@ Use Mesh MCP to access Mesh docs and get coding/debugging help directly in VS Co
       "command": "npx",
       "args": ["-y", "meshjs-mcp"],
       "env": {
-        "OPENAI_API_KEY": "your-openai-api-key",
+        "API_KEY": "your-api-key",
         "MODEL": "your-preferred-model"
       }
     }
@@ -52,13 +52,18 @@ Use Mesh MCP to access Mesh docs and get coding/debugging help directly in VS Co
 
 ### Setup notes
 
-1. Replace your-openai-api-key with your OpenAI API key.
+1. Replace your-api-key with your API key from the supported providers (OpenAI, Gemini, or Anthropic Claude).
 
-2. Set MODEL to the model you want to use.
+2. Set MODEL to the model you want to use from respective provider.
 
 3. Restart your editor after saving the config.
 
-4. Get help to code faster with Mesh MCP and AI editor
+4. Start the server manually (restarting alone doesn't run it):
+   - VS Code: Open Command Palette (Cmd+Shift+P), search "MCP: List Servers", select "mesh-mcp", and choose "Run Server".
+   - Cursor: Similar to VS Code, use the MCP extension's list servers command to run it.
+   - Claude Desktop: The server should start automatically on launch if configured correctly in settings; check the MCP logs if issues arise.
+
+5. Get help to code faster with Mesh MCP and AI editor
 
 ### Example
 

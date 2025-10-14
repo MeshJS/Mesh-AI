@@ -48,11 +48,14 @@ async def ask_mesh_ai(body: ChatCompletionRequest, credentials: HTTPAuthorizatio
   if openai_api_key is None:
     raise ValueError("OpenAI api key is missing")
 
-  openai_service = OpenAIService(openai_api_key)
+  openai_service = OpenAIService(
+    embedding_api_key=openai_api_key,
+    completion_api_key=openai_api_key,
+    completion_model="gpt-4o-mini"
+  )
 
   try:
     question = body.messages[-1].content
-
     embedded_query = await openai_service.embed_query(question)
     context = await get_context(embedded_query, supabase)
     generator = openai_service.get_answer(question=question, context=context)
@@ -72,7 +75,7 @@ async def ask_mesh_ai(body: ChatCompletionRequest, credentials: HTTPAuthorizatio
 
 ###########################################################################################################
 @router.post("/mcp")
-async def ask_mesh_ai(body: MCPRequestBody, authorization: str = Header(None), supabase: AsyncClient = Depends(get_db_client)):
+async def mesh_mcp(body: MCPRequestBody, authorization: str = Header(None), supabase: AsyncClient = Depends(get_db_client)):
 
   if not authorization or not authorization.startswith("Bearer"):
     print("error")
@@ -80,27 +83,39 @@ async def ask_mesh_ai(body: MCPRequestBody, authorization: str = Header(None), s
       status_code=status.HTTP_401_UNAUTHORIZED,
       detail="You are not authorized"
     )
+  
+  embedding_api_key = os.getenv("OPENAI_KEY") or None
+  if embedding_api_key is None:
+    raise ValueError("Embedding api key is missing")
 
   try:
-    OPENAI_KEY = authorization.split(" ")[-1]
-    openai_service = OpenAIService(OPENAI_KEY)
-
+    completion_api_key = authorization.split(" ")[-1]
     question = body.query
     model = body.model
 
+    if model.startswith("gemini"):
+      base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    elif model.startswith("claude"):
+      base_url = "https://api.anthropic.com/v1/"
+
+    openai_service = OpenAIService(
+      embedding_api_key=embedding_api_key,
+      completion_api_key=completion_api_key,
+      completion_model=model,
+      base_url=base_url
+    )
+
     embedded_query = await openai_service.embed_query(question)
     context = await get_context(embedded_query, supabase)
-    response = await openai_service.get_mcp_answer(question=question, context=context, model=model)
+    response = await openai_service.get_mcp_answer(question=question, context=context)
     return response
 
   except (openai.APIError, openai.AuthenticationError, openai.RateLimitError) as e:
-    print(e)
     raise HTTPException(
       status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
       detail=f"An OpenAI API error occurred: {e}"
     )
   except Exception as e:
-    print(e)
     raise HTTPException(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=f"An unexpected error occurred: {e}"
