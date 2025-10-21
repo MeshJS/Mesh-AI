@@ -1,0 +1,24 @@
+name: Automate docs ingestion
+
+on:
+    pull_request:
+        types: [closed]
+        branches:
+            - main
+        paths:
+            - "apps/docs/**"
+
+jobs:
+    trigger_ingest:
+        if: github.event.pull_request.merged == true
+        runs-on: ubuntu-latest
+        steps:
+            - name: Call backend ingest docs endpoint
+              run: |
+                echo "Triggering docs ingestion"
+                response=$(curl --fail --silent --show-error \
+                    -X POST "${{ secrets.BACKEND_BASE_URL }}/ingest" \
+                    -H "Authorization: Bearer ${{ secrets.INGEST_KEY }}" \
+                    -H "Accept: application/json")
+
+                echo "Ingestion response: $response"
