@@ -17,7 +17,7 @@ jobs:
               run: |
                 echo "Triggering docs ingestion"
                 response=$(curl --fail --silent --show-error \
-                    -X POST "${{ secrets.BACKEND_BASE_URL }}/ingest" \
+                    -X POST "${{ secrets.BACKEND_BASE_URL }}/ingest/docs" \
                     -H "Authorization: Bearer ${{ secrets.INGEST_KEY }}" \
                     -H "Accept: application/json")
 
