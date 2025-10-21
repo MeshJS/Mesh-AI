@@ -18,7 +18,7 @@ security = HTTPBearer()
 # ENDPOINTS
 ###########################################################################################################
 
-@router.post("/")
+@router.post("/docs")
 async def ingest_docs(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
 
   token = credentials.credentials
@@ -67,7 +67,7 @@ async def ingest_docs(credentials: HTTPAuthorizationCredentials = Depends(securi
 
 
 @router.post("/packages")
-async def ingest_packages(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
+async def ingest_mesh_packages(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
 
   token = credentials.credentials
   if not token or token != os.getenv("ADMIN_KEY"):
@@ -110,7 +110,7 @@ async def ingest_packages(credentials: HTTPAuthorizationCredentials = Depends(se
 
 
 @router.post("/aiken-docs")
-async def ingest_packages(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
+async def ingest_aiken_docs(credentials: HTTPAuthorizationCredentials = Depends(security), supabase: AsyncClient = Depends(get_db_client)):
 
   token = credentials.credentials
   if not token or token != os.getenv("ADMIN_KEY"):
