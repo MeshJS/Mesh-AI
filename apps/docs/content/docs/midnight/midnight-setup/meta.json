@@ -1,0 +1,6 @@
+{
+  "title": "Midnight Setup",
+  "icon": "WrenchScrewdriverIcon",
+  "pages": ["index", "getting-started", "api", "wallet", "examples"]
+}
+

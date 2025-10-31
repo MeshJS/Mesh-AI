@@ -1,0 +1,25 @@
+---
+title: "Overview"
+description: "Complete development setup for building Midnight Network dApps"
+icon: Cog6ToothIcon
+---
+
+import {linksMidnightSetup} from "@/data/links-midnight";
+import Link from "next/link";
+import {
+  Card,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
+
+<div className="grid md:grid-cols-2 gap-6 items-stretch">
+  {linksMidnightSetup.map((card) => (
+    <Link key={card.title} href={card.link} className="no-underline">
+      <Card className="h-full text-center hover:border-primary/50 transition-colors px-4 py-8">
+        <CardTitle className="font-heading">{card.title}</CardTitle>
+        <CardDescription>{card.desc}</CardDescription>
+      </Card>
+    </Link>
+  ))}
+</div>
+
