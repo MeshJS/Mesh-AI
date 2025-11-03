@@ -34,7 +34,43 @@ export const linksMidnight = [
     title: "Midnight Setup",
     desc: "Complete development setup for building Midnight Network dApps",
     link: "/midnight/midnight-setup"
+  },
+  {
+    title: "Midnight Contracts Wizard",
+    desc: "CLI tool to scaffold Midnight smart contract projects with pre-built templates",
+    link: "/midnight/midnight-contracts-wizard"
   }
+];
+
+export const metaMidnightContractsWizardInstallation = {
+  title: "Installation",
+  desc: "Install the CLI tool and get started with Midnight Contracts Wizard",
+  link: "/midnight/midnight-contracts-wizard/installation",
+};
+
+export const metaMidnightContractsWizardUsage = {
+  title: "Usage",
+  desc: "Learn how to use the interactive wizard to scaffold your project",
+  link: "/midnight/midnight-contracts-wizard/usage",
+};
+
+export const metaMidnightContractsWizardContracts = {
+  title: "Available Contracts",
+  desc: "Explore pre-built contract templates for tokenization, staking, identity, oracle, and lending",
+  link: "/midnight/midnight-contracts-wizard/contracts",
+};
+
+export const metaMidnightContractsWizardProjectStructure = {
+  title: "Project Structure",
+  desc: "Understanding the generated project structure and configuration files",
+  link: "/midnight/midnight-contracts-wizard/project-structure",
+};
+
+export const linksMidnightContractsWizard = [
+  metaMidnightContractsWizardInstallation,
+  metaMidnightContractsWizardUsage,
+  metaMidnightContractsWizardContracts,
+  metaMidnightContractsWizardProjectStructure,
 ];
 
 export const metaMidnight = {
