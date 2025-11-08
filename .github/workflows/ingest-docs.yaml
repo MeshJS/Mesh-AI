@@ -1,16 +1,14 @@
 name: Automate docs ingestion
 
 on:
-    pull_request:
-        types: [closed]
+    push:
         branches:
             - main
         paths:
-            - "apps/docs/**"
+            - "apps/docs/content/docs"
 
 jobs:
     trigger_ingest:
-        if: github.event.pull_request.merged == true
         runs-on: ubuntu-latest
         steps:
             - name: Call backend ingest docs endpoint
