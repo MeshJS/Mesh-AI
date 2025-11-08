@@ -9,15 +9,11 @@ Web3 tools and documentation platform for the Cardano ecosystem.
 - AI Chat functionality
 - Includes llms.txt
 
-**Mesh AI** (`apps/mesh-ai` & `apps/mesh.ai.chat-main`)
-- Discord bot for community knowledge management
-- Question answering from community interactions
-
-**RAG System** (`apps/mesh-rag-ai`)
-- RAG system for discord bot in TS
-
 **Starter Site** (`apps/mesh-startersite`)
 - Application for onboarding non Web3 developers.
+
+**MeshJS MCP** (`apps/meshjs-mcp`)
+- MCP server that integrates with code editors to provide real-time MeshJS documentation and context-aware assistance.
 
 **RAG Backend** (`meshjs-rag`)
 - Python based contextual RAG system
