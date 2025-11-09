@@ -5,7 +5,7 @@ on:
         branches:
             - main
         paths:
-            - "apps/docs/content/docs"
+            - "apps/docs/content/docs/**"
 
 jobs:
     trigger_ingest:
