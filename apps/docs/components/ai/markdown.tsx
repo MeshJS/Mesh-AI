@@ -14,7 +14,6 @@ import {
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { Skeleton } from '../ui/Skeleton';
 
 export interface Processor {
   process: (content: string) => Promise<ReactNode>;
@@ -66,7 +65,7 @@ export function Markdown({ text }: { text: string }) {
   const deferredText = useDeferredValue(text);
 
   return (
-    <Suspense fallback={<Skeleton />}>
+    <Suspense fallback={text}>
       <Renderer text={deferredText} />
     </Suspense>
   );
