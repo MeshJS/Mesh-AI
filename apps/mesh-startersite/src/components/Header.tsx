@@ -33,7 +33,7 @@ export default function Header() {
       {/* Far right: community icons */}
       <div className="flex items-center gap-3 min-w-[160px] justify-end">
         <Link
-          href="https://discord.gg/meshjs"
+          href="https://discord.gg/dH48jH3BKa"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Discord"

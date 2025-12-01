@@ -10,3 +10,5 @@ const config: NextConfig = {
     ];
   },
 };
+
+export default config;

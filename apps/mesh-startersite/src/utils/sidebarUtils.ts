@@ -110,7 +110,7 @@ export function getSidebarSections(
             items: [
               {
                 label: "Join Discord",
-                href: "https://discord.gg/meshjs",
+                href: "https://discord.gg/dH48jH3BKa",
                 difficulty: "beginner",
               },
               {
