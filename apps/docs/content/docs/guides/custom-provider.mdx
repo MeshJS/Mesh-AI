@@ -4,30 +4,29 @@ icon: "guides/implement-custom-provider.png"
 ---
 import Link from "fumadocs-core/link";
 
-As of writing (Dec 2022), Mesh offers a few options: <Link href="https://blockfrost.io/">Blockfrost</Link> or <Link href="https://www.koios.rest/">Koios</Link> (see a list of <Link href="/providers">Providers</Link>). These blockchain providers allow developers to access the Cardano blockchain and retrieve intricate data. For example, they can be used to query the UTXO of a smart contract and use it as part of a transaction, or to submit a signed transaction to the chain.
+Mesh offers options like <Link href="https://blockfrost.io/">Blockfrost</Link> or <Link href="https://www.koios.rest/">Koios</Link> (see <Link href="/providers">Providers</Link>). These providers access the Cardano blockchain to retrieve data, such as smart contract UTXOs, or submit signed transactions.
 
-You can customize a provider to utilize GraphQL, cardano-cli, or websocket with Mesh SDK. Whatever the query method used to obtain the data, it will work perfectly with Mesh SDK so long as the output of the function is compatible with the interface.
+Customize a provider to utilize GraphQL, cardano-cli, or websocket with Mesh SDK. Any query method works if the output conforms to the interface.
 
-This guide will show us how to make a custom provider and how to integrate it with Mesh so that it works in tandem with the transaction builder.
+This guide demonstrates how to create a custom provider and integrate it with Mesh to work with the transaction builder.
 
+## How it works
 
-## How Does It Work?
+JavaScript interfaces define the application structure and syntax for classes. Classes based on an interface must abide by its structure.
 
-JavaScript interfaces are structures that define the interface of an application: they are used to define the syntax for classes to follow. Thus, any classes which are based on an interface must abide by the structure laid out in the interface.
+Providers implement one or more interfaces. For example, the **KoiosProvider** Class implements **IFetcher** and **ISubmitter**. It must strictly conform to their structures.
 
-All providers have one or more interface(s). For example, the **KoiosProvider** Class implements the **IFetcher** and **ISubmitter** interfaces, thus **KoiosProvider** needs to strictly conform to the structure of these two interfaces.
-
-**IFetcher** and **ISubmitter** are implemented in the **KoiosProvider** class using the **implement** keyword:
+**KoiosProvider** implements **IFetcher** and **ISubmitter** using the **implement** keyword:
 
 ```tsx
 export class KoiosProvider implements IFetcher, ISubmitter {}
 ```
 
-To see the latest up-to-date list of interfaces used by Mesh, visit the GitHub repo, <Link href="https://github.com/MeshJS/mesh/tree/main/packages/module/src/common/contracts">packages/module/src/common/contracts</Link>.
+Visit the GitHub repo at <Link href="https://github.com/MeshJS/mesh/tree/main/packages/module/src/common/contracts">packages/module/src/common/contracts</Link> for the latest interfaces.
 
-To create a custom provider class, one must create functions with the same name, input parameters, and return type as the list of defined methods for each interface. Doing so will allow the functions to work as expected when building transactions and any of the other many functions provided in Mesh.
+Create a custom provider class by creating functions with the same name, input parameters, and return type as the defined methods for each interface. This ensures compatibility with Mesh functions.
 
-For example, as of writing, IFetcher has 6 functions (see packages/module/src/common/contracts/fetcher.ts for latest implemention):
+IFetcher has 6 functions (see packages/module/src/common/contracts/fetcher.ts):
 
 ```tsx
 import type { AccountInfo, AssetMetadata, Protocol, UTxO } from '@mesh/common/types';
@@ -42,14 +41,13 @@ export interface IFetcher {
 }
 ```
 
-As such, **KoiosProvider** must implement these functions as defined in **IFetcher**.
+**KoiosProvider** must implement these functions as defined in **IFetcher**.
 
+## Implement your own provider
 
-## Implement Your Own Provider
+Review existing providers to get started. Visit <Link href="https://github.com/MeshJS/mesh/tree/main/packages/module/src/providers">packages/module/src/providers</Link>.
 
-If you want to begin utilizing your own provider, looking at one of the existing providers is the ideal way to get started. Visit the GitHub repo, <Link href="https://github.com/MeshJS/mesh/tree/main/packages/module/src/providers">packages/module/src/providers</Link> to see a list of providers.
-
-This code base below can be used as a starting point:
+Use this codebase as a starting point:
 
 ```tsx
 import { IFetcher, ISubmitter } from "@mesh/common/contracts";
@@ -135,18 +133,17 @@ export class NAMEProvider implements IFetcher, ISubmitter {
 }
 ```
 
-However, please note that it may no longer be valid when the interface is updated. It is also important to note that the interface you require may not be **IFetcher** or **ISubmitter**, but rather other interfaces, depending on the purpose of the provider you are implementing.
+This code may change if the interface updates. Your provider may require different interfaces depending on its purpose.
 
+## Implement constructor and functions
 
-## Implement Constructor and Functions
+Define the constructor.
 
-To start, we want to define the constructor.
+A constructor creates and initializes a class. It runs when creating an object using the **new** keyword.
 
-A constructor is a special function that creates and initializes a class. This constructor gets called when an object is created using the **new** keyword. The purpose of a constructor is to create a new object and set values for any existing object properties.
+Providers usually require basic information, such as the network or API key.
 
-When setting up a provider, it is usually necessary to provide some basic information, such as which network it should be connected to and if an API key is required.
-
-In the case of **KoiosProvider**, we want the users to define the **network** and **version** (optional):
+**KoiosProvider** requires **network** and **version** (optional):
 
 ```tsx
 private readonly _axiosInstance: AxiosInstance;
@@ -158,19 +155,19 @@ constructor(network: 'api' | 'preview' | 'preprod' | 'guild', version = 0) {
 }
 ```
 
-This constructor initializes the Axios instance, with the parameters provided by the user.
+This constructor initializes the Axios instance with user-provided parameters.
 
-Next, we can define each function that is required by the interface. To do this, you must understand the answers to the following:
+Define each function required by the interface. Understand the following:
 
-- how to query the blockchain provider?
-- what are the input parameters of the interface?
-- what are the input parameters needed to query the blockchain provider?
-- what are the expected outputs of the interface?
-- what is being returned by the blockchain provider?
+- Query method for the blockchain provider.
+- Interface input parameters.
+- Blockchain provider input parameters.
+- Expected interface outputs.
+- Blockchain provider return values.
 
-By knowing the inputs and outputs of both the interface and the blockchain provider, one can create the functions that map the data correctly from the blockchain provider to the interface's required data type.
+Map data correctly from the blockchain provider to the interface's required data type.
 
-For example, below we have implemeted the **fetchProtocolParameters()** for **KoiosProvider** to map the responses returned from Koios, transforming the output into the required Protocol data type. This function is used for fetching protocol parameters:
+For example, **KoiosProvider** implements **fetchProtocolParameters()** to map Koios responses to the Protocol data type:
 
 ```tsx
 async fetchProtocolParameters(epoch: number): Promise<Protocol> {
@@ -210,6 +207,6 @@ async fetchProtocolParameters(epoch: number): Promise<Protocol> {
 }
 ```
 
-To complete implementation of your custom provider, simply do the same for every function specified by the interface and test that they work as expected.
+Implement every function specified by the interface and test them.
 
-If you think that the provider you have implemented will benefit the Cardano developer community, <Link href="https://github.com/MeshJS/mesh/pulls">create a pull request</Link>.
+<Link href="https://github.com/MeshJS/mesh/pulls">Create a pull request</Link> if your provider benefits the Cardano developer community.
