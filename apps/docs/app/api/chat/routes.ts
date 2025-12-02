@@ -1,7 +1,7 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { convertToModelMessages, streamText } from 'ai';
 
-//export const runtime = 'edge';
+export const runtime = 'edge';
 const apiKey = process.env.API_KEY;
 const baseURL = process.env.BACKEND_BASE_URL;
 
