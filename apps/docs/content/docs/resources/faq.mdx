@@ -1,0 +1,311 @@
+---
+title: "Frequently Asked Questions"
+description: "Common questions and answers about Mesh - the TypeScript SDK for Cardano blockchain development."
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+# Frequently Asked Questions
+
+Find answers to common questions about Mesh, the open-source TypeScript SDK for Cardano.
+
+## Getting Started
+
+<Accordions>
+<Accordion title="What is MeshJS?">
+Mesh is an open-source TypeScript SDK that makes it easy to build Cardano blockchain applications. It provides a comprehensive suite of tools, React components, wallet integrations, and transaction builders to help developers ship UTXO dApps faster.
+</Accordion>
+
+<Accordion title="Why should I use Mesh for Cardano development?">
+Mesh offers several advantages:
+- **Lightweight**: Less than 60kB bundle size for fast-loading applications
+- **Production-Ready**: Battle-tested with 1M+ downloads
+- **Developer-Friendly**: Simple, intuitive APIs with excellent TypeScript support
+- **Comprehensive**: Everything you need - wallet integration, transaction building, smart contracts
+- **AI-Powered**: Built-in AI features to help you develop faster
+- **Always Updated**: Kept current with the latest Cardano network changes
+</Accordion>
+
+<Accordion title="Is Mesh free to use?">
+Yes! Mesh is completely open-source and free to use for both personal and commercial projects. You can find the source code on [GitHub](https://github.com/MeshJS/mesh).
+</Accordion>
+
+<Accordion title="What are the system requirements?">
+Mesh requires:
+- Node.js 16 or higher
+- npm or yarn package manager
+- TypeScript 4.5+ (recommended)
+- For React projects: React 18+
+</Accordion>
+</Accordions>
+
+## Installation & Setup
+
+<Accordions>
+<Accordion title="How do I install Mesh?">
+Install Mesh using npm or yarn:
+
+```bash
+npm install @meshsdk/core @meshsdk/react
+```
+
+or
+
+```bash
+yarn add @meshsdk/core @meshsdk/react
+```
+
+Then follow our [Getting Started Guide](/guides) for setup instructions.
+</Accordion>
+
+<Accordion title="Can I use Mesh with Next.js?">
+Yes! Mesh works great with Next.js. Check out our [Next.js integration guide](/guides/nextjs) for detailed setup instructions including App Router and Pages Router configurations.
+</Accordion>
+
+<Accordion title="Does Mesh support other frameworks?">
+Yes! While we have official React support, Mesh Core can be used with:
+- Next.js
+- Vue.js
+- Svelte (we have a [Svelte package](/svelte))
+- Angular
+- Vanilla JavaScript/TypeScript
+- Node.js backend applications
+</Accordion>
+</Accordions>
+
+## Wallets & Integration
+
+<Accordions>
+<Accordion title="Which Cardano wallets does Mesh support?">
+Mesh supports all CIP-30 compliant Cardano wallets including:
+- Nami
+- Eternl
+- Flint
+- Typhon
+- Yoroi
+- Lace
+- And many more!
+
+The wallet integration is universal, so any new CIP-30 wallet is automatically supported.
+</Accordion>
+
+<Accordion title="Can I build a wallet application with Mesh?">
+Absolutely! Mesh provides the `MeshWallet` class that allows you to create wallet applications. You can:
+- Generate wallets from mnemonic phrases
+- Import wallets from private keys
+- Work with cardano-cli wallets
+- Build multi-signature applications
+- Create browser extension wallets
+
+Check out the [Wallet documentation](/apis/wallets) for details.
+</Accordion>
+
+<Accordion title="How do I connect a wallet in my dApp?">
+Use the `CardanoWallet` React component for the easiest integration:
+
+```tsx
+import { CardanoWallet } from '@meshsdk/react';
+
+export default function MyApp() {
+  return (
+    <CardanoWallet
+      label="Connect Wallet"
+      persistence={true}
+      onConnected={() => console.log('Wallet connected!')}
+    />
+  );
+}
+```
+
+See our [wallet hooks documentation](/react/wallet-hooks) for more advanced use cases.
+</Accordion>
+</Accordions>
+
+## Smart Contracts & Transactions
+
+<Accordions>
+<Accordion title="Does Mesh support smart contracts?">
+Yes! Mesh provides comprehensive smart contract support for both Plutus and Aiken:
+- Transaction building with smart contract execution
+- Datum and redeemer handling
+- Script validation
+- Multi-asset operations
+- Complex transaction scenarios
+
+Check out our [Smart Contracts guides](/smart-contracts) and [Aiken tutorials](/aiken).
+</Accordion>
+
+<Accordion title="How do I build transactions with Mesh?">
+Mesh provides an intuitive transaction builder API. Here's a simple example:
+
+```typescript
+import { Transaction } from '@meshsdk/core';
+
+const tx = new Transaction({ initiator: wallet })
+  .sendLovelace(
+    'addr1...', // recipient address
+    '1000000'   // 1 ADA in lovelace
+  );
+
+const unsignedTx = await tx.build();
+const signedTx = await wallet.signTx(unsignedTx);
+const txHash = await wallet.submitTx(signedTx);
+```
+
+See the [Transaction Builder documentation](/apis/transaction) for advanced features.
+</Accordion>
+
+<Accordion title="Can I mint NFTs with Mesh?">
+Yes! Mesh makes NFT minting straightforward. We have dedicated guides for:
+- [Minting your first NFT](/guides/nft-collection)
+- [Multi-signature minting](/guides/multisig-minting)
+- Creating NFT collections
+- Metadata standards (CIP-25, CIP-68)
+
+Check out our [NFT guides](/guides) for step-by-step tutorials.
+</Accordion>
+</Accordions>
+
+## Development & Debugging
+
+<Accordions>
+<Accordion title="How do I test my Cardano dApp?">
+Mesh supports testing on:
+- **Cardano Testnet**: Use the preprod or preview test networks
+- **Local DevNet**: Run [Yaci DevNet](/yaci) for faster development
+- **Mainnet**: Deploy when ready for production
+
+Configure the network by setting the `networkId` in your provider.
+</Accordion>
+
+<Accordion title="Where can I find code examples?">
+We provide extensive examples:
+- Throughout our [documentation](/docs)
+- In our [guides section](/guides)
+- On our [GitHub examples repository](https://github.com/MeshJS/examples)
+- Interactive demos on each API page
+
+All examples are tested and ready to use.
+</Accordion>
+
+<Accordion title="How do I get help if I'm stuck?">
+Several resources are available:
+- **Documentation**: Comprehensive guides and API references
+- **Discord Community**: Join our [Discord server](https://discord.gg/dH48jH3BKa) for real-time help
+- **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/MeshJS/mesh/issues)
+- **Stack Overflow**: Tag questions with `meshsdk`
+- **Twitter**: Follow [@meshsdk](https://twitter.com/meshsdk) for updates
+</Accordion>
+</Accordions>
+
+## Performance & Optimization
+
+<Accordions>
+<Accordion title="Is Mesh suitable for production applications?">
+Absolutely! Mesh is production-ready and used by many live Cardano applications. Key production features:
+- Battle-tested code with 1M+ downloads
+- Comprehensive error handling
+- TypeScript for type safety
+- Small bundle size (< 60kB)
+- Regular updates aligned with Cardano network changes
+- Active maintenance and support
+</Accordion>
+
+<Accordion title="How do I optimize bundle size?">
+Mesh is already optimized with tree-shaking support. To minimize bundle size:
+- Import only what you need
+- Use code splitting in your bundler
+- Enable production builds
+- Leverage Next.js automatic optimization
+
+The core Mesh library is less than 60kB minified and gzipped.
+</Accordion>
+
+<Accordion title="Does Mesh work offline?">
+Yes and no:
+- **Offline**: Transaction building, address generation, key management work offline
+- **Online Required**: Querying blockchain data, submitting transactions, fetching UTXOs require internet connectivity
+
+For offline scenarios, consider pre-fetching required data.
+</Accordion>
+</Accordions>
+
+## Commercial Use & Support
+
+<Accordions>
+<Accordion title="Can I use Mesh for commercial projects?">
+Yes! Mesh is open-source (Apache 2.0 and MIT licenses) and free for commercial use. You can build and sell applications using Mesh without any licensing fees.
+</Accordion>
+
+<Accordion title="Do you offer enterprise support?">
+Yes, MeshJS Pte. Ltd. provides enterprise support packages including:
+- Priority support
+- Custom feature development
+- Consulting services
+- Training and onboarding
+- SLA guarantees
+
+Contact us through our [support channels](/about/support-us) for enterprise inquiries.
+</Accordion>
+
+<Accordion title="How can I contribute to Mesh?">
+We welcome contributions! You can:
+- Submit bug reports and feature requests on [GitHub](https://github.com/MeshJS/mesh/issues)
+- Contribute code via pull requests
+- Improve documentation
+- Help other developers in our Discord
+- Share your projects built with Mesh
+- [Support us financially](/about/support-us)
+
+Check our [GitHub repository](https://github.com/MeshJS/mesh) for contribution guidelines.
+</Accordion>
+</Accordions>
+
+## Still Have Questions?
+
+If you can't find the answer you're looking for, please:
+- Join our [Discord community](https://discord.gg/dH48jH3BKa)
+- Ask on [GitHub Discussions](https://github.com/MeshJS/mesh/discussions)
+- Check our comprehensive [documentation](/docs)
+- Reach out on [Twitter](https://twitter.com/meshsdk)
+
+<script type="application/ld+json">
+{JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is MeshJS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Mesh is an open-source TypeScript SDK that makes it easy to build Cardano blockchain applications. It provides a comprehensive suite of tools, React components, wallet integrations, and transaction builders to help developers ship UTXO dApps faster."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Mesh free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Mesh is completely open-source and free to use for both personal and commercial projects."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which Cardano wallets does Mesh support?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Mesh supports all CIP-30 compliant Cardano wallets including Nami, Eternl, Flint, Typhon, Yoroi, Lace, and many more. The wallet integration is universal, so any new CIP-30 wallet is automatically supported."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use Mesh for commercial projects?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Mesh is open-source (Apache 2.0 and MIT licenses) and free for commercial use. You can build and sell applications using Mesh without any licensing fees."
+      }
+    }
+  ]
+})}
+</script>

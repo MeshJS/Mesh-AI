@@ -4,25 +4,22 @@ icon: "guides/standalone.png"
 ---
 import Link from "fumadocs-core/link";
 
-If you're looking to run a javascript files to interact with the blockchain, you can use the tsx package to run the files directly from the command line.
+Run JavaScript/TypeScript files directly to interact with the blockchain using the `tsx` package.
 
-This guide will walk you through setting up a simple project using MeshSDK. By the end, you'll have a working environment that can create a wallet, build and sign transactions, and submit them to the blockchain.
+Set up a simple project using MeshSDK. Create a wallet, build and sign transactions, and submit them to the blockchain.
 
-In this tutorial, we'll cover:
+This tutorial covers:
 
-- Creating a package.json file to manage your project dependencies.
-- Installing the necessary packages, including MeshSDK.
-- Writing a TypeScript script to create a wallet and send a transaction.
-- Running your project to see the results.
+- Creating a `package.json` file.
+- Installing MeshSDK and dependencies.
+- Writing a script to create a wallet and send a transaction.
+- Running the project.
 
-Let's get started!
+## System Setup
 
+### Create `package.json` [!toc]
 
-## System setup
-
-### Create a package.json file [!toc]
-
-First, create a new `package.json` file in the root of your project with the following content:
+Create `package.json` in the project root:
 
 ```tsx
 {
@@ -34,16 +31,16 @@ First, create a new `package.json` file in the root of your project with the fol
 }
 ```
 
-### Install the necessary packages [!toc]
+### Install Packages [!toc]
 
-Open your terminal and run these commands to install the required packages and MeshSDK:
+Install required packages:
 
 ```tsx
 npm install
 npm install tsx @meshsdk/core
 ```
 
-Here's how your `package.json` file should look after installing the packages:
+`package.json` should look like this:
 
 ```tsx
 {
@@ -58,15 +55,14 @@ Here's how your `package.json` file should look after installing the packages:
 }
 ```
 
-- @meshsdk/core: Core functionality for network interactions, wallets, and transactions.
-- tsx: Allows running TypeScript files directly from the command line.
+- `@meshsdk/core`: Core functionality.
+- `tsx`: Runs TypeScript files directly.
 
+## Make a Simple Transaction
 
-## Make a simple transaction
+### Create `index.ts` [!toc]
 
-### Create the index.ts file [!toc]
-
-Next, create a new `index.ts` file in the root of your project and add the following code:
+Create `index.ts` and add the following code:
 
 ```tsx
 import { BlockfrostProvider, MeshWallet, Transaction } from "@meshsdk/core";
@@ -98,22 +94,16 @@ const signedTx = await wallet.signTx(unsignedTx);
 const txHash = await wallet.submitTx(signedTx);
 ```
 
-Explanation:
+### Run Application [!toc]
 
-- Wallet Initialization: The code sets up a new wallet using MeshWallet with a mnemonic key and a blockchain provider.
-- Transaction Creation: A new transaction is created to send 1 ADA to a specific address. The transaction is built, signed, and submitted to the blockchain.
-- Output: The transaction hash is logged to the console.
+Replace `YOUR_KEY_HERE` with a valid Blockfrost key and the mnemonic words with your own. Get a key from <Link href="https://blockfrost.io/">Blockfrost</Link> and generate a mnemonic from <Link href="/apis/wallets/meshwallet#generate-wallet">Mesh</Link>.
 
-### Run Your Application [!toc]
-
-In the code, you must replace `YOUR\_KEY\_HERE` with a valid blockfrost key, and replace the mnemonic words with your own. You can visit <Link href="https://blockfrost.io/">Blockfrost</Link> to get a free API key, and generate a new mnemonic key from the <Link href="/apis/wallets/meshwallet#generate-wallet">Mesh website</Link>.
-
-Finally, start your application by running this command:
+Start the application:
 
 ```tsx
 npm run dev
 ```
 
-If everything is set up correctly, you should see the transaction hash logged to the console. Congratulations! You've successfully created a wallet and sent a transaction using MeshSDK.
+The transaction hash will log to the console.
 
-You can find the complete code for this guide in the <Link href="https://github.com/MeshJS/standalone-template">Mesh GitHub repo</Link>.
+View the complete code in the <Link href="https://github.com/MeshJS/standalone-template">Mesh GitHub repo</Link>.

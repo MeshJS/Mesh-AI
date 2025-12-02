@@ -4,9 +4,9 @@ icon: "guides/node-specific-imports.png"
 ---
 import Link from "fumadocs-core/link";
 
-How to Resolve Node-Specific Imports Errors (e.g., Buffer, TextEncoder) in Browser-Based Projects?
+Resolve Node-Specific Imports Errors (e.g., Buffer, TextEncoder) in Browser-Based Projects.
 
-When working on a web-based project (React, Vue, Svelte, Angular, etc.), you may encounter errors such as:
+Web-based projects (React, Vue, Svelte, Angular) may encounter errors like:
 
 ```bash
 Uncaught ReferenceError: Buffer is not defined
@@ -24,49 +24,44 @@ or
 ReferenceError: TextEncoder is not defined
 ```
 
-These errors often occur because your code (or one of your dependencies) is relying on Node.js-specific modules or globals that are not available by default in a browser environment. Common examples include:
+These errors occur when code relies on Node.js-specific modules unavailable in browsers. Common examples:
 
 - `Buffer`
-- `TextEncoder` / `TextDecoder` (older browsers / polyfills)
+- `TextEncoder` / `TextDecoder`
 - `crypto`
 - `process`
-- Node’s built-in modules (e.g., `fs`, `path`, `stream`)
+- Node’s built-in modules (`fs`, `path`, `stream`)
 
-Modern bundlers and frameworks (Webpack 5, Vite, Next.js, etc.) do **not** automatically include Node polyfills as was common in Webpack 4 and earlier. Below are some guidelines and configurations to fix these errors by adding the required polyfills for a browser environment.
+Modern bundlers (Webpack 5, Vite, Next.js) do **not** automatically include Node polyfills. Use these guidelines to fix errors.
 
 ## 1. General Concepts [!toc]
 
-1. **Polyfill**: A script that implements functionality missing in certain environments.
-
-- Example: Using the `buffer` npm package to polyfill the `Buffer` API in the browser.
-
-2. **Fallback configuration**: Telling your bundler to replace Node modules (like `buffer`) with a browser-friendly version.
-
-3. **npm dependencies**: You may need to install extra packages to provide browser equivalents:
+1. **Polyfill**: Implements missing functionality (e.g., `buffer` package).
+2. **Fallback configuration**: Replaces Node modules with browser-friendly versions.
+3. **npm dependencies**: Install equivalents:
 
 ```tsx
 npm install buffer process stream-browserify crypto-browserify --save
 ```
 
-(You may not need all of them, but this is just an example.)
-
-4. **ES Modules vs CommonJS**: Make sure your imports match your bundler’s expectations. Some polyfills are distributed as ESM (e.g., `import { Buffer } from 'buffer'`) or CommonJS.
+4. **ES Modules vs CommonJS**: Ensure imports match bundler expectations.
 
 ## 2. Webpack [!toc]
 
 ### 2.1 Webpack 5 and Above [!toc]
 
-Webpack 5 **no longer** includes Node polyfills by default. You have two main approaches:
+Webpack 5 excludes Node polyfills. Two approaches exist:
 
 **Approach A: Use NodePolyfillPlugin**
 
-1. Install the plugin:
+Install the plugin:
 
 ```tsx
 npm install node-polyfill-webpack-plugin --save-dev
 ```
 
-2. Add to your `webpack.config.js`:
+Add to `webpack.config.js`:
+
 ```tsx
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
@@ -79,18 +74,20 @@ module.exports = {
 };
 ```
 
-This plugin automatically injects commonly used polyfills (for `Buffer`, `process`, `stream`, etc.) where possible.
+This plugin injects common polyfills.
 
-**Approach B: Use the `resolve.fallback` Setting**
+**Approach B: Use `resolve.fallback`**
 
-For more granular control, you can manually configure fallbacks:
+For granular control, configure fallbacks manually:
 
-1. Install the required polyfills (if not already):
+Install polyfills:
+
 ```tsx
 npm install buffer process stream-browserify --save
 ```
 
-2. Edit `webpack.config.js`:
+Edit `webpack.config.js`:
+
 ```tsx
 module.exports = {
   // ...
@@ -105,23 +102,25 @@ module.exports = {
 };
 ```
 
-3. Import polyfills if needed in your code:
+Import polyfills if needed:
+
 ```tsx
 import { Buffer } from 'buffer';
 global.Buffer = global.Buffer || Buffer;
 ```
 
-
 ## 3. Vite
 
-Vite uses <Link href="https://rollupjs.org/">Rollup</Link> under the hood, which does not automatically provide Node polyfills. However, there is a Rollup plugin that can help.
+Vite uses <Link href="https://rollupjs.org/">Rollup</Link>, which lacks automatic Node polyfills. Use a Rollup plugin.
 
-1. Install the Rollup polyfill plugin:
+Install the plugin:
+
 ```tsx
 npm install rollup-plugin-polyfill-node --save-dev
 ```
 
-2. Add it to `vite.config.js`:
+Add to `vite.config.js`:
+
 ```tsx
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue' // or react, svelte, etc.
@@ -150,21 +149,18 @@ export default defineConfig({
 })
 ```
 
-3. Use the polyfilled global in your code if necessary:
+Use the polyfilled global if necessary:
+
 ```tsx
 import { Buffer } from 'buffer';
 globalThis.Buffer = globalThis.Buffer || Buffer;
 ```
 
-
 ## 4. Next.js
 
-Next.js uses Webpack under the hood, so you can either:
+Next.js uses Webpack. Use `node-polyfill-webpack-plugin` or configure `resolve.fallback`.
 
-1. Use `node-polyfill-webpack-plugin` directly in your `next.config.js`.
-2. Manually configure the `webpack` property in `next.config.js` with `resolve.fallback`.
-
-Example using `node-polyfill-webpack-plugin`:
+Example with `node-polyfill-webpack-plugin`:
 
 ```tsx
 // next.config.js
@@ -180,24 +176,22 @@ module.exports = {
 }
 ```
 
-Now, references to Node modules like `Buffer` or `process` will be polyfilled in the client build.
-
+Node modules like `Buffer` or `process` are now polyfilled.
 
 ## 5. Create React App (CRA)
 
-Create React App **v5** switched to Webpack 5, which does not automatically include Node polyfills. Since CRA does not allow direct modifications to the Webpack config out of the box, you have two main options:
-
-1. **Eject** your CRA setup to edit the Webpack config directly (not recommended usually).
-2. Use a tool like react-app-rewired or craco to override Webpack config without ejecting.
+Create React App **v5** uses Webpack 5. Use `react-app-rewired` or `craco` to override config.
 
 ### 5.1 Example with craco [!toc]
 
-1.Install craco:
+Install craco:
+
 ```tsx
 npm install @craco/craco --save-dev
 ```
 
-2. Update your `package.json` scripts:
+Update `package.json` scripts:
+
 ```tsx
 {
   "scripts": {
@@ -208,7 +202,8 @@ npm install @craco/craco --save-dev
 }
 ```
 
-3. Create `craco.config.js` in your project root:
+Create `craco.config.js`:
+
 ```tsx
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
@@ -232,31 +227,32 @@ module.exports = {
 };
 ```
 
-4. Use your polyfills in code (e.g., `Buffer`):
+Use polyfills:
+
 ```tsx
 import { Buffer } from 'buffer';
 global.Buffer = global.Buffer || Buffer;
 ```
 
-
 ## 6. Angular
 
-Angular CLI also uses Webpack behind the scenes. To polyfill Node modules:
+Angular CLI uses Webpack. Polyfill Node modules:
 
-1. Install necessary polyfills:
+Install polyfills:
+
 ```tsx
 npm install buffer process stream-browserify --save
 ```
 
-2. Edit `angular.jso`n to include the polyfill files or modify the Webpack config via a custom builder or a third-party library (e.g., ngx-build-plus).
+Edit `angular.json` or use `ngx-build-plus`.
 
-An example using `ngx-build-plus` to extend the Angular CLI’s Webpack config:
+Example with `ngx-build-plus`:
 
 ```tsx
 npm install ngx-build-plus --save-dev
 ```
 
-Then in your `angular.json`:
+In `angular.json`:
 
 ```tsx
 {
@@ -286,7 +282,7 @@ Then in your `angular.json`:
 }
 ```
 
-Create or update a `webpack.config.js`:
+Create or update `webpack.config.js`:
 
 ```tsx
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
@@ -305,12 +301,11 @@ module.exports = {
 };
 ```
 
-Then run your Angular commands via `ng build --extra-webpack-config webpack.config.js --output-hashing=none`.
-
+Run Angular commands via `ng build --extra-webpack-config webpack.config.js --output-hashing=none`.
 
 ## 7. Svelte
 
-SvelteKit or a custom Svelte setup may use Vite or Rollup. Use the Vite instructions (Section **3** above) or directly add the polyfill plugin if you’re using a plain Rollup config:
+SvelteKit uses Vite or Rollup. Use Vite instructions (Section 3) or add the plugin to Rollup config:
 
 ```tsx
 // rollup.config.js

@@ -28,7 +28,7 @@ export default function CommunitySection() {
             <span className="text-sm font-medium">Twitter</span>
           </motion.a>
           <motion.a
-            href="https://discord.gg/meshjs"
+            href="https://discord.gg/dH48jH3BKa"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 text-text-secondary hover:text-primary transition-colors duration-200"

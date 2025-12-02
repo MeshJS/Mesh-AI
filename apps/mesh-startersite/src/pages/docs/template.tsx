@@ -50,7 +50,7 @@ const communityCards = [
     title: "Discord Community",
     description: "Join our Discord server for real-time help and discussions",
     icon: <MessageCircle className="w-6 h-6" />,
-    href: "https://discord.gg/meshjs",
+    href: "https://discord.gg/dH48jH3BKa",
   },
   {
     title: "Twitter Updates",

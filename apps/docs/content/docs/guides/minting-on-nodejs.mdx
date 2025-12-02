@@ -4,39 +4,39 @@ icon: "guides/minting-application.png"
 ---
 import Link from "fumadocs-core/link";
 
-In this guide, we will be minting some assets with **MeshWallet** on Node.js.
+Mint assets with **MeshWallet** on Node.js.
 
 ## System setup
 
 ### 1. Visual Studio Code [!toc]
 
-Visual Studio Code is a code editor made by Microsoft. Download and install <Link href="https://code.visualstudio.com/">Visual Studio Code</Link> for code editing.
+Download and install <Link href="https://code.visualstudio.com/">Visual Studio Code</Link>.
 
 ### 2. Node.js [!toc]
 
-Node.js is a cross-platform JavaScript runtime environment that runs on the V8 engine and executes JavaScript code. Install the Long-Term Support (LTS) version of <Link href="https://nodejs.org/en">Node.js</Link> (as of writing v22.18.0).
+Install the Long-Term Support (LTS) version of <Link href="https://nodejs.org/en">Node.js</Link>.
 
 ## Project setup
 
-Firstly, create a new folder, and initialize a Node.js project:
+Create a new folder and initialize a Node.js project:
 
 ```tsx
 npm init
 ```
 
-Next, install the **typescript** and **Mesh** package:
+Install **typescript** and **Mesh**:
 
 ```tsx
 npm install --dev typescript && npm install @meshsdk/core
 ```
 
-Then, initialize Typescript which is require to compile a TypeScript:
+Initialize TypeScript:
 
 ```tsx
 npx tsc --init
 ```
 
-After that, open the **tsconfig.json** file and define the following configurations:
+Open **tsconfig.json** and define the configurations:
 
 ```tsx
 {
@@ -49,7 +49,7 @@ After that, open the **tsconfig.json** file and define the following configurati
 }
 ```
 
-Finally, open the **package.json** file add the following configurations:
+Open **package.json** and add the configurations:
 
 ```tsx
 {
@@ -62,12 +62,11 @@ Finally, open the **package.json** file add the following configurations:
 }
 ```
 
-
 ## Build the minting transaction
 
 ### 1. Create list of NFT's metadata [!toc]
 
-Create a file named **metadata.ts** and define the metadata for our NFTs:
+Create `metadata.ts` and define the NFT metadata:
 
 ```tsx
 export const metadata: { [assetName: string]: any } = {
@@ -97,7 +96,7 @@ export const metadata: { [assetName: string]: any } = {
 
 ### 2. Create a list of recipients [!toc]
 
-Create a file named **recipients.ts** and specify the list of recipients:
+Create `recipients.ts` and specify the recipients:
 
 ```tsx
 export const recipients: { [recipient: string]: string } = {
@@ -112,7 +111,7 @@ export const recipients: { [recipient: string]: string } = {
 
 ### 3. Create main.ts and import the packages: [!toc]
 
-Lets create a file named **main.ts** and import the packages we need and the files we have created:
+Create `main.ts` and import the required packages and files:
 
 ```tsx
 import {
@@ -131,7 +130,7 @@ import { recipients } from './recipients.js';
 
 ### 4. Define variables [!toc]
 
-Next, lets define some variables we will need for minting. You should be using your own wallet if you want to mint a collection of your own. For this example, these are the variables we need:
+Define minting variables. Use your own wallet to mint your own collection. This example uses:
 
 ```tsx
 const demoCLIKey = {
@@ -146,15 +145,15 @@ const blockfrostKey = 'BLOCKFROST_KEY_HERE';
 
 ### 5. Build the minting transaction [!toc]
 
-In this guide, we are building a minting transaction, but it could be any transactions. <Link href="/apis/transaction">Learn more about Transaction</Link>.
+This guide builds a minting transaction, but the process applies to any transaction. <Link href="/apis/transaction">Learn more about Transaction</Link>.
 
-Firstly, we need a blockchain provider, in this guide, we will import **BlockfrostProvider**, but you can use other providers as well:
+Initialize a blockchain provider. This guide uses **BlockfrostProvider**:
 
 ```tsx
 const provider = new BlockfrostProvider(blockfrostKey);
 ```
 
-Next, lets initialize the **MeshWallet** and its forging script. In this example, we initialize using CLI generated keys, but you can also load your wallet with private key and mnemonic phrases. <Link href="/apis/wallets/meshwallet">Learn more about MeshWallet</Link>.
+Initialize **MeshWallet** and its forging script. This example uses CLI generated keys, but you can load your wallet with a private key or mnemonic phrase. <Link href="/apis/wallets/meshwallet">Learn more about MeshWallet</Link>.
 
 ```tsx
 const wallet = new MeshWallet({
@@ -173,7 +172,7 @@ const walletAddress = wallet.getPaymentAddress();
 const forgingScript = ForgeScript.withOneSignature(walletAddress);
 ```
 
-Then, lets create a new Transaction, loop through each recipient, and mint an assets with **mintAsset** (<Link href="/apis/transaction">Learn more about minting transactions</Link>):
+Create a new Transaction, loop through each recipient, and mint assets with **mintAsset** (<Link href="/apis/transaction">Learn more about minting transactions</Link>):
 
 ```tsx
 const tx = new Transaction({ initiator: wallet });
@@ -192,7 +191,7 @@ for (let recipient in recipients) {
 }
 ```
 
-Finally, lets sign and submit the transaction:
+Sign and submit the transaction:
 
 ```tsx
 const unsignedTx = await tx.build();
@@ -200,10 +199,10 @@ const signedTx = await wallet.signTx(unsignedTx, false);
 const txHash = await wallet.submitTx(signedTx);
 ```
 
-To execute the script, run the following on your Terminal:
+Execute the script:
 
 ```tsx
 npm start
 ```
 
-For a successful transaction, you should get a transaction hash, you should have minted multiple assets in a single transaction, and sent them to multiple recipients.
+A successful transaction returns a transaction hash, mints multiple assets, and sends them to multiple recipients.
