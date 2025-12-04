@@ -1,11 +1,7 @@
 name: Automate docs ingestion
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - "apps/docs/content/docs/**"
+    workflow_dispatch:
 
 jobs:
     trigger_ingest:

@@ -1,6 +1,6 @@
 {
   "name": "meshjs-mcp",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "type": "module",
   "description": "Provides MeshJS library documentation for user's queries.",
   "main": "dist/index.js",
