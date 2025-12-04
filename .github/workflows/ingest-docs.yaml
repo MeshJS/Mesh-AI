@@ -1,22 +1,19 @@
-name: Automate docs ingestion
+# manual trigger if webhook doesn't work
+name: Automate docs ingestion (Backup)
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - "apps/docs/content/docs/**"
+  workflow_dispatch:
 
 jobs:
-    trigger_ingest:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Call backend ingest docs endpoint
-              run: |
-                echo "Triggering docs ingestion"
-                response=$(curl --fail --silent --show-error \
-                    -X POST "${{ secrets.BACKEND_BASE_URL }}/ingest/docs" \
-                    -H "Authorization: Bearer ${{ secrets.INGEST_KEY }}" \
-                    -H "Accept: application/json")
+  trigger_ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manually trigger mimir-rag ingestion
+        run: |
+          echo "Manually triggering docs ingestion"
+          response=$(curl --fail --silent --show-error \
+              -X POST "${{ secrets.BACKEND_BASE_URL }}/ingest" \
+              -H "x-api-key: ${{ secrets.MIMIR_API_KEY }}" \
+              -H "Accept: application/json")
 
-                echo "Ingestion response: $response"
+          echo "Ingestion response: $response"
