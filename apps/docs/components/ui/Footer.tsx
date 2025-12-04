@@ -4,6 +4,7 @@ import {linksApi} from "@/data/links-api";
 import {metaGuides} from "@/data/links-guides";
 import {metaSolutions} from  "@/data/links-solutions";
 import {metaResources} from  "@/data/links-resources";
+import {metaCourse} from  "@/data/links-course";
 import {linksAbout} from  "@/data/links-about";
 
 export default function Footer() {
@@ -65,6 +66,15 @@ export default function Footer() {
             <Link href={metaGuides.link} className='font-bold'>{metaGuides.title.toUpperCase()}</Link>
             {
               "items" in metaGuides && metaGuides.items.map((item) => (
+                <Link href={item.link} key={item.link}>{item.title}</Link>
+              ))
+            }
+          </div>
+
+          <div className='flex flex-col gap-3 [&>a]:hover:underline' key={metaCourse.link}>
+            <Link href={metaCourse.link} className='font-bold'>{metaCourse.title.toUpperCase()}</Link>
+            {
+              "items" in metaCourse && metaCourse.items.map((item) => (
                 <Link href={item.link} key={item.link}>{item.title}</Link>
               ))
             }

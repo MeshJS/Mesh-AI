@@ -213,10 +213,11 @@ const roleName: Record<string, string> = {
 
 function Message({
   message,
+  isStreaming,
   ...props
-}: { message: UIMessage } & ComponentProps<'div'>) {
+}: { message: UIMessage; isStreaming?: boolean } & ComponentProps<'div'>) {
   let markdown = '';
-  let links: z.infer<typeof ProvideLinksToolSchema>['links'] = [];
+  let sources: Array<{ url: string; title?: string; sourceId: string }> = [];
 
   for (const part of message.parts ?? []) {
     if (part.type === 'text') {
@@ -224,10 +225,17 @@ function Message({
       continue;
     }
 
-    if (part.type === 'tool-provideLinks' && part.input) {
-      links = (part.input as z.infer<typeof ProvideLinksToolSchema>).links;
+    if (part.type === 'source-url') {
+      sources.push({
+        url: part.url,
+        title: part.title,
+        sourceId: part.sourceId
+      });
     }
   }
+
+  // Only show sources if message is not currently streaming (i.e., completed)
+  const showSources = !isStreaming;
 
   return (
     <div {...props}>
@@ -244,29 +252,34 @@ function Message({
       <div className="prose text-sm">
         <Markdown text={markdown} />
       </div>
-      {links && links.length > 0 ? (
+      {showSources && sources.length > 0 && (
         <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-          {links.map((item, i) => (
+          {sources.map((source, i) => (
             <Link
-              key={i}
-              href={item.url}
+              key={source.sourceId || i}
+              href={source.url}
               className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
-              <p className="font-medium">{item.title}</p>
-              <p className="text-fd-muted-foreground">Reference {item.label}</p>
+              <p className="font-medium">{source.title || 'Source'}</p>
+              <p className="text-fd-muted-foreground">Reference {i + 1}</p>
             </Link>
           ))}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
 
 export function AISearch(props: DialogProps) {
+  const apiUrl = '/api/chat';
+
   const chat = useChat({
     id: 'search',
     transport: new DefaultChatTransport({
-      api: '/api/chat',
+      api: apiUrl,
+      body: {
+        stream: true,
+      },
     }),
     messages: getInitialChatHistory()
   });
@@ -321,8 +334,12 @@ export function AISearch(props: DialogProps) {
               }}
             >
               <div className="flex flex-col gap-4 p-3">
-                {messages.map((item) => (
-                  <Message key={item.id} message={item} />
+                {messages.map((item, index) => (
+                  <Message
+                    key={item.id}
+                    message={item}
+                    isStreaming={index === messages.length - 1 && (chat.status === 'streaming' || chat.status === 'submitted')}
+                  />
                 ))}
               </div>
             </List>
@@ -348,10 +365,15 @@ export function AISearch(props: DialogProps) {
 
 
 export function MobileAISearch(props: DialogProps) {
+  const apiUrl = '/api/chat';
+
   const chat = useChat({
     id: 'search',
     transport: new DefaultChatTransport({
-      api: '/api/chat',
+      api: apiUrl,
+      body: {
+        stream: true,
+      },
     }),
     messages: getInitialChatHistory()
   });
@@ -407,8 +429,12 @@ export function MobileAISearch(props: DialogProps) {
                 className='max-h-[calc(100dvh-240px)]'
               >
                 <div className="flex flex-col gap-4 p-3">
-                  {messages.map((item) => (
-                    <Message key={item.id} message={item} />
+                  {messages.map((item, index) => (
+                    <Message
+                      key={item.id}
+                      message={item}
+                      isStreaming={index === messages.length - 1 && (chat.status === 'streaming' || chat.status === 'submitted')}
+                    />
                   ))}
                 </div>
               </List>

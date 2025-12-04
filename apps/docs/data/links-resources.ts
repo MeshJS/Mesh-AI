@@ -5,11 +5,11 @@ import {
   StarIcon,
 } from "@heroicons/react/24/solid";
 
-import { metaGuides } from "./links-guides";
+import { metaCourse } from "./links-course";
 import { Wand2Icon } from "lucide-react";
 
 export const linksResources = [
-  metaGuides,
+  metaCourse,
   {
     title: "AI Features",
     desc: "We've built AI tools to help you work with Mesh faster",

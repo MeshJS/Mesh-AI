@@ -13,13 +13,21 @@ import {
 } from "@/components/ui/card";
 
 <div className="grid md:grid-cols-2 gap-6 items-stretch">
-  {linksGuides.map((card) => (
-    <Link key={card.title} href={card.link} className="no-underline">
-      <Card className="h-full text-center hover:border-primary/50 transition-colors px-4 py-8">
-        <CardTitle className="font-heading">{card.title}</CardTitle>
-        <CardDescription>{card.desc}</CardDescription>
-      </Card>
-    </Link>
-  ))}
+  {linksGuides.map((card) => {
+    const Icon = card.icon;
+    return (
+      <Link key={card.title} href={card.link} className="no-underline">
+        <Card className="h-full text-center hover:border-primary/50 transition-colors px-4 py-8">
+          {Icon && (
+            <div className="flex justify-center mb-4">
+              <Icon className="w-12 h-12 text-primary" />
+            </div>
+          )}
+          <CardTitle className="font-heading">{card.title}</CardTitle>
+          <CardDescription>{card.desc}</CardDescription>
+        </Card>
+      </Link>
+    );
+  })}
 </div>
 

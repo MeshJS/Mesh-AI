@@ -1,0 +1,15 @@
+{
+  "title": "Lessons",
+  "pages": [
+    "01-wallet-send-lovelace",
+    "02-multisig",
+    "03-aiken-contracts",
+    "04-contract-testing",
+    "05-avoid-redundant-validation",
+    "06-interpreting-blueprint",
+    "07-vesting",
+    "08-plutus-nft",
+    "09-hydra",
+    "10-web3-services"
+  ]
+}

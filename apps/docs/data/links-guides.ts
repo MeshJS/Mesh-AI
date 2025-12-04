@@ -1,4 +1,17 @@
-import { BookOpenIcon } from "@heroicons/react/24/solid";
+import {
+  BookOpenIcon,
+  GlobeAltIcon,
+  CommandLineIcon,
+  KeyIcon,
+  ShieldCheckIcon,
+  CloudIcon,
+  ShoppingCartIcon,
+  CodeBracketIcon,
+  DocumentTextIcon,
+  ClockIcon,
+  WrenchScrewdriverIcon,
+  PhotoIcon,
+} from "@heroicons/react/24/solid";
 
 export const guidenextjs = {
   title: "Develop your first Web3 App",
@@ -6,6 +19,7 @@ export const guidenextjs = {
   link: "/guides/nextjs",
   thumbnail: "/guides/develop-first-web-app.png",
   image: "/guides/laptop-g44c60b4ed_1280.jpg",
+  icon: GlobeAltIcon,
 };
 export const guidenodejs = {
   title: "Minting Application",
@@ -13,6 +27,7 @@ export const guidenodejs = {
   link: "/guides/minting-on-nodejs",
   thumbnail: "/guides/minting-application.png",
   image: "/guides/art-g68512aa8d_1280.jpg",
+  icon: CommandLineIcon,
 };
 export const guideminting = {
   title: "Multi-Signatures Transaction",
@@ -20,6 +35,7 @@ export const guideminting = {
   link: "/guides/multisig-minting",
   thumbnail: "/guides/multi-signatures-transaction.png",
   image: "/guides/keys-g25a80b203_1280.jpg",
+  icon: KeyIcon,
 };
 export const guideownership = {
   title: "Prove Wallet Ownership",
@@ -27,6 +43,7 @@ export const guideownership = {
   link: "/guides/prove-wallet-ownership",
   thumbnail: "/guides/cryptographically-prove-wallet-ownership.png",
   image: "/guides/door-gf0710cc4d_640.jpg",
+  icon: ShieldCheckIcon,
 };
 export const guideprovider = {
   title: "Implement Custom Provider",
@@ -34,6 +51,7 @@ export const guideprovider = {
   link: "/guides/custom-provider",
   thumbnail: "/guides/implement-custom-provider.png",
   image: "/guides/service-g2192fe835_640.jpg",
+  icon: CloudIcon,
 };
 export const guidetransactions = {
   title: "Smart Contract Transactions",
@@ -41,6 +59,7 @@ export const guidetransactions = {
   link: "/guides/smart-contract-transactions",
   thumbnail: "/guides/smart-contract-transactions.png",
   image: "/guides/supermarket-g42acef7c1_640.jpg",
+  icon: ShoppingCartIcon,
 };
 export const guideaiken = {
   title: "Aiken Hello World",
@@ -48,6 +67,7 @@ export const guideaiken = {
   link: "/guides/aiken",
   thumbnail: "/guides/aiken.png",
   image: "/guides/arches-1866598_1280.jpg",
+  icon: CodeBracketIcon,
 };
 export const guidestandalone = {
   title: "Executing a standalone script",
@@ -55,6 +75,7 @@ export const guidestandalone = {
   link: "/guides/standalone",
   thumbnail: "/guides/standalone.png",
   image: "/guides/salt-harvesting-3060093_1280.jpg",
+  icon: DocumentTextIcon,
 };
 export const guideVesting = {
   title: "Vesting Script End-to-End",
@@ -62,6 +83,7 @@ export const guideVesting = {
   link: "/guides/vesting",
   thumbnail: "/guides/vesting.png",
   image: "/guides/laptop-3196481_640.jpg",
+  icon: ClockIcon,
 };
 export const guideNodeSpecificImports = {
   title: "Resolve Node-Specific Imports Errors",
@@ -69,6 +91,7 @@ export const guideNodeSpecificImports = {
   link: "/guides/node-specific-imports",
   thumbnail: "/guides/node-specific-imports.png",
   image: "/guides/electrician-3087536_640.jpg",
+  icon: WrenchScrewdriverIcon,
 };
 export const guideMintNftCollection = {
   title: "Mint an NFT Collection",
@@ -76,6 +99,7 @@ export const guideMintNftCollection = {
   link: "/guides/nft-collection",
   thumbnail: "/guides/mint-nft-collection.png",
   image: "/guides/laptop-3196481_640.jpg",
+  icon: PhotoIcon,
 };
 
 export const linksGuides = [
