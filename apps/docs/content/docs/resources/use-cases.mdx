@@ -54,24 +54,7 @@ Mesh simplifies NFT creation and distribution:
 - **Generative Art**: Create unique combinations programmatically
 - **Metadata Management**: CIP-25 and CIP-68 compliance
 
-**Example Implementation:**
-```typescript
-const { Transaction } = require('@meshsdk/core');
-
-const tx = new Transaction({ initiator: wallet })
-  .mintAsset(
-    forgingScript,
-    {
-      assetName: 'MyNFT',
-      assetQuantity: '1',
-      metadata: {
-        name: 'My Amazing NFT',
-        image: 'ipfs://...',
-        description: 'A unique digital collectible'
-      }
-    }
-  );
-```
+**Implementation tip:** For minting NFTs in your own project, use the modern `MeshTxBuilder` APIs shown in the [Mint and Burn Assets guide](/apis/txbuilder/minting) rather than the legacy `Transaction` class.
 
 ### Secondary Marketplaces
 
