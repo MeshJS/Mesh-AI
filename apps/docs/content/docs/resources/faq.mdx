@@ -42,16 +42,22 @@ Mesh requires:
 
 <Accordions>
 <Accordion title="How do I install Mesh?">
-Install Mesh using npm or yarn:
+Install Mesh Core using npm or yarn:
 
 ```bash
-npm install @meshsdk/core @meshsdk/react
+npm install @meshsdk/core
 ```
 
 or
 
 ```bash
-yarn add @meshsdk/core @meshsdk/react
+yarn add @meshsdk/core
+```
+
+If you're building a React app, you can also install the optional React bindings:
+
+```bash
+npm install @meshsdk/react
 ```
 
 Then follow our [Getting Started Guide](/guides) for setup instructions.
@@ -135,23 +141,30 @@ Check out our [Smart Contracts guides](/smart-contracts) and [Aiken tutorials](/
 </Accordion>
 
 <Accordion title="How do I build transactions with Mesh?">
-Mesh provides an intuitive transaction builder API. Here's a simple example:
+Mesh provides an intuitive transaction builder API via `MeshTxBuilder`. Here's a simple example for sending ADA:
 
 ```typescript
-import { Transaction } from '@meshsdk/core';
+import { MeshTxBuilder } from '@meshsdk/core';
 
-const tx = new Transaction({ initiator: wallet })
-  .sendLovelace(
+const txBuilder = new MeshTxBuilder({
+  fetcher: provider,
+  verbose: true,
+});
+
+const unsignedTx = await txBuilder
+  .txOut(
     'addr1...', // recipient address
-    '1000000'   // 1 ADA in lovelace
-  );
+    [{ unit: 'lovelace', quantity: '1000000' }] // 1 ADA in lovelace
+  )
+  .changeAddress(changeAddress)
+  .selectUtxosFrom(utxos)
+  .complete();
 
-const unsignedTx = await tx.build();
 const signedTx = await wallet.signTx(unsignedTx);
 const txHash = await wallet.submitTx(signedTx);
 ```
 
-See the [Transaction Builder documentation](/apis/transaction) for advanced features.
+See the [`MeshTxBuilder` documentation](/apis/txbuilder) for advanced features.
 </Accordion>
 
 <Accordion title="Can I mint NFTs with Mesh?">
@@ -234,17 +247,6 @@ For offline scenarios, consider pre-fetching required data.
 <Accordions>
 <Accordion title="Can I use Mesh for commercial projects?">
 Yes! Mesh is open-source (Apache 2.0 and MIT licenses) and free for commercial use. You can build and sell applications using Mesh without any licensing fees.
-</Accordion>
-
-<Accordion title="Do you offer enterprise support?">
-Yes, MeshJS Pte. Ltd. provides enterprise support packages including:
-- Priority support
-- Custom feature development
-- Consulting services
-- Training and onboarding
-- SLA guarantees
-
-Contact us through our [support channels](/about/support-us) for enterprise inquiries.
 </Accordion>
 
 <Accordion title="How can I contribute to Mesh?">
