@@ -32,7 +32,36 @@ AI code editors like Cursor let you add and index documentation, so you can refe
 
 Use Mesh MCP to access Mesh docs and get coding/debugging help directly in VS Code, Cursor, or Claude Desktop.
 
-### Add this to your MCP server settings:
+### Quick Install (Cursor)
+
+If you're using Cursor, you can install Mesh MCP with one click:
+<a href="https://cursor.com/en-US/install-mcp?name=mesh-mcp&config=eyJuYW1lIjoibWVzaC1tY3Atc2VydmVyIiwiZW52Ijp7IkFQSV9LRVkiOiJ5b3VyLWFwaS1rZXkiLCJNT0RFTCI6InlvdXItcHJlZmVycmVkLW1vZGVsIn0sImNvbW1hbmQiOiJucHggLXkgbWVzaGpzLW1jcCJ9" className="dark:hidden inline-block" style={{ margin: 0, padding: 0, lineHeight: 0 }}>
+  <img src="https://cursor.com/deeplink/mcp-install-light.svg" alt="Add mesh-mcp MCP server to Cursor" style={{ height: '36px', margin: 0, padding: 0, display: 'block' }} />
+</a>
+<a href="https://cursor.com/en-US/install-mcp?name=mesh-mcp&config=eyJuYW1lIjoibWVzaC1tY3Atc2VydmVyIiwiZW52Ijp7IkFQSV9LRVkiOiJ5b3VyLWFwaS1rZXkiLCJNT0RFTCI6InlvdXItcHJlZmVycmVkLW1vZGVsIn0sImNvbW1hbmQiOiJucHggLXkgbWVzaGpzLW1jcCJ9" className="hidden dark:inline-block" style={{ margin: 0, padding: 0, lineHeight: 0 }}>
+  <img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Add mesh-mcp MCP server to Cursor" style={{ height: '36px', margin: 0, padding: 0, display: 'block' }} />
+</a>
+
+**Note:** After clicking the button, you'll need to configure your `API_KEY` and `MODEL` environment variables in Cursor's MCP settings.
+
+### CLI Setup (Claude Desktop)
+
+If you have the `claude` CLI installed, you can add Mesh MCP with:
+
+```bash
+claude mcp add-json mesh-mcp '{
+  "command": "npx",
+  "args": ["-y", "meshjs-mcp"],
+  "env": {
+    "API_KEY": "your-api-key",
+    "MODEL": "your-preferred-model"
+  }
+}'
+```
+
+### Manual Setup
+
+Add this to your MCP server settings:
 
 ```ts
 {
