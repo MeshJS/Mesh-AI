@@ -4,7 +4,7 @@ import {
   NavbarMenuLink,
   NavbarMenuTrigger,
 } from 'fumadocs-ui/layouts/home/navbar';
-import { LinkItemType } from 'fumadocs-ui/layouts/links';
+import { LinkItemType } from '@fumadocs/ui/link-item';
 import {linksApi} from "@/data/links-api";
 import {linksResources} from "@/data/links-resources";
 import {linksSolutions} from "@/data/links-solutions";

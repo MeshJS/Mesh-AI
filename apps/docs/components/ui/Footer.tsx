@@ -10,9 +10,9 @@ import {linksAbout} from  "@/data/links-about";
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-fd-card py-12 text-muted-foreground bg-transparent dark:bg-transparent backdrop-blur-3xl">
-      <div className="container flex flex-col gap-12">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-10">
-          <div className="flex flex-col gap-2 min-w-[200px]">
+      <div className="w-full flex flex-col gap-12 items-center px-4">
+        <div className="w-full max-w-7xl">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <Image
                 src="/logo-mesh/black/logo-mesh-vector.svg"
@@ -29,7 +29,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-10 gap-y-20">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-16 gap-y-20 w-full max-w-7xl">
 
           {
             linksApi.map((item) => (

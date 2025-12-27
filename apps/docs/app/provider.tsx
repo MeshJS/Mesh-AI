@@ -1,15 +1,8 @@
 'use client';
 
-import { RootProvider } from 'fumadocs-ui/provider';
-import dynamic from 'next/dynamic';
+import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { ReactNode } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { SharedProps } from 'fumadocs-ui/contexts/search';
-
-const SearchDialog = dynamic<SharedProps>(
-  () => import('../components/ai/search').then(mod => mod.AISearch),
-  { ssr: false }
-);
 
 const inject = `
 const urlParams = new URLSearchParams(window.location.search);
