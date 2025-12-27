@@ -1,4 +1,4 @@
-# Mimir
+# Mesh AI
 
 Web3 tools and documentation platform for the Cardano ecosystem.
 
