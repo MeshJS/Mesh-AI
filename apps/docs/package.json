@@ -8,6 +8,9 @@
     "start": "next start",
     "postinstall": "fumadocs-mdx"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.1",
     "@ai-sdk/react": "^3.0.3",

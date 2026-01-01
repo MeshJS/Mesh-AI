@@ -5,6 +5,9 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  
+  // Explicitly set the build output directory to ensure .next is created here
+  distDir: '.next',
 
   // Security and SEO headers
   async headers() {
