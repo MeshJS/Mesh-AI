@@ -51,7 +51,7 @@ If you have the `claude` CLI installed, you can add Mesh MCP with:
 ```bash
 claude mcp add-json mesh-mcp '{
   "command": "npx",
-  "args": ["-y", "meshjs-mcp"],
+  "args": ["-y", "mimir-mcp"],
   "env": {
     "API_KEY": "your-api-key",
     "MODEL": "your-preferred-model"
@@ -69,7 +69,7 @@ Add this to your MCP server settings:
     "mesh-mcp": {
       "name": "mesh-mcp-server",
       "command": "npx",
-      "args": ["-y", "meshjs-mcp"],
+      "args": ["-y", "mimir-mcp"],
       "env": {
         "API_KEY": "your-api-key",
         "MODEL": "your-preferred-model"
