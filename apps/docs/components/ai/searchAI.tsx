@@ -11,16 +11,21 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Loader2, MessageCircleIcon, RefreshCw, Send, X } from 'lucide-react';
+import { Loader2, MessageCircleIcon, RefreshCw, Send, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import Link from 'fumadocs-core/link';
 import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
 import type { ProvideLinksToolSchema } from '@/lib/chat/inkeep-qa-schema';
 import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
 import { Markdown } from './markdown';
 import { Presence } from '@radix-ui/react-presence';
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from '@/components/ai/sources';
 
 import { iconResolver } from "@/lib/iconResolver";
 
@@ -262,6 +267,9 @@ function Message({
   isStreaming,
   ...props
 }: { message: UIMessage; isStreaming?: boolean } & ComponentProps<'div'>) {
+  const [showAllSources, setShowAllSources] = useState(false);
+  const INITIAL_SOURCES_COUNT = 3;
+  
   let markdown = '';
   let links: z.infer<typeof ProvideLinksToolSchema>['links'] = [];
   let sources: Array<{ url: string; title?: string; sourceId: string }> = [];
@@ -286,8 +294,37 @@ function Message({
     }
   }
 
+  // Combine all sources into a single array
+  const allSources: Array<{ url: string; title: string; label?: string; sourceId?: string }> = [];
+  
+  // Add links from tool-provideLinks
+  if (links && links.length > 0) {
+    links.forEach((item) => {
+      allSources.push({
+        url: item.url,
+        title: item.title || 'Source',
+        label: item.label || undefined,
+      });
+    });
+  }
+  
+  // Add source-url sources
+  sources.forEach((source, i) => {
+    allSources.push({
+      url: source.url,
+      title: source.title || 'Source',
+      sourceId: source.sourceId,
+      label: `Reference ${i + 1}`,
+    });
+  });
+
   // Only show sources if message is not currently streaming (i.e., completed)
-  const showSources = !isStreaming && ((links && links.length > 0) || sources.length > 0);
+  const showSources = !isStreaming && allSources.length > 0;
+  const hasMoreSources = allSources.length > INITIAL_SOURCES_COUNT;
+  const displayedSources = showAllSources 
+    ? allSources 
+    : allSources.slice(0, INITIAL_SOURCES_COUNT);
+  const remainingCount = allSources.length - INITIAL_SOURCES_COUNT;
 
   return (
     <div {...props}>
@@ -305,32 +342,45 @@ function Message({
         <Markdown text={markdown} />
       </div>
       {showSources && (
-        <div className="mt-4 flex flex-col gap-2">
-          <p className="text-xs font-semibold text-fd-muted-foreground uppercase tracking-wider">Sources</p>
-          <div className="flex flex-row flex-wrap items-center gap-2">
-            {/* Render tool-provideLinks sources */}
-            {links && links.map((item, i) => (
-              <Link
-                key={`link-${i}`}
-                href={item.url}
-                className="block text-xs rounded-xl border bg-fd-card/50 backdrop-blur-md p-3 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground min-w-[140px] shadow-sm"
-              >
-                <p className="font-bold line-clamp-1">{item.title}</p>
-                <p className="text-fd-muted-foreground mt-0.5">Reference {item.label}</p>
-              </Link>
-            ))}
-            {/* Render source-url sources */}
-            {sources.map((source, i) => (
-              <Link
-                key={source.sourceId || `source-${i}`}
-                href={source.url}
-                className="block text-xs rounded-xl border bg-fd-card/50 backdrop-blur-md p-3 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground min-w-[140px] shadow-sm"
-              >
-                <p className="font-bold line-clamp-1">{source.title || 'Source'}</p>
-                <p className="text-fd-muted-foreground mt-0.5">Reference {i + 1}</p>
-              </Link>
-            ))}
-          </div>
+        <div className="mt-4">
+          <Sources>
+            <SourcesTrigger count={allSources.length} />
+            <SourcesContent className="flex flex-row flex-wrap items-center gap-2">
+              {displayedSources.map((source, i) => (
+                <Source
+                  key={source.sourceId || `source-${i}`}
+                  href={source.url}
+                  title={source.title}
+                  className="block text-xs rounded-xl border bg-fd-card/50 backdrop-blur-md p-3 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground min-w-[140px] shadow-sm"
+                >
+                  <div className="flex flex-col">
+                    <p className="font-bold line-clamp-1">{source.title}</p>
+                    {source.label && (
+                      <p className="text-fd-muted-foreground mt-0.5 text-xs">{source.label}</p>
+                    )}
+                  </div>
+                </Source>
+              ))}
+              {hasMoreSources && !showAllSources && (
+                <button
+                  onClick={() => setShowAllSources(true)}
+                  className="flex items-center justify-center text-xs rounded-xl border bg-fd-card/50 backdrop-blur-md p-3 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground min-w-[140px] shadow-sm appearance-none outline-none"
+                  style={{ minHeight: '60px' }}
+                >
+                  <p className="font-bold text-center">Show {remainingCount} more {remainingCount === 1 ? 'source' : 'sources'}</p>
+                </button>
+              )}
+              {hasMoreSources && showAllSources && (
+                <button
+                  onClick={() => setShowAllSources(false)}
+                  className="flex items-center justify-center text-xs rounded-xl border bg-fd-card/50 backdrop-blur-md p-3 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground min-w-[140px] shadow-sm appearance-none outline-none"
+                  style={{ minHeight: '60px' }}
+                >
+                  <p className="font-bold text-center">Show less</p>
+                </button>
+              )}
+            </SourcesContent>
+          </Sources>
         </div>
       )}
     </div>

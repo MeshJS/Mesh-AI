@@ -17,6 +17,7 @@
     "@fumadocs/mdx-remote": "^1.4.3",
     "@heroicons/react": "^2.2.0",
     "@icons-pack/react-simple-icons": "^13.8.0",
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@vercel/og": "^0.8.6",
