@@ -1,5 +1,0 @@
-{
-  "title": "Midnight Contracts Wizard",
-  "icon": "BoltIcon",
-  "pages": ["index", "installation", "usage", "contracts", "project-structure"]
-}

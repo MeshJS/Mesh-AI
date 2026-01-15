@@ -1,4 +1,0 @@
-{
-  "title": "Utilities",
-  "pages": ["serializers", "deserializers", "resolvers", "../data/index.mdx", "blueprints"]
-}
