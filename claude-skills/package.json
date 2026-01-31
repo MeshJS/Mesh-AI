@@ -1,0 +1,40 @@
+{
+  "name": "@meshsdk/ai-skills",
+  "version": "1.0.0",
+  "description": "AI assistant skills for Mesh SDK - Cardano development made easy",
+  "keywords": [
+    "cardano",
+    "blockchain",
+    "mesh",
+    "meshsdk",
+    "claude",
+    "claude-code",
+    "ai-skill",
+    "cursor",
+    "copilot"
+  ],
+  "author": "MeshJS",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MeshJS/Mesh-AI.git",
+    "directory": "claude-skills"
+  },
+  "homepage": "https://meshjs.dev",
+  "files": [
+    "transaction/",
+    "wallet/",
+    "core-cst/",
+    "react/",
+    "contract/",
+    "provider/",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./README.md",
+    "./transaction": "./transaction/SKILL.md",
+    "./wallet": "./wallet/SKILL.md",
+    "./core-cst": "./core-cst/SKILL.md",
+    "./react": "./react/SKILL.md"
+  }
+}
