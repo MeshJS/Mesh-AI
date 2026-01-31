@@ -17,3 +17,6 @@ Web3 tools and documentation platform for the Cardano ecosystem.
 
 **RAG Backend** (`meshjs-rag`)
 - Python based contextual RAG system
+  
+**MeshJS Claude Code Skills**
+- Mesh Claude-Code Skills
