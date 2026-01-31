@@ -1,6 +1,7 @@
 # Mesh AI
+https://meshjs.dev/ai
 
-Web3 tools and documentation platform for the Cardano ecosystem.
+AI compatible Web3 tools and documentation platform for the Cardano ecosystem.
 
 ## Applications
 
@@ -11,12 +12,15 @@ Web3 tools and documentation platform for the Cardano ecosystem.
 
 **Starter Site** (`apps/mesh-startersite`)
 - Application for onboarding non Web3 developers.
+- https://meshjs.dev/ai/chatbot
 
 **MeshJS MCP** (`apps/meshjs-mcp`)
 - MCP server that integrates with code editors to provide real-time MeshJS documentation and context-aware assistance.
+- https://meshjs.dev/ai/mcp
 
 **RAG Backend** (`meshjs-rag`)
 - Python based contextual RAG system
   
-**MeshJS Claude Code Skills**
+**MeshJS Claude Code Skills** (`meshsdk/ai-skills`)
 - Mesh Claude-Code Skills
+- https://meshjs.dev/ai/claude-code-skills 
