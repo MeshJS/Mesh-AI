@@ -46,15 +46,15 @@ Install all Mesh skills into any supported agent with a single command:
 
 ```bash
 # Install all skills
-npx skills add MeshJS/Mesh-AI
+npx skills add MeshJS/skills
 
 # Install a specific skill
-npx skills add MeshJS/Mesh-AI --skill mesh-transaction
+npx skills add MeshJS/skills --skill mesh-transaction
 
 # Install for a specific agent
-npx skills add MeshJS/Mesh-AI -a claude-code
-npx skills add MeshJS/Mesh-AI -a cursor
-npx skills add MeshJS/Mesh-AI -a codex
+npx skills add MeshJS/skills -a claude-code
+npx skills add MeshJS/skills -a cursor
+npx skills add MeshJS/skills -a codex
 ```
 
 Browse on [skills.sh](https://skills.sh) to discover more agent skills.
@@ -138,7 +138,7 @@ Once installed, ask your AI assistant:
 
 ## Contributing
 
-1. Fork the [Mesh-AI repository](https://github.com/MeshJS/Mesh-AI)
+1. Fork the [skills repository](https://github.com/MeshJS/skills)
 2. Edit or add skill files in `skills/`
 3. Submit a PR
 

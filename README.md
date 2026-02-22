@@ -23,6 +23,6 @@ AI compatible Web3 tools and documentation platform for the Cardano ecosystem.
   
 **MeshJS Agent Skills** (`skills/`)
 - AI agent skills for Cardano development with MeshJS — compatible with Claude Code, Cursor, Codex, and 37+ agents
-- Install via: `npx skills add MeshJS/Mesh-AI`
+- Install via: `npx skills add MeshJS/skills`
 - Browse on [skills.sh](https://skills.sh)
 - https://meshjs.dev/ai/claude-code-skills

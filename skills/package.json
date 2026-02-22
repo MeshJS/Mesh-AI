@@ -17,7 +17,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MeshJS/Mesh-AI.git",
+    "url": "https://github.com/MeshJS/skills.git",
     "directory": "skills"
   },
   "homepage": "https://meshjs.dev",
