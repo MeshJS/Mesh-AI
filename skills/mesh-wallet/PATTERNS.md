@@ -122,10 +122,10 @@ const provider = new BlockfrostProvider('your-api-key');
 
 // 24-word mnemonic
 const mnemonic = [
-  'solution', 'solution', 'solution', 'solution', 'solution', 'solution',
-  'solution', 'solution', 'solution', 'solution', 'solution', 'solution',
-  'solution', 'solution', 'solution', 'solution', 'solution', 'solution',
-  'solution', 'solution', 'solution', 'solution', 'solution', 'solution'
+  'abandon', 'beauty', 'clever', 'double', 'energy', 'favorite',
+  'garden', 'humble', 'ivory', 'jungle', 'kitchen', 'liberty',
+  'monkey', 'noble', 'orange', 'puzzle', 'quantum', 'ribbon',
+  'sunset', 'travel', 'useful', 'violin', 'window', 'yellow'
 ];
 
 const wallet = await MeshCardanoHeadlessWallet.fromMnemonic({

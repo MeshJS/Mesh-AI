@@ -34,9 +34,9 @@ You just ask: *"Help me connect a browser wallet and send 10 ADA to this address
 
 | Skill | Package | Description |
 |-------|---------|-------------|
-| [mesh-transaction](./transaction/) | `@meshsdk/transaction` | Transaction building with MeshTxBuilder |
-| [mesh-wallet](./wallet/) | `@meshsdk/wallet` | Browser & headless wallet integration |
-| [mesh-core-cst](./core-cst/) | `@meshsdk/core-cst` | Low-level serialization & utilities |
+| [mesh-transaction](./mesh-transaction/) | `@meshsdk/transaction` | Transaction building with MeshTxBuilder |
+| [mesh-wallet](./mesh-wallet/) | `@meshsdk/wallet` | Browser & headless wallet integration |
+| [mesh-core-cst](./mesh-core-cst/) | `@meshsdk/core-cst` | Low-level serialization & utilities |
 
 ## Installation
 
@@ -46,15 +46,15 @@ Install all Mesh skills into any supported agent with a single command:
 
 ```bash
 # Install all skills
-npx skills add MeshJS/skills
+npx skills add MeshJS/Mesh-AI
 
 # Install a specific skill
-npx skills add MeshJS/skills --skill mesh-transaction
+npx skills add MeshJS/Mesh-AI --skill mesh-transaction
 
 # Install for a specific agent
-npx skills add MeshJS/skills -a claude-code
-npx skills add MeshJS/skills -a cursor
-npx skills add MeshJS/skills -a codex
+npx skills add MeshJS/Mesh-AI -a claude-code
+npx skills add MeshJS/Mesh-AI -a cursor
+npx skills add MeshJS/Mesh-AI -a codex
 ```
 
 Browse on [skills.sh](https://skills.sh) to discover more agent skills.
@@ -65,9 +65,9 @@ Copy skill folders to Claude Code's skill directory:
 
 ```bash
 # Copy all skills
-cp -r skills/transaction ~/.claude/skills/mesh-transaction
-cp -r skills/wallet ~/.claude/skills/mesh-wallet
-cp -r skills/core-cst ~/.claude/skills/mesh-core-cst
+cp -r skills/mesh-transaction ~/.claude/skills/mesh-transaction
+cp -r skills/mesh-wallet ~/.claude/skills/mesh-wallet
+cp -r skills/mesh-core-cst ~/.claude/skills/mesh-core-cst
 ```
 
 ### Option 3: Project-Local (Team-Wide)
@@ -76,9 +76,9 @@ Add to your repository so everyone on the team gets the skills automatically:
 
 ```bash
 mkdir -p .claude/skills
-cp -r skills/transaction .claude/skills/mesh-transaction
-cp -r skills/wallet .claude/skills/mesh-wallet
-cp -r skills/core-cst .claude/skills/mesh-core-cst
+cp -r skills/mesh-transaction .claude/skills/mesh-transaction
+cp -r skills/mesh-wallet .claude/skills/mesh-wallet
+cp -r skills/mesh-core-cst .claude/skills/mesh-core-cst
 ```
 
 Then commit to git — any team member using Claude Code gets the skills when they clone the repo.
@@ -88,13 +88,13 @@ Then commit to git — any team member using Claude Code gets the skills when th
 Copy the skill's main file as Cursor rules:
 
 ```bash
-cp skills/transaction/SKILL.md .cursorrules
+cp skills/mesh-transaction/SKILL.md .cursorrules
 ```
 
 For multiple skills, concatenate them:
 
 ```bash
-cat skills/transaction/SKILL.md skills/wallet/SKILL.md > .cursorrules
+cat skills/mesh-transaction/SKILL.md skills/mesh-wallet/SKILL.md > .cursorrules
 ```
 
 ## How It Works
@@ -138,18 +138,49 @@ Once installed, ask your AI assistant:
 
 ## Contributing
 
-1. Fork the [skills repository](https://github.com/MeshJS/skills)
-2. Edit or add skill files in `skills/`
-3. Submit a PR
+We welcome contributions to improve and expand Mesh SDK skills.
+
+### How to Contribute
+
+1. Fork the [Mesh-AI repository](https://github.com/MeshJS/Mesh-AI)
+2. Create a branch for your changes
+3. Edit or add skill files in `skills/`
+4. Submit a PR with a clear description of your changes
 
 ### Adding a New Skill
 
 ```bash
-mkdir skills/new-package
-# Create SKILL.md with name and description
-# Add domain-specific documentation
-# Add PATTERNS.md and TROUBLESHOOTING.md
+mkdir skills/my-new-skill
 ```
+
+Each new skill needs at minimum a `SKILL.md` with frontmatter:
+
+```yaml
+---
+name: my-new-skill
+description: Use when [describe what this skill helps with and when to activate it].
+license: Apache-2.0
+metadata:
+  author: YourName
+  version: "1.0"
+---
+```
+
+Then add supporting files:
+
+- `SKILL.md` - Overview, quick reference, constructor options
+- `{DOMAIN}.md` - Complete API reference
+- `PATTERNS.md` - Common recipes with working code examples
+- `TROUBLESHOOTING.md` - Error messages, causes, and solutions
+
+See the [Agent Skills Specification](https://agentskills.io/specification) for the full format reference.
+
+### Improving Existing Skills
+
+- Fix inaccurate code examples or API signatures
+- Add missing methods or parameters to API docs
+- Add new patterns for common use cases
+- Add troubleshooting entries for errors you've encountered
 
 ## Related
 

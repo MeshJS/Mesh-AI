@@ -1,6 +1,10 @@
 ---
 name: mesh-core-cst
-description: Use when working with low-level Cardano utilities via MeshJS core-cst package. Covers CBOR serialization, Plutus data conversion, address resolution and parsing, CIP-8 message signing and verification, script parameterization with applyParamsToScript, and direct access to cardano-sdk types.
+description: Use when working with low-level Cardano utilities via MeshJS core-cst package. Covers CBOR serialization and deserialization, Plutus data conversion, address resolution and parsing, CIP-8 message signing and verification, script parameterization with applyParamsToScript, native script hashing, and direct access to cardano-sdk types.
+license: Apache-2.0
+metadata:
+  author: MeshJS
+  version: "1.0"
 ---
 
 # Mesh SDK Core CST Skill
