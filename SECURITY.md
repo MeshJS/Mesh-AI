@@ -19,7 +19,7 @@ https://discord.gg/dH48jH3BKa
 
 ## Scope
 
-**In scope:** All code in this repository, including apps/docs, apps/meshjs-mcp, apps/rag-backend, and claude-skills.
+**In scope:** All code in this repository, including apps/docs, apps/meshjs-mcp, apps/rag-backend, and skills.
 
 **Out of scope:** Third-party dependencies without demonstrated impact, social engineering, DoS attacks.
 

@@ -1,18 +1,6 @@
 ---
-name: MeshTransaction
-description: Cardano transaction building with @meshsdk/transaction
-version: 1.9.0
-triggers:
-  - mesh
-  - meshsdk
-  - meshtxbuilder
-  - cardano transaction
-  - cardano tx
-  - plutus script
-  - minting tokens
-  - stake delegation
-  - drep
-  - governance vote
+name: mesh-transaction
+description: Use when building Cardano transactions with MeshJS SDK. Covers MeshTxBuilder API for sending ADA, minting tokens, spending from Plutus scripts, staking, governance voting, and multi-sig patterns. Includes correct method ordering, coin selection, fee calculation, and troubleshooting common Cardano transaction errors.
 ---
 
 # Mesh SDK Transaction Skill
