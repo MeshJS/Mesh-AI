@@ -15,7 +15,7 @@ Part of [@meshsdk/ai-skills](../README.md).
 
 | File | Purpose |
 |------|---------|
-| `SKILL.md` | Main entry - triggers, overview, quick reference |
+| `SKILL.md` | Main entry - overview, quick reference |
 | `TRANSACTION.md` | Complete API documentation |
 | `PATTERNS.md` | Common transaction recipes with code |
 | `TROUBLESHOOTING.md` | Error solutions and debugging |

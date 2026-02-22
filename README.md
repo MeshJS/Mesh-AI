@@ -21,6 +21,8 @@ AI compatible Web3 tools and documentation platform for the Cardano ecosystem.
 **RAG Backend** (`meshjs-rag`)
 - Python based contextual RAG system
   
-**MeshJS Claude Code Skills** (`meshsdk/ai-skills`)
-- Mesh Claude-Code Skills
-- https://meshjs.dev/ai/claude-code-skills 
+**MeshJS Agent Skills** (`skills/`)
+- AI agent skills for Cardano development with MeshJS — compatible with Claude Code, Cursor, Codex, and 37+ agents
+- Install via: `npx skills add MeshJS/Mesh-AI`
+- Browse on [skills.sh](https://skills.sh)
+- https://meshjs.dev/ai/claude-code-skills

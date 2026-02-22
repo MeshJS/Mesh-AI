@@ -1,20 +1,10 @@
 ---
-name: MeshWallet
-description: Cardano wallet integration with @meshsdk/wallet
-version: 1.0.0
-triggers:
-  - wallet
-  - browser wallet
-  - mesh wallet
-  - connect wallet
-  - sign transaction
-  - sign data
-  - cip-30
-  - eternl
-  - nami
-  - flint
-  - mnemonic
-  - seed phrase
+name: mesh-wallet
+description: Use when integrating Cardano wallets with MeshJS SDK. Covers browser wallet connection (CIP-30) for Eternl, Nami, Lace, Flint, and Yoroi, headless server-side wallets from mnemonic or private keys, transaction signing, CIP-8 data signing for authentication, multi-signature workflows, and React wallet integration patterns.
+license: Apache-2.0
+metadata:
+  author: MeshJS
+  version: "1.0"
 ---
 
 # Mesh SDK Wallet Skill
