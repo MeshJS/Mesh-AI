@@ -1,28 +1,45 @@
 {
   "name": "meshjs-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
-  "description": "Provides MeshJS library documentation for user's queries.",
+  "description": "MCP server that gives AI agents and code editors real-time, retrieval-augmented MeshJS SDK documentation and Cardano development context.",
   "main": "dist/index.js",
   "bin": {
     "mesh-mcp-server": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && node test/smoke.mjs",
     "build": "tsup src/index.ts --format esm --target esnext",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "meshjs",
+    "cardano",
+    "web3"
+  ],
+  "author": "MeshJS",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MeshJS/Mesh-AI.git",
+    "directory": "apps/meshjs-mcp"
+  },
+  "homepage": "https://meshjs.dev/ai/mcp",
+  "bugs": {
+    "url": "https://github.com/MeshJS/Mesh-AI/issues"
+  },
   "devDependencies": {
     "@types/node": "^24.5.2",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.18.1",
+    "@modelcontextprotocol/sdk": "1.22.0",
     "axios": "^1.12.2",
     "dotenv": "^17.2.2",
     "zod": "^3.25.76"

@@ -3,7 +3,7 @@ from supabase import AsyncClient
 
 from app.utils.extract_github_links import extract_github_links
 
-PACKAGES = ["mesh-common", "mesh-core-csl", "mesh-contract", "mesh-provider", "mesh-transaction", "mesh-wallet"]
+PACKAGES = ["mesh-common", "mesh-contract", "mesh-core", "mesh-scalus-emulator", "mesh-transaction", "mesh-wallet"]
 
 async def get_context(embedded_query: List[float], supabase: AsyncClient) -> str:
   response = await supabase.rpc("match_docs", {

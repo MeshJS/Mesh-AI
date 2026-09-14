@@ -28,7 +28,7 @@ async def ingest_docs(credentials: HTTPAuthorizationCredentials = Depends(securi
       detail="You are not authorized"
     )
   
-  github = GithubService(owner="MeshJS", repo="mimir", doc_path="apps/docs/content/docs", output_path="docs")
+  github = GithubService(owner="MeshJS", repo="meshjs.dev", doc_path="content/docs", output_path="docs")
   await github.download_docs()
 
   docs_dir = pathlib.Path(__file__).resolve().parents[3] / "docs"

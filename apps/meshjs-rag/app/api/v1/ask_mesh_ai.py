@@ -93,6 +93,7 @@ async def mesh_mcp(body: MCPRequestBody, authorization: str = Header(None), supa
     question = body.query
     model = body.model
 
+    base_url = None
     if model.startswith("gemini"):
       base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
     elif model.startswith("claude"):

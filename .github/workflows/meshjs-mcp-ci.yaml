@@ -1,0 +1,37 @@
+name: meshjs-mcp CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/meshjs-mcp/**"
+  pull_request:
+    paths:
+      - "apps/meshjs-mcp/**"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/meshjs-mcp
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/meshjs-mcp/package-lock.json
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: type check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: build and smoke test
+        run: npm test

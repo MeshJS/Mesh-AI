@@ -81,6 +81,6 @@ class GithubService:
 
 
 if __name__ == "__main__":
-  github = GithubService(owner="MeshJS", repo="mimir", doc_path="apps/docs/content/docs", output_path="docs")
+  github = GithubService(owner="MeshJS", repo="meshjs.dev", doc_path="content/docs", output_path="docs")
   asyncio.run(github.download_docs())
   print("Successfully downloaded docs from github")

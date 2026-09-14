@@ -5,7 +5,7 @@ AI compatible Web3 tools and documentation platform for the Cardano ecosystem.
 
 ## Applications
 
-**Mesh Documentation Platform** (`apps/docs`)
+**Mesh Documentation Platform** ([MeshJS/meshjs.dev](https://github.com/MeshJS/meshjs.dev))
 - MeshJS documentation site built with Next.js and Fumadocs
 - AI Chat functionality
 - Includes llms.txt
